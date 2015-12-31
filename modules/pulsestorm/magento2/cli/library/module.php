@@ -183,8 +183,31 @@ function addSchemaToXmlString($xmlString, $schema=false)
     return $xml;
 }
 
+function notEmpty($item)
+{
+    return (boolean) $item;
+}
+
+function isAboveRoot($path)
+{
+    $parts = explode('..', $path);
+    $real  = array_shift($parts);
+    $parts_real = explode('/',$real);
+    array_unshift($parts, '/');
+    $parts      = array_filter($parts,      __NAMESPACE__ . '\notEmpty');
+    $parts_real = array_filter($parts_real, __NAMESPACE__ . '\notEmpty');
+    
+    return count($parts) > count($parts_real);
+}
+
 function getBaseMagentoDir($path=false)
 {
+    if($path && isAboveRoot($path))
+    {
+        output("Could not find base Magento directory");
+        exit;
+    }
+
     $path = $path ? $path : getcwd();
     if(file_exists($path . '/app/etc/di.xml'))
     {
