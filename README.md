@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/astorm/pestle.svg?branch=master)](https://travis-ci.org/astorm/pestle)
+
 You probably don't want to be here.  This project is in the very early stages.  Things are broken, everything will change.  Havoc will be wrought, etc.
 
 What is Pestle?
