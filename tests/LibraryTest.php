@@ -1,9 +1,19 @@
 <?php
-require_once(__DIR__ . '/../modules/pulsestorm/magento2/cli/library/module.php');
-use function Pulsestorm\Magento2\Cli\Library\createClassTemplate;
-use function Pulsestorm\Magento2\Cli\Library\isAboveRoot;
-class LibraryTest extends PHPUnit_Framework_TestCase
+namespace Pulsestorm\Pestle\Tests;
+require_once 'PestleBaseTest.php';
+use function Pulsestorm\Pestle\Importer\pestle_import;
+pestle_import('Pulsestorm\Magento2\Cli\Library\createClassTemplate');
+pestle_import('Pulsestorm\Magento2\Cli\Library\isAboveRoot');
+
+class LibraryTest extends PestleBaseTest
 {
+    public function setup()
+    {
+        $path = $this->getPathToModuleFileUnderTest(
+            'modules/pulsestorm/magento2/cli/library/module.php');
+        require_once $path;
+    }
+    
     public function testSetup()
     {
         $this->assertEquals(-1, -1);
