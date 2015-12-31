@@ -1,5 +1,7 @@
 <?php
 namespace Pulsestorm\Pestle\Importer;
+use function Pulsestorm\Pestle\Runner\getBaseProjectDir;
+
 function pestle_import($thing_to_import, $as=false)
 {
     $thing_to_import = trim($thing_to_import, '\\');
@@ -49,7 +51,7 @@ function includeModule($function_name)
     $short_name    = array_pop($parts);
     $namespace     = implode('/',$parts);
     $file          = $namespace . '/module.php';
-    return include_once('modules/' . $file);
+    return require_once(getBaseProjectDir() . '/modules/' . $file);
 }
 
 function includeCode($namespace, $code)
@@ -59,7 +61,7 @@ function includeCode($namespace, $code)
     $full_path = $full_dir . '/'  . md5($code) . '.php';
     if(file_exists($full_path))
     {
-        include_once $full_path;
+        require_once $full_path;
         return;
     }
     
@@ -70,7 +72,7 @@ function includeCode($namespace, $code)
     
     file_put_contents($full_path,
         '<' . '?' . 'php' . "\n" . $code);        
-    include_once $full_path;  
+    require_once $full_path;  
 }
 
 function getCacheDir()
