@@ -1,6 +1,6 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Testbed;
-use function Pulsestorm\Pestle\Runner\pestle_import;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('pulsestorm\cli\build_command_list\getListOfFilesInModuleFolder');
 

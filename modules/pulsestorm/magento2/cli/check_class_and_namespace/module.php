@@ -1,6 +1,6 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Check_Class_And_Namespace;
-use function Pulsestorm\Pestle\Runner\pestle_import;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
 pestle_import('Pulsestorm\Magento2\Cli\Library\glob_recursive');

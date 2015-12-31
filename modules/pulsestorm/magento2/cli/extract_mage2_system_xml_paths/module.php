@@ -1,6 +1,6 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Extract_Mage2_System_Xml_Paths;
-use function Pulsestorm\Pestle\Runner\pestle_import;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\input');
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getSimpleTreeFromSystemXmlFile');

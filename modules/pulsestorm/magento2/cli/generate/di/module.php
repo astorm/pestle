@@ -1,6 +1,6 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Di;
-use function Pulsestorm\Pestle\Runner\pestle_import;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\input');
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getDiLinesFromMage2ClassName');

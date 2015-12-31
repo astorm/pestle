@@ -1,6 +1,6 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Route;
-use function Pulsestorm\Pestle\Runner\pestle_import;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 use Exception;
 pestle_import('Pulsestorm\Magento2\Cli\Library\input');
 pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');

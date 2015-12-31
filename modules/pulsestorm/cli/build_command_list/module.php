@@ -1,12 +1,12 @@
 <?php
 namespace Pulsestorm\Cli\Build_Command_List;
-use function Pulsestorm\Pestle\Runner\getCacheDir;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use ReflectionFunction;
-use function Pulsestorm\Pestle\Runner\pestle_import;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getDocCommentAsString');
+pestle_import('Pulsestorm\Pestle\Importer\getCacheDir');
 
 function getListOfFilesInModuleFolder()
 {

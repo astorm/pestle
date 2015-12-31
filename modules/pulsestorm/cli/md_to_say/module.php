@@ -1,6 +1,6 @@
 <?php
 namespace Pulsestorm\Cli\Md_To_Say;
-use function Pulsestorm\Pestle\Runner\pestle_import;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
 use Michelf\Markdown;

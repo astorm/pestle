@@ -1,6 +1,6 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Help;
-use function Pulsestorm\Pestle\Runner\pestle_import;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\List_Commands\pestle_cli');
 /**
 * Alias for list

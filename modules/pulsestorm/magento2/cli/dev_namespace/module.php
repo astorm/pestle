@@ -1,6 +1,6 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Dev_Namespace;
-use function Pulsestorm\Pestle\Runner\pestle_import;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 // use function Pulsestorm\Magento2\Cli\Library\output;
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
