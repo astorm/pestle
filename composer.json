@@ -1,0 +1,9 @@
+{
+    "require": {
+        "michelf/php-markdown": "1.6.0"
+    },
+    
+    "require-dev": {
+        "phpunit/phpunit": "4.8.*"
+    }
+}
