@@ -172,6 +172,7 @@ function doPestleImports()
     pestle_import('Pulsestorm\Cli\Token_Parse\getFunctionFromCode');
     pestle_import('Pulsestorm\Cli\Build_Command_List\buildCommandList');   
     pestle_import('Pulsestorm\Pestle\Library\parseDocBlockIntoParts');     
+    pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');         
 }
 
 function getReflectedCommand($command_name)
@@ -194,9 +195,43 @@ function getCommandNameFromParsedArgv($parsed_argv)
     return $command_name;
 }
 
+function parseQuestionAndDefaultFromText($text)
+{
+    $return = [
+        'question'=>$text,
+        'default'=>''
+    ];
+    if(strpos($text, '[') === false)
+    {
+        return $return;
+    }
+    
+    list($return['question'], $return['default']) = explode('[',$text,2);
+    $return['default'] = trim($return['default']);
+    $return['default'] = trim($return['default'],']');
+    return $return;
+}
 function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block)
 {
-    return $arguments;
+    if(!array_key_exists('argument', $parsed_doc_block))
+    {
+        return $arguments;
+    }
+    
+    $new_arguments=[];
+    $c=0;
+    foreach($parsed_doc_block['argument'] as $argument)
+    {
+        list($argument_name, $text)       = explode(' ', $argument,2);
+        $text_parts = parseQuestionAndDefaultFromText($text);
+        $question = $text_parts['question'];
+        $default  = $text_parts['default'];
+        $default = 'how to make default';
+        $new_arguments[$argument_name] = inputOrIndex(
+            $question,'',$arguments,$c);
+        $c++;
+    }
+    return $new_arguments;
 }
 
 function limitOptionsIfPresentInDocBlock($options, $parsed_doc_block)

@@ -90,8 +90,12 @@ function parseArgvIntoCommandAndArgumentsAndOptions($argv)
             }
             else
             {
-                $option_value = $argv[$i+1];
-                $i++;
+                $option_value = '';
+                if(array_key_exists($i+1, $argv))
+                {
+                    $option_value = $argv[$i+1];
+                }
+                $i++;                
             }
             
             
