@@ -1,5 +1,5 @@
 <?php
-namespace Pulsestorm\Magento2\Cli\Event_Add;
+namespace Pulsestorm\Magento2\Cli\Generate\Observer;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\input');
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
@@ -13,7 +13,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 * Short Description
 * Long
 * Description
-* @command event_add
+* @command generate_observer
 */
 function pestle_cli($argv)
 {
