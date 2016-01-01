@@ -87,9 +87,9 @@ class CommandExistsTest extends PestleBaseTest
         $this->assertContains('Description', $results);    
         
     }
-    function testCommandsExistevent_add()
+    function testCommandsExistgenerate_observer()
     {
-        $results = $this->runHelpCommand('event_add');
+        $results = $this->runHelpCommand('generate_observer');
         $this->assertContains('Description', $results);    
         
     }
