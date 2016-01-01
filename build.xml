@@ -2,6 +2,7 @@
 <project name="MyProject" default="info">
 <!-- Target: build -->
 	<target name="build">
+		<delete dir="/tmp/pestle_cache" /> 	
 		<delete dir="./build" /> 
 		<mkdir  dir="./build" /> 
 		

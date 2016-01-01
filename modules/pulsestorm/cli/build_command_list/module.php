@@ -7,14 +7,11 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getDocCommentAsString');
 pestle_import('Pulsestorm\Pestle\Importer\getCacheDir');
+pestle_import('Pulsestorm\Pestle\Runner\getBaseProjectDir');
 
 function getListOfFilesInModuleFolder()
 {
-    $path = realpath(__DIR__ . '/../../../../modules/');
-    if(!$path)
-    {
-        $path = 'phar://pestle.phar/modules/';
-    }
+    $path = getBaseProjectDir() . '/modules/';
     $objects = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($path), 
         RecursiveIteratorIterator::SELF_FIRST
