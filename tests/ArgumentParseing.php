@@ -155,6 +155,16 @@ class ArgumentParsingTest extends PestleBaseTest
             []);            
     }
           
+    public function testArguments()
+    {
+        $results = $this->runCommand('hello_argument', [
+            '--explain=true', 'Hola', 'World'
+        ]);
+        $lines = preg_split('%[\r\n]%', $results);
+        
+        $this->assertEquals($lines[0],'Hola World');
+        $this->assertEquals($lines[1],'This command demos automatic arguments');
+    }          
     protected function assertResults($results)
     {
         $this->assertEquals($results['command'], 'command_name');
@@ -164,6 +174,7 @@ class ArgumentParsingTest extends PestleBaseTest
             'baz'=>'hello']
         );    
     }
+
             
     
 }
