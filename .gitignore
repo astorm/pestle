@@ -2,3 +2,4 @@ vendor/
 .DS_Store
 cache/*
 build/
+pestle.phar
