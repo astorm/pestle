@@ -5,8 +5,8 @@ use RecursiveDirectoryIterator;
 use ReflectionFunction;
 use function Pulsestorm\Cli\Token_Parse\getFunctionFromCode;
 use function Pulsestorm\Cli\Build_Command_List\buildCommandList;
+use function Pulsestorm\Pestle\Importer\pestle_import;
 use function Pulsestorm\Pestle\Importer\getCacheDir;
-
 
 function isPhar()
 {
@@ -173,6 +173,8 @@ function versionCheck()
 */
 function main($argv)
 {
+    pestle_import('Pulsestorm\Pestle\Library\parseArgvIntoCommandAndArgumentsAndOptions');
+    
     versionCheck();
     //include in the library for this command
     includeLibraryForCommand($argv);        
@@ -184,12 +186,16 @@ function main($argv)
         output("No such command $command");
         exit;
     }
-    $command = $commands[$command];
+    $command = $commands[$command];        
+    
+    $parsed_argv = parseArgvIntoCommandAndArgumentsAndOptions($argv);
+    $arguments   = $parsed_argv['arguments'];
+    $options     = $parsed_argv['options'];
     
     //get arguments
-    $to_pass = $argv;
-    array_shift($to_pass);    
-    array_shift($to_pass);
+    $arguments = $argv;
+    array_shift($arguments);    
+    array_shift($arguments);
         
-    $command->invoke($to_pass);
+    $command->invokeArgs([$arguments, $options]);
 }

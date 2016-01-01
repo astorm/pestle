@@ -12,5 +12,5 @@ pestle_import('pulsestorm\cli\build_command_list\getListOfFilesInModuleFolder');
 */
 function pestle_cli($argv)
 {
-
+    var_dump($argv);
 }

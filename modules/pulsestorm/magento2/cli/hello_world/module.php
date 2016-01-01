@@ -8,7 +8,16 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 *
 * @command hello_world
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options)
 {
-    output("Hello Sailor");
+    $person = 'Sailor';
+    if(array_key_exists('service', $options))
+    {
+        if($options['service'] === 'army')
+        {
+            $person = 'Soldier';
+        }
+        
+    }
+    output("Hello $person");
 }
