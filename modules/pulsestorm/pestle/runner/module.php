@@ -106,7 +106,7 @@ function includeLibraryForCommand($command, $try_again=true)
     $command_list = loadSerializedCommandListFromCache();
     if(!array_key_exists($command, $command_list) && $try_again)
     {
-        // pestle_import('pulsestorm\cli\build_command_list');
+        // pestle_import('Pulsestorm\Cli\Build_Command_List');
         require_once getBaseProjectDir() . '/modules/pulsestorm/cli/build_command_list/module.php';
         buildCommandList();
         return includeLibraryForCommand($command, false);
@@ -268,11 +268,18 @@ function getArgumentsAndOptionsFromParsedArgvAndDocComment($parsed_argv, $doc_bl
         $options
     ];            
 }
+
+function bootstrapPhp()
+{
+    error_reporting(E_ALL);
+}
+
 /**
 * Main entry point
 */
 function main($argv)
 {
+    bootstrapPhp();
     doVersionCheck();
     doPestleImports();
 
