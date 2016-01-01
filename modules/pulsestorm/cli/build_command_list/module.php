@@ -34,7 +34,7 @@ function includeAllModuleFiles()
         $info = pathinfo($name);        
         if($info['basename'] == 'module.php')
         {
-            include_once $name;
+            require_once $name;
         }
     }
 
