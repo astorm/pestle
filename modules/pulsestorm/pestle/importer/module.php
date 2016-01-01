@@ -77,7 +77,6 @@ function includeCode($namespace, $code)
 
 function getCacheDir()
 {
-    // $cache_dir = realpath(__DIR__) . '/../../../../cache';
     $cache_dir = '/tmp/pestle_cache';
     if(!is_dir($cache_dir)){ 
         mkdir($cache_dir, 0755);

@@ -8,8 +8,17 @@ use function Pulsestorm\Cli\Build_Command_List\buildCommandList;
 use function Pulsestorm\Pestle\Importer\getCacheDir;
 
 
+function isPhar()
+{
+    $first_include = get_included_files()[0];
+    return strpos($first_include, '/pestle.phar') !== false;
+}
 function getBaseProjectDir()
 {
+    if(isPhar())
+    {
+        return 'phar://pestle.phar';
+    }
     return __DIR__ . '/../../../..';
 }
 require getBaseProjectDir()  . '/vendor/autoload.php';

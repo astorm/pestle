@@ -109,7 +109,7 @@ function pestle_cli($argv)
     $all_pestle_imports = [];  
     foreach($files as $file)
     {
-        include_once $file;
+        require_once $file;
         $namespace  = parseNamespaceFromFile($file);
         $command    = parseCommandFromFile($file);
         reportOnNamespaceAndCommandName($namespace, $command, $file);
