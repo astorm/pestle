@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\input');
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getDiLinesFromMage2ClassName');
-pestle_import('Pulsestorm\Cli\Token_Parse\pestle_token_get_all');
+pestle_import('Pulsestorm\Cli\Token_Parse\token_get_all');
 pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
 pestle_import('Pulsestorm\Magento2\Cli\Library\writeStringToFile');
 

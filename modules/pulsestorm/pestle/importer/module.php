@@ -54,6 +54,19 @@ function includeModule($function_name)
     return require_once(getBaseProjectDir() . '/modules/' . $file);
 }
 
+function functionCollidesWithPhpGlobalSpace($namespace)
+{
+    $parts      = explode('\\', $namespace);
+    $short_name = array_pop($parts);
+    
+    $results = in_array($short_name, get_defined_functions()['internal']);
+    if($results)
+    {
+        return $short_name;
+    }
+    return $results;
+}
+
 function includeCode($namespace, $code)
 {    
     $cache_dir = getCacheDir();
@@ -69,10 +82,22 @@ function includeCode($namespace, $code)
     {
         mkdir($full_dir, 0755, true);
     }
-    
+
+    if($short_name = functionCollidesWithPhpGlobalSpace($namespace))
+    {
+        //export with a pestle_prefix
+        $code = replaceFirstInstanceOfFunctionName($code, $short_name);
+    }
+            
     file_put_contents($full_path,
         '<' . '?' . 'php' . "\n" . $code);        
     require_once $full_path;  
+}
+
+function replaceFirstInstanceOfFunctionName($code, $short_name)
+{
+    return str_replace('function ' . $short_name, 
+    'function pestle_' . $short_name, $code);    
 }
 
 function getCacheDir()
