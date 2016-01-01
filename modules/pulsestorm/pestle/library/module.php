@@ -10,6 +10,58 @@ function isOption($string)
     return false;
 }
 
+function cleanDocBlockLine($line)
+{
+    $parts = explode('*', $line);
+    array_shift($parts);
+    $line = implode('', $parts);
+    return trim($line);
+}
+
+function parseDocBlockIntoParts($string)
+{
+    $return = [
+        'one-line'      => '',
+        'description'   => '',      
+    ];
+    
+    $lines = preg_split('%[\r\n]%', $string);
+    $start_block = trim(array_shift($lines));
+    if($start_block !== '/**')
+    {
+        return $return;
+    }
+    
+    while($line = array_shift($lines))
+    {
+        $line = cleanDocBlockLine($line);
+        if($line && $line[0] === '@')
+        {
+            array_unshift($lines, $line);
+            break;
+        }
+        if(!$line) { continue;}
+        
+        if(!$return['one-line'])
+        {
+            $return['one-line'] = $line;
+        }
+        else
+        {
+            $return['description'] .= $line . ' ';
+        }
+    }
+    $return['description'] = trim($return['description']);
+
+    $all = implode("\n",$lines);
+    preg_match_all('%^.*?@([a-z0-1]+?)[ ](.+?$)%mix', $all, $matches, PREG_SET_ORDER);
+    foreach($matches as $match)
+    {        
+        $return[$match[1]][] = trim($match[2]);
+    }
+    return $return;
+}
+
 function parseArgvIntoCommandAndArgumentsAndOptions($argv)
 {
     $script  = array_shift($argv);

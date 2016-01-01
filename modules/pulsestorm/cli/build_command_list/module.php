@@ -8,6 +8,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getDocCommentAsString');
 pestle_import('Pulsestorm\Pestle\Importer\getCacheDir');
 pestle_import('Pulsestorm\Pestle\Runner\getBaseProjectDir');
+pestle_import('Pulsestorm\Pestle\Library\parseDocBlockIntoParts');
 
 function getListOfFilesInModuleFolder()
 {
@@ -50,9 +51,14 @@ function buildCommandList()
             continue;
         }
         $r = new ReflectionFunction($function);
-        $doc_comment = getDocCommentAsString($function);
-        $parts       = explode('@command ', $doc_comment);
-        $command     = array_pop($parts);        
+        // $doc_comment        = getDocCommentAsString($function);
+        $parsed_doc_command = parseDocBlockIntoParts($r->getDocComment());
+        
+        $command = array_key_exists('command', $parsed_doc_command) 
+            ? $parsed_doc_command['command'] : ['pestle-none-set'];
+
+        $command = array_shift($command);            
+
         $lookup[$command] = $r->getFilename();
     }
     cacheCommandList($lookup);

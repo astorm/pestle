@@ -3,6 +3,7 @@ namespace Pulsestorm\Pestle\Tests;
 require_once 'PestleBaseTest.php';
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\parseArgvIntoCommandAndArgumentsAndOptions');
+pestle_import('Pulsestorm\Pestle\Library\parseDocBlockIntoParts');
 
 class ArgumentParsingTest extends PestleBaseTest
 {
@@ -24,6 +25,56 @@ class ArgumentParsingTest extends PestleBaseTest
 //         $this->assertResults($results);            
 //     }
 
+    public function testEmpty()
+    {
+        $args = [
+            'fake-script.php',
+            ];  
+        $results = parseArgvIntoCommandAndArgumentsAndOptions($args);        
+            
+        $this->assertEquals($results['command'], '');
+        $this->assertEquals($results['arguments'], []);
+        $this->assertEquals($results['options'], []);                  
+    }
+    
+    public function testDocBlockParsingIncomplete()
+    {
+
+        $fixture = '/**
+        * @command foo
+        */';
+        
+        $parts = parseDocBlockIntoParts($fixture);
+        $this->assertEquals($parts['one-line']    , '');
+        $this->assertEquals($parts['description'] , '');
+        $this->assertEquals($parts['command']      , ['foo']);        
+        
+    }
+    
+    public function testDocBlockParsing()
+    {
+        $fixture = '/**
+        * One Line Description
+        *
+        * Multi Line Description
+        * With Mint Frosting
+        * @author Alan Storm <alan.storm@example.com>
+        * @package ScienceSays
+        * @var type $varName
+        * @param type $var_name
+        * @var type $foo        
+        * @return type $var_name
+        */';
+        
+        $parts = parseDocBlockIntoParts($fixture);
+        $this->assertEquals($parts['one-line']    , 'One Line Description');
+        $this->assertEquals($parts['description'] , 'Multi Line Description With Mint Frosting');
+        $this->assertEquals($parts['author']      , ['Alan Storm <alan.storm@example.com>']);        
+        $this->assertEquals($parts['package']     , ['ScienceSays']);                
+        $this->assertEquals($parts['var']         , ['type $varName','type $foo']);                        
+        $this->assertEquals($parts['return']      , ['type $var_name']);         
+    }
+    
     public function testParse2()
     {
         $args = [

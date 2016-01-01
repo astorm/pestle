@@ -3,10 +3,7 @@ namespace Pulsestorm\Pestle\Runner;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use ReflectionFunction;
-use function Pulsestorm\Cli\Token_Parse\getFunctionFromCode;
-use function Pulsestorm\Cli\Build_Command_List\buildCommandList;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-use function Pulsestorm\Pestle\Importer\getCacheDir;
 
 function isPhar()
 {
@@ -104,17 +101,17 @@ function loadSerializedCommandListFromCache()
     return $command_list;
 }
 
-function includeLibraryForCommand($argv, $try_again=true)
-{
-    $command = array_key_exists(1, $argv) ? $argv[1] : 'help';
+function includeLibraryForCommand($command, $try_again=true)
+{    
     $command_list = loadSerializedCommandListFromCache();
     if(!array_key_exists($command, $command_list) && $try_again)
     {
         // pestle_import('pulsestorm\cli\build_command_list');
         require_once getBaseProjectDir() . '/modules/pulsestorm/cli/build_command_list/module.php';
         buildCommandList();
-        return includeLibraryForCommand($argv, false);
+        return includeLibraryForCommand($command, false);
     }    
+    
     if(!array_key_exists($command, $command_list))
     {    
         output("Can't find [$command]");
@@ -157,7 +154,7 @@ function getListOfDefinedCliFunctions()
     return $commands;
 }
 
-function versionCheck()
+function doVersionCheck()
 {
     $version = phpversion();    
     if(version_compare($version, '5.6.0') === -1)
@@ -168,34 +165,92 @@ function versionCheck()
     }
 }
 
+function doPestleImports()
+{
+    pestle_import('Pulsestorm\Pestle\Library\parseArgvIntoCommandAndArgumentsAndOptions');
+    pestle_import('Pulsestorm\Pestle\Importer\getCacheDir');
+    pestle_import('Pulsestorm\Cli\Token_Parse\getFunctionFromCode');
+    pestle_import('Pulsestorm\Cli\Build_Command_List\buildCommandList');   
+    pestle_import('Pulsestorm\Pestle\Library\parseDocBlockIntoParts');     
+}
+
+function getReflectedCommand($command_name)
+{
+    $reflected_commands = getListOfDefinedCliFunctions();        
+
+    if(!array_key_exists($command_name, $reflected_commands))
+    {
+        output("No such command $command_name");
+        exit;
+    }
+    $reflected_command = $reflected_commands[$command_name];  
+    return $reflected_command;
+}
+
+function getCommandNameFromParsedArgv($parsed_argv)
+{
+    $command_name   = $parsed_argv['command'];
+    $command_name   = $command_name ? $command_name : 'help'; 
+    return $command_name;
+}
+
+function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block)
+{
+    return $arguments;
+}
+
+function limitOptionsIfPresentInDocBlock($options, $parsed_doc_block)
+{
+    if(!array_key_exists('option', $parsed_doc_block))
+    {
+        return $options;
+    }
+    
+    $final_options = [];
+    foreach($parsed_doc_block['option'] as $option)
+    {        
+        list($option_name, $text)       = explode(' ', $option);        
+        $final_options[$option_name]    = null;        
+        if(array_key_exists($option_name, $options))
+        {
+            $final_options[$option_name] = $options[$option_name];
+        }
+    }
+
+    return $final_options;
+}
+
+function getArgumentsAndOptionsFromParsedArgvAndDocComment($parsed_argv, $doc_block)
+{
+    $arguments      = limitArgumentsIfPresentInDocBlock(
+        $parsed_argv['arguments'], $doc_block);
+                        
+    $options        = limitOptionsIfPresentInDocBlock(
+        $parsed_argv['options'], $doc_block);
+        
+    return [
+        $arguments,
+        $options
+    ];            
+}
 /**
 * Main entry point
 */
 function main($argv)
 {
-    pestle_import('Pulsestorm\Pestle\Library\parseArgvIntoCommandAndArgumentsAndOptions');
-    
-    versionCheck();
-    //include in the library for this command
-    includeLibraryForCommand($argv);        
-    $commands = getListOfDefinedCliFunctions();        
-    
-    $command = array_key_exists(1, $argv) ? $argv[1] : 'help';
-    if(!array_key_exists($command, $commands))
-    {
-        output("No such command $command");
-        exit;
-    }
-    $command = $commands[$command];        
-    
-    $parsed_argv = parseArgvIntoCommandAndArgumentsAndOptions($argv);
-    $arguments   = $parsed_argv['arguments'];
-    $options     = $parsed_argv['options'];
-    
-    //get arguments
-    $arguments = $argv;
-    array_shift($arguments);    
-    array_shift($arguments);
+    doVersionCheck();
+    doPestleImports();
+
+    $parsed_argv    = parseArgvIntoCommandAndArgumentsAndOptions($argv);
+    $command_name   = getCommandNameFromParsedArgv($parsed_argv);
         
+    //include in the library for this command
+    includeLibraryForCommand($command_name);            
+    $command        = getReflectedCommand($command_name);
+    $doc_block      = parseDocBlockIntoParts($command->getDocComment());
+
+    list($arguments, $options) = 
+        getArgumentsAndOptionsFromParsedArgvAndDocComment($parsed_argv, $doc_block);
+    
     $command->invokeArgs([$arguments, $options]);
 }

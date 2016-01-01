@@ -7,6 +7,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 * One Line Description
 *
 * @command hello_world
+* @option service Which branch of the service
 */
 function pestle_cli($argv, $options)
 {
