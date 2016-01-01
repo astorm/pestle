@@ -148,11 +148,24 @@ function getListOfDefinedCliFunctions()
     return $commands;
 }
 
+function versionCheck()
+{
+    $version = phpversion();    
+    $version = '5.5.9';
+    if(version_compare($version, '5.6.0') === -1)
+    {
+        output("We're sorry, pestle requires PHP 5.6 or greater. It looks like " . 
+            "you're running " . $version . '.');
+        exit;    
+    }
+}
+
 /**
 * Main entry point
 */
 function main($argv)
 {
+    versionCheck();
     //include in the library for this command
     includeLibraryForCommand($argv);        
     $commands = getListOfDefinedCliFunctions();        
