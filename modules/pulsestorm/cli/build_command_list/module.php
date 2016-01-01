@@ -11,6 +11,10 @@ pestle_import('Pulsestorm\Pestle\Importer\getCacheDir');
 function getListOfFilesInModuleFolder()
 {
     $path = realpath(__DIR__ . '/../../../../modules/');
+    if(!$path)
+    {
+        $path = 'phar://pestle.phar/modules/';
+    }
     $objects = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($path), 
         RecursiveIteratorIterator::SELF_FIRST
