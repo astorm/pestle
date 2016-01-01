@@ -2,9 +2,9 @@
 namespace Pulsestorm\Magento2\Cli\List_Commands;
 use ReflectionFunction;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\getAtCommandFromDocComment');
-pestle_import('Pulsestorm\Magento2\Cli\Library\getDocCommentAsString');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\getAtCommandFromDocComment');
+pestle_import('Pulsestorm\Pestle\Library\getDocCommentAsString');
+pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Cli\Build_Command_List\includeAllModuleFiles');
 /**
 * Lists help

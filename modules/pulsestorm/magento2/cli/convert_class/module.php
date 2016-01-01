@@ -1,8 +1,8 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Convert_Class;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\input');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\input');
+pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\resolveAlias');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getMage1ClassPathFromConfigPathAndMage2ClassName');
 pestle_import('\Pulsestorm\Magento2\Cli\Library\convertMageOneClassIntoNamespacedClass');

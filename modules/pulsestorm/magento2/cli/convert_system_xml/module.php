@@ -1,8 +1,8 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Convert_System_Xml;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\input');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\input');
+pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
 * Short Description

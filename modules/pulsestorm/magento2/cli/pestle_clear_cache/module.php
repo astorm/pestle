@@ -1,7 +1,7 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Pestle_Clear_Cache;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Importer\getCacheDir');
 /**
 * One Line Description

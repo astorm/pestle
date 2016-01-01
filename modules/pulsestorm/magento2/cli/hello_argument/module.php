@@ -1,7 +1,7 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Hello_Argument;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
 * One Line Description

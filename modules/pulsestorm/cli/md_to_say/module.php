@@ -1,8 +1,8 @@
 <?php
 namespace Pulsestorm\Cli\Md_To_Say;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
-pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
+pestle_import('Pulsestorm\Pestle\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 use Michelf\Markdown;
 
 function swapExtension($filename, $from, $to)

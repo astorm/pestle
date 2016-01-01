@@ -1,12 +1,12 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Di;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\input');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\input');
+pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getDiLinesFromMage2ClassName');
 pestle_import('Pulsestorm\Cli\Token_Parse\token_get_all');
-pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
-pestle_import('Pulsestorm\Magento2\Cli\Library\writeStringToFile');
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 
 use stdClass;
 function getClassIndent()

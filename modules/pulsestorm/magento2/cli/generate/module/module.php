@@ -1,9 +1,9 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Module;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
-pestle_import('Pulsestorm\Magento2\Cli\Library\writeStringToFile');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
+pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
 pestle_import('Pulsestorm\Magento2\Cli\Library\addSchemaToXmlString');
 pestle_import('Pulsestorm\Magento2\Cli\Library\templateRegistrationPhp');

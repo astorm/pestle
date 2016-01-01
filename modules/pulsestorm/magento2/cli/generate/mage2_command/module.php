@@ -1,9 +1,9 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Mage2_Command;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
-pestle_import('Pulsestorm\Magento2\Cli\Library\writeStringToFile');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
+pestle_import('Pulsestorm\Pestle\Library\output');
 
 function createPathFromNamespace($namespace)
 {
@@ -45,7 +45,7 @@ function pestle_cli($argv)
     $command = '<' . '?php' . "\n" .
         'namespace ' . $namespace . ';'  . "\n" .
         'use function Pulsestorm\Pestle\Importer\pestle_import;'       . "\n" .
-        'pestle_import(\'Pulsestorm\Magento2\Cli\Library\output\');' . "\n\n" .
+        'pestle_import(\'Pulsestorm\Pestle\Library\output\');' . "\n\n" .
         '/**' . "\n" .
         '* One Line Description' . "\n" .
         '*' . "\n" .

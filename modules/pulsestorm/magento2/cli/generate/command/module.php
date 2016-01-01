@@ -1,13 +1,13 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Command;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\input');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\input');
+pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
-pestle_import('Pulsestorm\Magento2\Cli\Library\writeStringToFile');
+pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Magento2\Cli\Library\askForModuleAndReturnInfo');
-pestle_import('Pulsestorm\Magento2\Cli\Library\formatXmlString');
-pestle_import('Pulsestorm\Magento2\Cli\Library\simpleXmlAddNodesXpath');
+pestle_import('Pulsestorm\Xml_Library\formatXmlString');
+pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
 pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
 
 function templateCommandClass($namespace, $module_name, $command_name)

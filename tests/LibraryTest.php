@@ -3,7 +3,7 @@ namespace Pulsestorm\Pestle\Tests;
 require_once 'PestleBaseTest.php';
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassTemplate');
-pestle_import('Pulsestorm\Magento2\Cli\Library\isAboveRoot');
+pestle_import('Pulsestorm\Pestle\Library\isAboveRoot');
 
 class LibraryTest extends PestleBaseTest
 {

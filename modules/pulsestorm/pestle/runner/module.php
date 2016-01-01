@@ -172,7 +172,7 @@ function doPestleImports()
     pestle_import('Pulsestorm\Cli\Token_Parse\getFunctionFromCode');
     pestle_import('Pulsestorm\Cli\Build_Command_List\buildCommandList');   
     pestle_import('Pulsestorm\Pestle\Library\parseDocBlockIntoParts');     
-    pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');         
+    pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');         
 }
 
 function getReflectedCommand($command_name)

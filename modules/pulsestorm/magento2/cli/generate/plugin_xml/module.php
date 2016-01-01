@@ -1,17 +1,17 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Plugin_Xml;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\input');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\input');
+pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Format_Xml_String\format_xml');
-pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
 pestle_import('Pulsestorm\Magento2\Cli\Library\askForModuleAndReturnInfo');
-pestle_import('Pulsestorm\Magento2\Cli\Library\formatXmlString');
-pestle_import('Pulsestorm\Magento2\Cli\Library\writeStringToFile');
+pestle_import('Pulsestorm\Xml_Library\formatXmlString');
+pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassTemplate');
 pestle_import('Pulsestorm\Magento2\Cli\Path_From_Class\getPathFromClass');
-pestle_import('Pulsestorm\Magento2\Cli\Library\simpleXmlAddNodesXpath');
+pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
 
 
 function getDiXmlTemplate($config_attributes='xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd"')

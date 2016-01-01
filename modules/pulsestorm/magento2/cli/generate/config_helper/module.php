@@ -2,8 +2,8 @@
 namespace Pulsestorm\Magento2\Cli\Generate\Config_Helper;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 use Exception;
-pestle_import('Pulsestorm\Magento2\Cli\Library\input');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\input');
+pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
 * Short Description

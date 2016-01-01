@@ -2,9 +2,9 @@
 namespace Pulsestorm\Magento2\Cli\Search_Controllers;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
-pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
-pestle_import('Pulsestorm\Magento2\Cli\Library\glob_recursive');
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+pestle_import('Pulsestorm\Pestle\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\glob_recursive');
 pestle_import('Pulsestorm\Cli\Token_Parse\getFunctionFromClass');
 
 

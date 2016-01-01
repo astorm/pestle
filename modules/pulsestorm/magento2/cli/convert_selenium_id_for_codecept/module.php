@@ -1,7 +1,7 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Convert_Selenium_Id_For_Codecept;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\indexOrInput');
 
 function getCommandAndTwoArgs($string)

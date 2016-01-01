@@ -1,12 +1,12 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Observer;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\input');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\input');
+pestle_import('Pulsestorm\Pestle\Library\output');
 // pestle_import('Pulsestorm\Magento2\Cli\Library');
 pestle_import('Pulsestorm\Magento2\Cli\Library\initilizeModuleConfig');
-pestle_import('Pulsestorm\Magento2\Cli\Library\writeStringToFile');
-pestle_import('Pulsestorm\Magento2\Cli\Library\createBasicClassContents');
+pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
+pestle_import('Pulsestorm\Pestle\Library\createBasicClassContents');
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 
 /**

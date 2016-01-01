@@ -2,13 +2,13 @@
 namespace Pulsestorm\Magento2\Cli\Generate\Route;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 use Exception;
-pestle_import('Pulsestorm\Magento2\Cli\Library\input');
-pestle_import('Pulsestorm\Magento2\Cli\Library\inputOrIndex');
-pestle_import('Pulsestorm\Magento2\Cli\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\input');
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\askForModuleAndReturnInfo');
-pestle_import('Pulsestorm\Magento2\Cli\Library\simpleXmlAddNodesXpath');
-pestle_import('Pulsestorm\Magento2\Cli\Library\formatXmlString');
-pestle_import('Pulsestorm\Magento2\Cli\Library\writeStringToFile');
+pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
+pestle_import('Pulsestorm\Xml_Library\formatXmlString');
+pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
 pestle_import('Pulsestorm\Magento2\Cli\Path_From_Class\getPathFromClass');
 
