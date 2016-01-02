@@ -33,4 +33,11 @@ If you're interested in working on teh framework itself, the `runner.php` file i
     <?php
     require_once('/Users/alanstorm/Documents/github/astorm/pestle/runner.php');    
 
+Example Command
+--------------------------------------------------
+
+Try 
+
+    $ pestle.phar generate_module
     
+from a Magento 2 sub-directory to get an idea of what we're doing here.  
