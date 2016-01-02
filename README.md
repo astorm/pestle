@@ -18,16 +18,19 @@ How to Use
 --------------------------------------------------
 Can you not read?  The havoc furnaces having been building throughout the night.
 
-We don't have a good story for new user setup, the project's still in the "crappy first draft" stage where we're meandering towards a final goal.  For now dropping the following in your `~/bin`
+We've got a `phing` `build.xml` file setup now, so all you *should* need to do to build a stand along `pestle.phar` executable is 
 
-    #File: ~/bin/mage2
-    
+- `git checkout git@github.com:astorm/pestle.git`
+- composer.phar install
+- ./build.sh (which, in turn, calls the `phing` job that builds the `phar`
+
+If you're not sure what to do with a `phar`, we may not be ready for your yet.
+
+If you're interested in working on teh framework itself, the `runner.php` file in the root is where you want to be.  I personally use it by dropping the folloing in my `~/bin`
+
+    #File: ~/bin/pestle_dev
     #!/usr/bin/env php
     <?php
-    require_once('/path/to/pestle/runner.php');    
-    
-should be enough to get you going.  
-
-Use at your own risk, more to come, etc.
+    require_once('/Users/alanstorm/Documents/github/astorm/pestle/runner.php');    
 
     
