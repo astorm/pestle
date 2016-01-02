@@ -15,7 +15,7 @@ function getBaseProjectDir()
     if(isPhar())
     {
         return 'phar://pestle.phar';
-    }
+    }    
     return __DIR__ . '/../../../..';
 }
 require getBaseProjectDir()  . '/vendor/autoload.php';

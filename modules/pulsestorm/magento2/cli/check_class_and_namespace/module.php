@@ -3,7 +3,7 @@ namespace Pulsestorm\Magento2\Cli\Check_Class_And_Namespace;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
-pestle_import('Pulsestorm\Pestle\Library\glob_recursive');
+pestle_import('Pulsestorm\PhpDotNet\glob_recursive');
 
 function parseNamespace($contents)
 {
