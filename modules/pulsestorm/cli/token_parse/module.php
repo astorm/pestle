@@ -144,11 +144,11 @@ function outputTokens($tokens, $buffer=false)
     }
 }
 
-// function pestle_token_get_all($string)
-// {
-//     $tokens = php_token_get_all($string);
-//     return fix_all_tokens($tokens);
-// }
+function pestle_token_get_all($string)
+{
+    $tokens = php_token_get_all($string);
+    return fix_all_tokens($tokens);
+}
 
 function token_get_all($string)
 {

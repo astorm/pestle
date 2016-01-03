@@ -32,14 +32,16 @@ function createNamespaceFromCommandName($command_name)
 }
 
 /**
-* One Line Description
+* Generates pestle command boiler plate
+* This command creates the necessary files 
+* for a pestle command
 *
-* @command generate_mage2_command
+* @command generate_pestle_command
+* @argument command_name New Command Name? [foo_bar]
 */
 function pestle_cli($argv)
 {
-    $command_name = inputOrIndex('Command Name?', 'foo_bar', $argv, 0);
-    
+    $command_name = $argv['command_name'];
     $namespace = createNamespaceFromCommandName($command_name);
             
     $command = '<' . '?php' . "\n" .
@@ -69,4 +71,6 @@ function pestle_cli($argv)
 
     writeStringToFile($path_full, $command);
     output("bbedit $path_full");
+    output("sublime $path_full");
+    output("vi $path_full");    
 }

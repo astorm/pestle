@@ -81,8 +81,7 @@ function createDiIfNeeded($module_dir)
 */
 function pestle_cli($argv)
 {
-    $module_info        = getModuleInformation($argv['module_name']);
-    
+    $module_info        = getModuleInformation($argv['module_name']);    
     $namespace          = $module_info->vendor;
     $module_name        = $module_info->name;
     $module_shortname   = $module_info->short_name;

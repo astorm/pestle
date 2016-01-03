@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getDiLinesFromMage2ClassName');
-pestle_import('Pulsestorm\Cli\Token_Parse\token_get_all');
+pestle_import('Pulsestorm\Cli\Token_Parse\pestle_token_get_all');
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 
@@ -55,7 +55,7 @@ function insertConstrctorIntoPhpClassFileTokens($tokens)
         $c++;
     }
     
-    return token_get_all(implodeTokensIntoContents($new_tokens));
+    return pestle_token_get_all(implodeTokensIntoContents($new_tokens));
 }
 
 function implodeTokensIntoContents($tokens)
@@ -137,35 +137,33 @@ function defineStates()
 }
 /**
 * Injects a dependency into a class constructor
-* Inserts a property, __construct paramater, and parameter assignment
+* This command modifies a preexisting class, adding the provided 
+* dependency to that class's property list, `__construct` parameters 
+* list, and assignment list.
 *
-* Description
+*    pestle.phar generate_di app/code/Pulsestorm/Generate/Command/Example.php 'Magento\Catalog\Model\ProductFactory' 
+*
 * @command generate_di
+* @argument file Which PHP class file are we injecting into?
+* @argument class Which class to inject? [Magento\Catalog\Model\ProductFactory]
+*
 */
 function pestle_cli($argv)
 {
-    ##original($argv);
     defineStates();
-
-    $file  = inputOrIndex(
-        "Which file are we injecting into?", null, $argv, 0
-    );   
-    
-    $file = realpath($file);
+    $file = realpath($argv['file']);
     if(!$file)
     {
         exit("Could not find $file.\n");
-    } 
-    $class = inputOrIndex(
-        "Which class to inject?", 'Magento\Catalog\Model\ProductFactory',
-        $argv, 1);    
+    }     
+    $class = $argv['class'];
 
     $di_lines = (object) getDiLinesFromMage2ClassName($class);
     $di_lines->parameter = trim(trim($di_lines->parameter,','));        
     
     $indent   = getClassIndent();
     $contents = file_get_contents($file);
-    $tokens   = token_get_all($contents);    
+    $tokens   = pestle_token_get_all($contents);    
     
     $has_constructor = arrayContainsConstructToken($tokens);
     if(!$has_constructor)
@@ -231,6 +229,6 @@ function pestle_cli($argv)
     }
     
     $contents = implodeTokensIntoContents($new_tokens);
-    
+    output("Injecting $class into $file");
     writeStringToFile($file, $contents);    
 }
