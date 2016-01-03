@@ -8,7 +8,8 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\inputModuleName');
 
 /**
 * Generates registration.php
-* This command generates the PHP code for a Magento module registration.php file.
+* This command generates the PHP code for a 
+* Magento module registration.php file.
 * 
 *     $ pestle_dev generate_registration Foo_Bar
 *     <?php
@@ -19,14 +20,11 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\inputModuleName');
 *         );
 * 
 * @command generate_registration
+* @argument module_name Which Module? [Vendor_Module] 
 */
 function pestle_cli($argv)
 {
-    if(count($argv) === 0)
-    {
-        $argv[] = inputModuleName();
-    }
-    $module_name = $argv[0];
+    $module_name = $argv['module_name'];
     
     output(templateRegistrationPhp($module_name));
 }

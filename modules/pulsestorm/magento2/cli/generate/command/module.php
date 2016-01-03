@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
-pestle_import('Pulsestorm\Magento2\Cli\Library\askForModuleAndReturnInfo');
+pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
 pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
 pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
@@ -65,20 +65,30 @@ function createDiIfNeeded($module_dir)
 }
 
 /**
-* Short Description
-* Long
-* Description
+* Generates bin/magento command files
+* This command generates the necessary files and configuration 
+* for a new command for Magento 2's bin/magento command line program.
+*
+*   pestle.phar Pulsestorm_Generate Example
+* 
+* Creates
+* app/code/Pulsestorm/Generate/Command/Example.php
+* app/code/Pulsestorm/Generate/etc/di.xml
+*
 * @command generate_command
+* @argument module_name In which module? [Pulsestorm_Helloworld]
+* @argument command_name In which module? [Testbed]
 */
 function pestle_cli($argv)
 {
-    $module_info        = askForModuleAndReturnInfo($argv);
+    $module_info        = getModuleInformation($argv['module_name']);
     
     $namespace          = $module_info->vendor;
     $module_name        = $module_info->name;
     $module_shortname   = $module_info->short_name;
     $module_dir         = $module_info->folder;    
-    $command_name       = input("Command Name?", 'Testbed');    
+    $command_name       = $argv['command_name'];
+    // $command_name       = input("Command Name?", 'Testbed');    
         
     output($module_dir);    
             

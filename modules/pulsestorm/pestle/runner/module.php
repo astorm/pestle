@@ -201,6 +201,7 @@ function parseQuestionAndDefaultFromText($text)
         'question'=>$text,
         'default'=>''
     ];
+
     if(strpos($text, '[') === false)
     {
         return $return;
@@ -209,6 +210,7 @@ function parseQuestionAndDefaultFromText($text)
     list($return['question'], $return['default']) = explode('[',$text,2);
     $return['default'] = trim($return['default']);
     $return['default'] = trim($return['default'],']');
+    $return['question'] = trim($return['question']);
     return $return;
 }
 function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block)
@@ -225,10 +227,10 @@ function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block)
         list($argument_name, $text)       = explode(' ', $argument,2);
         $text_parts = parseQuestionAndDefaultFromText($text);
         $question = $text_parts['question'];
-        $default  = $text_parts['default'];
-        $default = 'how to make default';
+        $default  = trim($text_parts['default']);
+
         $new_arguments[$argument_name] = inputOrIndex(
-            $question,'',$arguments,$c);
+            $question,$default,$arguments,$c);
         $c++;
     }
     return $new_arguments;

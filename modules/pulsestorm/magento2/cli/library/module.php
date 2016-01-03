@@ -37,11 +37,8 @@ function createClassTemplate($class, $extends=false, $implements=false)
     return $template;
 }
 
-function askForModuleAndReturnInfo($argv, $index=0)
+function getModuleInformation($module_name)
 {
-    $module_name = inputOrIndex(
-        "Which module?", 
-        'Magento_Catalog', $argv, $index);
     list($vendor, $name) = explode('_', $module_name);        
     return (object) [
         'vendor'        => $vendor,
@@ -49,6 +46,14 @@ function askForModuleAndReturnInfo($argv, $index=0)
         'name'          => $module_name,
         'folder'        => getBaseMagentoDir() . "/app/code/$vendor/$name",
     ];
+}
+
+function askForModuleAndReturnInfo($argv, $index=0)
+{
+    $module_name = inputOrIndex(
+        "Which module?", 
+        'Magento_Catalog', $argv, $index);
+    return getModuleInformation($module_name);        
 }
 
 function askForModuleAndReturnFolder($argv)

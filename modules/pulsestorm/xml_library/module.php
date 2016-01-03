@@ -1,6 +1,6 @@
 <?php
 namespace Pulsestorm\Xml_Library;
-
+use DomDocument;
 /**
 * @command library
 */

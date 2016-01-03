@@ -2,7 +2,6 @@
 namespace Pulsestorm\Magento2\Cli\Hello_World;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
-global $asdebug;$asdebug=true;
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
