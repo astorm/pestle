@@ -100,8 +100,9 @@ function includeCodeReflectionStrategy($namespace, $code, $ns_called_from)
     functionRegister($short_name, $ns_called_from, $namespace);
 
     if(file_exists($full_path))
-    {
-        require_once $full_path;
+    {        
+        require_once getModulePathToFullyNamespacedFunction($namespace);
+        require_once $full_path;    //require the exported file
         return;
     }
     
@@ -230,12 +231,26 @@ function convertAbsoluteFilePathIntoNamespace($path)
 
 }
 
-function splitPopDiscard($char, $namespace)
+function splitShiftDiscard($char, $string)
 {
-    $parts = explode($char, $namespace);
+    $parts = explode($char, $string);
+    array_shift($parts);
+    return implode($char, $parts);
+}
+
+function splitPop($char, $string)
+{
+    $parts = explode($char, $string);
+    return array_pop($parts);
+}
+
+function splitPopDiscard($char, $string)
+{
+    $parts = explode($char, $string);
     array_pop($parts);
     return implode($char, $parts);
 }
+
 function getNamespaceCalledFromRegularFunction($item)
 {
     if(array_key_exists('function', $item) && $item['function'] !== 'require_once')
@@ -295,6 +310,16 @@ function getCanidateStackFramesForNamespaceHeuristics()
     $items['getItemAfterPestleImportFromCallstack']         = getItemAfterPestleImportFromCallstack();
     $items['getItemAfterCallFromGeneratedFromCallstack']    = getItemAfterCallFromGeneratedFromCallstack();    
     return $items;
+}
+
+function getModulePathToFullyNamespacedFunction($namespaced_function)
+{
+    $namespace = splitPopDiscard('\\',$namespaced_function);
+    $function  = splitPop('\\',$namespaced_function);
+    
+    $namespace = strToLower(str_replace('\\','/',$namespace));
+    $path = getBaseProjectDir() . '/modules/' . $namespace . '/module.php';
+    return $path;
 }
 
 function getNamespaceCalledFrom()
