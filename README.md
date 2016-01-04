@@ -18,7 +18,7 @@ How to Use
 --------------------------------------------------
 The easiest way to get started is to grab the latest build using curl
 
-    curl -LO 'http://alanstorm.com/2016/projects/pestle/pestle.phar
+    curl -LO http://alanstorm.com/2016/projects/pestle/pestle.phar
     
 You can see a list of commands with the following
 
