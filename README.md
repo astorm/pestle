@@ -16,17 +16,25 @@ PHP doesn't **need** another command line framework.  Symfony's console does a f
 
 How to Use
 --------------------------------------------------
-Can you not read?  The havoc furnaces having been building throughout the night.
+The easiest way to get started is to grab the latest build using curl
 
-We've got a `phing` `build.xml` file setup now, so all you *should* need to do to build a stand along `pestle.phar` executable is 
+    curl -LO 'http://alanstorm.com/2016/projects/pestle/pestle.phar
+    
+You can see a list of commands with the following
+
+    php pestle.phar list 
+
+and get help for a specific command with
+
+    php pestle.phar help generate_module    
+
+If you want to build your own `phar`, we've got a `phing` `build.xml` file setup so all you *should* need to do to build a stand along `pestle.phar` executable is 
 
 - `git checkout git@github.com:astorm/pestle.git`
 - composer.phar install
 - ./build.sh (which, in turn, calls the `phing` job that builds the `phar`
 
-If you're not sure what to do with a `phar`, we may not be ready for you yet.
-
-If you're interested in working on the framework itself, the `runner.php` file in the root is where you want to be.  I personally use it by dropping the folloing in my `~/bin`
+If you're interested in working on the framework itself, you can use the `runner.php` in the project root.  I personally use it by dropping the folloing in my `~/bin`.
 
     #File: ~/bin/pestle_dev
     #!/usr/bin/env php
