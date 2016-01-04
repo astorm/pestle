@@ -114,7 +114,7 @@ function includeLibraryForCommand($command, $try_again=true)
     
     if(!array_key_exists($command, $command_list))
     {    
-        output("Can't find [$command]");
+        output("Can't find [$command] in " . __FUNCTION__);
         exit;    
     }
     
@@ -309,8 +309,14 @@ function main($argv)
     doPestleImports();
 
     $parsed_argv    = parseArgvIntoCommandAndArgumentsAndOptions($argv);
-    $command_name   = getCommandNameFromParsedArgv($parsed_argv);
-        
+    $command_name   = getCommandNameFromParsedArgv($parsed_argv);        
+    
+    if(preg_match('%\.php%', $command_name) && file_exists($command_name))
+    {        
+        $parsed_argv['arguments'][] = $command_name;
+        $command_name               = 'pestle_run_file';        
+        $parsed_argv['command']     = $command_name;        
+    }        
     //include in the library for this command
     includeLibraryForCommand($command_name);            
     $command        = getReflectedCommand($command_name);

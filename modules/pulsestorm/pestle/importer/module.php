@@ -162,16 +162,35 @@ function includeCode($namespace, $code, $ns_called_from)
     // includeCodeFullExportStrategy($namespace, $code); 
 }
 
+function functionRegisterGet(&$functions, $short_name,$ns_called_from)
+{
+    if(!array_key_exists($short_name, $functions))
+    {
+        exit("No such function [$short_name] imported.");
+    }
+    if(!array_key_exists($ns_called_from, $functions[$short_name]))
+    {
+        exit("No such function [$short_name] imported for namespace [$ns_called_from]");
+    }    
+    return $functions[$short_name][$ns_called_from]; 
+}
+
+function functionRegisterSet(&$functions, $short_name, $ns_called_from, $namespaced_function)
+{
+    $functions[$short_name][$ns_called_from] = $namespaced_function;    
+}
+
 function functionRegister($short_name,$ns_called_from=false,$namespaced_function=false)
 {    
     static $functions=[];
     if(!$namespaced_function) { 
-        return $functions[$short_name][$ns_called_from]; 
+        return functionRegisterGet($functions, $short_name,$ns_called_from);
+        // return $functions[$short_name][$ns_called_from]; 
     }
-    
+    return functionRegisterSet($functions,$short_name,$ns_called_from,$namespaced_function);
 //     echo "Registering `$short_name` as `$namespaced_function` 
 // for calls from `$ns_called_from`","\n";
-    $functions[$short_name][$ns_called_from] = $namespaced_function;    
+    
 }
 function replaceFirstInstanceOfFunctionName($code, $short_name)
 {
@@ -219,9 +238,15 @@ function convertAbsoluteFilePathIntoNamespace($path)
 {
     $contents = file_get_contents($path);
     preg_match('%namespace[\s]*(.+);%', $contents, $matches);
-    $namespace = $matches[1];
+//     var_dump($path);
+    if(array_key_exists(1, $matches))
+    {
+        $namespace = $matches[1];
+        return $namespace;
+    }
+    return false;
     // $namespace = splitPopDiscard('\\', $namespace);
-    return $namespace;
+    
 
 }
 
@@ -260,29 +285,25 @@ function getItemAfterPestleImportFromCallstack()
     return getItemAfterFunctionFromCallstack('Pulsestorm\Pestle\Importer\pestle_import');
 }
 
-function getItemAfterCallFromGeneratedFromCallstack()
+function getItemAfterCallFromGeneratedFromCallstack($offset=0)
 {
-    return getItemAfterFunctionFromCallstack('Pulsestorm\Pestle\Importer\getNamespaceCalledFromForGenerated');
+    return getItemAfterFunctionFromCallstack(
+        'Pulsestorm\Pestle\Importer\getNamespaceCalledFromForGenerated', $offset);
 }
 
-function getItemAfterFunctionFromCallstack($function)
+function getItemAfterFunctionFromCallstack($function, $offset=0)
 {
-    $info = debug_backtrace();
-    $ours = false; $c=-1;   
-    $now  = false;
-    foreach($info as $item)
+    $info   = debug_backtrace();
+    $count  = count($info);
+    for($i=0;$count;$i++)
     {
-        if($now)
-        {
-            $ours = $item;
-            break;
-        }
+        $item = $info[$i];
         if(array_key_exists('function', $item) && $item['function'] == $function)
         {
-            $now = true;
-        }
-    }    
-    return $ours;
+            return $info[($i + 1 + $offset)];
+        }        
+    }
+    return false;    
 }
 function getNamespaceFromFileOfNonNamespaceFunctionCall($item)
 {
@@ -316,150 +337,80 @@ function getModulePathToFullyNamespacedFunction($namespaced_function)
     return $path;
 }
 
-function getNamespaceCalledFrom()
+function getNamespaceCalledFromInsideAFile()
 {
-//     echo "Lookin up namespace with getNamespaceCalledFrom","\n";
-//     echo "Change this function name to be getImportedFromNamespace";
-    //start the special doPestleImports
-//     $trace = debug_backtrace();
-//     $functions = array_map(function($item){
-//         if(array_key_exists('function', $item))
-//         {
-//             return $item['function'];
-//         }
-//         return null;
-//     },$trace);
-//     $functions = array_filter($functions);
-//     if(array_search('Pulsestorm\Pestle\Runner\doPestleImports', $functions) === 2)
-//     {
-//         return('Pulsestorm\Pestle\Runner');
-//     }
-    //end the special doPestleImports
-    
     //start pestle_import from inside a file
     $trace = debug_backtrace();
     $found = false;
+    $i     = 0;
     foreach($trace as $item)
     {
+        $i++;
         if(!isset($item['function'])) { continue; };
         if($item['function'] !== 'Pulsestorm\Pestle\Importer\pestle_import') { continue; }
-        $found = true;
+        $found = true;        
         break;
     }
-    if($found)
+    if($found && $i > 0 && array_key_exists($i, $trace))
     {
         $namespace = convertAbsoluteFilePathIntoNamespace($item['file']);
-        return $namespace;
+        if(!$namespace) //for stand alone files
+        {
+            $namespace = convertAbsoluteFilePathIntoNamespace($trace[$i]['file']);
+        }
+        if($namespace)
+        {
+            return $namespace;
+        }
     }
-    //end pestle_import from inside a file
-    
-    //start callFromGenereate usage
-    $item = getItemAfterCallFromGeneratedFromCallstack($trace);
+    //end pestle_import from inside a file    
+}
+
+function ifItemExistsThenReturnNamespaceFromFile($item)
+{
     if($item)
     {
         $namespace = convertAbsoluteFilePathIntoNamespace($item['file']);
+    }
+    return $namespace;
+}
+
+function getNamespaceCalledFromCallFromGenerateFunction()
+{
+    //start callFromGenereate usage
+    $item = getItemAfterCallFromGeneratedFromCallstack();
+    $namespace = ifItemExistsThenReturnNamespaceFromFile($item);
+    if($namespace)
+    {
+        return $namespace;    
+    }
+    //for running stand alone file
+    $item = getItemAfterCallFromGeneratedFromCallstack(1);
+    $namespace = ifItemExistsThenReturnNamespaceFromFile($item);
+    return $namespace;    
+    //end callFromGenereate usage    
+}
+
+function getNamespaceCalledFrom()
+{   
+    $trace = debug_backtrace();
+    $found = false;
+    
+    $namespace = getNamespaceCalledFromInsideAFile();
+    if($namespace)
+    {
         return $namespace;
     }
-    //end callFromGenereate usage
     
-    var_dump($functions);
-    exit;
-    var_dump('Not Found' . __METHOD__);
-    exit;
+    $namespace = getNamespaceCalledFromCallFromGenerateFunction();
+    if($namespace)
+    {
+        return $namespace;
+    }
     
+    var_dump("Could not determine where pestle_include was callled from");
     var_dump($trace);
-    exit;
-    var_dump($functions);
-    exit;
-    var_dump(debug_backtrace());
-    exit;
-    // global $asdebug;
-//     if($asdebug)
-//     {
-//         var_dump(debug_backtrace());
-//     }
-    $items     = getCanidateStackFramesForNamespaceHeuristics();
-    $results   = [];
-    foreach($items as $item)
-    {     
-        if(!$item) { continue; }
-        $results['getNamespaceCalledFromRegularFunction'] 
-            = getNamespaceCalledFromRegularFunction($item);        
-        $results['getNamespaceCalledFromRequireOrInclude'] 
-            = getNamespaceCalledFromRequireOrInclude($item);    
-        $results['getNamespaceFromFileOfNonNamespaceFunctionCall'] 
-            = getNamespaceFromFileOfNonNamespaceFunctionCall($item);        
-//         if($asdebug)
-//         {
-//             var_dump($results);
-//             continue;
-//         }            
-        foreach($results as $result)
-        {
-            if($result){ 
-                return $result; 
-            }
-        }
-        
-        exit(__METHOD__ . '::' . __LINE__);
-    }
-
-    
-    
-
-    $info = debug_backtrace();    
-    var_dump($info);
-    exit(__METHOD__ . '::' . __LINE__);
-    
-    
-    var_dump($ours);
-    exit(__METHOD__ . "\n");
-//     $ours = false; $c=-1;   
-//     foreach($info as $item)
-//     {
-//         $c++;
-//         if(array_key_exists('function', $item) && $item['function'] == 'Pulsestorm\Pestle\Importer\getNamespaceCalledFrom')
-//         {
-//             continue;
-//         }
-// 
-//         if(array_key_exists('function', $item) && $item['function'] == 'getNamespaceCalledFrom')
-//         {
-//             continue;
-//         }
-// 
-//         if(array_key_exists('function', $item) && $item['function'] == 'getNamespaceCalledFrom')
-//         {
-//             continue;
-//         }            
-// 
-//         if(array_key_exists('function', $item) && $item['function'] == 'getNamespaceCalledFrom')
-//         {
-//             continue;
-//         }            
-//         
-//         if(array_key_exists('class', $item) && $item['class'] == 'ReflectionFunction')
-//         {
-//             continue;
-//         }
-// 
-//         
-//         $ours = $item;
-//         break;
-//     }
-    
-//     var_dump($c);
-//     var_dump($info);
-    
-    if(array_key_exists('class', $ours))
-    {
-        $r = new ReflectionClass($ours['class']);
-    }
-    else
-    {
-        $r = new ReflectionFunction($ours['function']);        
-    }
-    return $r->getNamespaceName();        
+    exit;      
 }
 
 /**

@@ -3,3 +3,4 @@ vendor/
 build/
 pestle.phar
 build2.sh
+test.php
