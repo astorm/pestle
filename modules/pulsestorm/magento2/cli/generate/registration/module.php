@@ -11,7 +11,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\inputModuleName');
 * This command generates the PHP code for a 
 * Magento module registration.php file.
 * 
-*     $ pestle_dev generate_registration Foo_Bar
+*     $ pestle.phar generate_registration Foo_Bar
 *     <?php
 *         \Magento\Framework\Component\ComponentRegistrar::register(
 *             \Magento\Framework\Component\ComponentRegistrar::MODULE,

@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Format_Xml_String\format_xml');
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
-pestle_import('Pulsestorm\Magento2\Cli\Library\askForModuleAndReturnInfo');
+pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassTemplate');
@@ -36,30 +36,29 @@ function underscoreClass($class)
 
 /**
 * Generates plugin XML
-* Long
-* Description
+* This command generates the necessary files and configuration 
+* to "plugin" to a preexisting Magento 2 object manager object. 
+*
+*     pestle.phar generate_plugin_xml Pulsestorm_Helloworld 'Magento\Framework\Logger\Monolog' 'Pulsestorm\Helloworld\Plugin\Magento\Framework\Logger\Monolog'
+* 
+* @argument module_name Create in which module? [Pulsestorm_Helloworld]
+* @argument class Which class are you plugging into? [Magento\Framework\Logger\Monolog]
+* @argument class_plugin What's your plugin class name? [<$module_name$>\Plugin\<$class$>]
 * @command generate_plugin_xml
 */
 function pestle_cli($argv)
 {
-    $module_info = askForModuleAndReturnInfo($argv);
-    
-    $class          = inputOrIndex(
-        "Which class are you plugging into?", 'Magento\Framework\Logger\Monolog',
-        $argv, 1);
-    // $class          = input("Which class are you plugging into?", 'Magento\Framework\Logger\Monolog');
-    
-    $class_plugin      = inputOrIndex(
-        "What's your plugin class name?", 
-        $module_info->vendor . '\\' . $module_info->short_name .'\Plugin\\' . str_replace('\\','',$class),
-        $argv, 2);    
-    // $class_plugin   = input("What's your plugin class name?", 'Packagename\Vendor\Plugin\\' . str_replace('\\','',$class));
-    
+    // $module_info = askForModuleAndReturnInfo($argv);
+    $module_info    = getModuleInformation($argv['module_name']);
+    $class          = $argv['class'];
+    $class_plugin   = $argv['class_plugin'];
+
     $path_di = $module_info->folder . '/etc/di.xml';
     if(!file_exists($path_di))
     {
         $xml =  simplexml_load_string(getBlankXml('di'));           
         writeStringToFile($path_di, $xml->asXml());
+        output("Created new $path_di");
     }
     
     $xml            =  simplexml_load_file($path_di);   
@@ -75,6 +74,7 @@ function pestle_cli($argv)
     $plugin->addAttribute('type',$class_plugin);
     
     writeStringToFile($path_di, formatXmlString($xml->asXml()));
+    output("Added nodes to $path_di");
     
     $path_plugin = getPathFromClass($class_plugin);  
     $body = implode("\n", [
@@ -83,6 +83,7 @@ function pestle_cli($argv)
         '    //function afterMETHOD($subject, $result){return $result;}']);
     $class_definition = str_replace('<$body$>', "\n$body\n", createClassTemplate($class_plugin));
     writeStringToFile($path_plugin, $class_definition);
+    output("Created file $path_plugin");
 }
 
 

@@ -224,6 +224,9 @@ function parseQuestionAndDefaultFromText($text, $new_arguments=[])
             case 'Class Name?':
                 $value = str_replace('_', '\\', $value);
                 break;
+            case 'What\'s your plugin class name?':
+                $value = str_replace('_','\\', $value);
+                break;
             default:
             
         }  
