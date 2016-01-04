@@ -2,3 +2,4 @@ vendor/
 .DS_Store
 build/
 pestle.phar
+build2.sh
