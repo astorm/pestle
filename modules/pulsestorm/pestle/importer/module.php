@@ -184,7 +184,7 @@ function getCacheDir()
     $cache_dir = '/tmp/pestle_cache/' . md5(getBaseProjectDir());
     
     if(!is_dir($cache_dir)){ 
-        mkdir($cache_dir, 0755);
+        mkdir($cache_dir, 0755, true);
     }
     return $cache_dir;
 }
