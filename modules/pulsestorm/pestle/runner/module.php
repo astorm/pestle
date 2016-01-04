@@ -3,13 +3,15 @@ namespace Pulsestorm\Pestle\Runner;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use ReflectionFunction;
+use Phar;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
 function isPhar()
 {
-    $first_include = get_included_files()[0];
-    return strpos($first_include, '/pestle.phar') !== false;
+    $running = Phar::running();
+    return (boolean) $running;
 }
+
 function getBaseProjectDir()
 {
     if(isPhar())
