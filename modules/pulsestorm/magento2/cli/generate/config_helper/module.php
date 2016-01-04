@@ -6,10 +6,13 @@ pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* Short Description
-* Long
-* Description
+* Generates a help class for reading Magento's configuration
+*
+* This command will generate the necessary files and configuration 
+* needed for reading Magento 2's configuration values.
+* 
 * @command generate_config_helper
+* @todo needs to be implemented
 */
 function pestle_cli($argv)
 {
