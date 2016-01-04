@@ -195,7 +195,7 @@ function getCommandNameFromParsedArgv($parsed_argv)
     return $command_name;
 }
 
-function parseQuestionAndDefaultFromText($text)
+function parseQuestionAndDefaultFromText($text, $new_arguments=[])
 {
     $return = [
         'question'=>$text,
@@ -208,9 +208,29 @@ function parseQuestionAndDefaultFromText($text)
     }
     
     list($return['question'], $return['default']) = explode('[',$text,2);
+    $return['question'] = trim($return['question']);
+    
     $return['default'] = trim($return['default']);
     $return['default'] = trim($return['default'],']');
-    $return['question'] = trim($return['question']);
+    
+    foreach($new_arguments as $key=>$value)
+    {    
+        //temporary hack to get the casing we want -- need general approach
+        switch($return['question'])
+        {
+            case 'Observer Name?':
+                $value = strToLower($value);
+                break;
+            case 'Class Name?':
+                $value = str_replace('_', '\\', $value);
+                break;
+            default:
+            
+        }  
+
+        $return['default'] = str_replace('<$'.$key.'$>',$value,$return['default']);
+    }
+    
     return $return;
 }
 function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block)
@@ -225,7 +245,7 @@ function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block)
     foreach($parsed_doc_block['argument'] as $argument)
     {
         list($argument_name, $text)       = explode(' ', $argument,2);
-        $text_parts = parseQuestionAndDefaultFromText($text);
+        $text_parts = parseQuestionAndDefaultFromText($text, $new_arguments);
         $question = $text_parts['question'];
         $default  = trim($text_parts['default']);
 

@@ -36,6 +36,8 @@ function createNamespaceFromCommandName($command_name)
 * This command creates the necessary files 
 * for a pestle command
 *
+*     pestle.phar generate_pestle_command command_name
+*
 * @command generate_pestle_command
 * @argument command_name New Command Name? [foo_bar]
 */

@@ -11,20 +11,21 @@ pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
 
 /**
 * Generates new module XML, adds to file system
-* Long
-* Description
-* @todo generate_registration
+* This command generates the necessary files and configuration
+* to add a new module to a Magento 2 system.
+*
+*    pestle.phar Pulsestorm TestingCreator 0.0.1
+*
+* @argument namespace Vendor Namespace? [Pulsestorm]
+* @argument name Module Name? [Testbed]
+* @argument version Version? [0.0.1]
 * @command generate_module
 */
 function pestle_cli($argv)
 {
-    // $namespace = input("Namespace?",'Pulsestorm');
-    // $name = input("Module Name?",'Helloworld');
-    // $version = input("Version?",'0.0.1');
-
-    $namespace = inputOrIndex("Namespace?",'Pulsestorm', $argv, 0);
-    $name      = inputOrIndex("Module Name?",'Helloworld', $argv, 1);
-    $version   = inputOrIndex("Version?",'0.0.1', $argv, 2);
+    $namespace = $argv['namespace'];
+    $name      = $argv['name'];
+    $version   = $argv['version'];
     
     $full_module_name = implode('_', [$namespace, $name]);    
     
@@ -33,22 +34,23 @@ function pestle_cli($argv)
     $module->addAttribute('name'         , $full_module_name);
     $module->addAttribute('setup_version', $version);
     $xml = $config->asXml();
-    // $xml = addSchemaToXmlString($xml);
     
-    $base_dir = getBaseMagentoDir();
-    $module_dir = implode('/',[$base_dir, 'app/code', $namespace, $name, 'etc']);
+    $base_dir   = getBaseMagentoDir();
+    $module_dir = implode('/',[$base_dir, 'app/code', $namespace, $name]);    
+    $etc_dir    = $module_dir . '/etc';
+    $reg_path   = $module_dir . '/registration.php';
     
-    if(is_dir($module_dir))
+    if(is_dir($etc_dir))
     {
-        output("Module directory [$module_dir] already exists, bailing");
+        output("Module directory [$etc_dir] already exists, bailing");
         return;
     }
     
-    mkdir($module_dir, 0777, $module_dir);
-    writeStringToFile($module_dir . '/module.xml', $xml);
-    output("Created: " . $module_dir . '/module.xml');
+    mkdir($etc_dir, 0777, $etc_dir);
+    writeStringToFile($etc_dir . '/module.xml', $xml);
+    output("Created: " . $etc_dir . '/module.xml');
     
     $register = templateRegistrationPhp($full_module_name);    
-    writeStringToFile($module_dir . '/../registration.php', $register);
-    output("Created: " . $module_dir . '/../registration.php');    
+    writeStringToFile($reg_path, $register);
+    output("Created: " . $reg_path);    
 }
