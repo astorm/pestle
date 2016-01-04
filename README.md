@@ -49,3 +49,5 @@ Try
     $ pestle.phar generate_module
     
 from a Magento 2 sub-directory to get an idea of what we're doing here.  
+
+Want to learn more?  We'll [be using the wiki](https://github.com/astorm/pestle/wiki) for documentation until we outgrow it. 
