@@ -24,9 +24,9 @@ We've got a `phing` `build.xml` file setup now, so all you *should* need to do t
 - composer.phar install
 - ./build.sh (which, in turn, calls the `phing` job that builds the `phar`
 
-If you're not sure what to do with a `phar`, we may not be ready for your yet.
+If you're not sure what to do with a `phar`, we may not be ready for you yet.
 
-If you're interested in working on teh framework itself, the `runner.php` file in the root is where you want to be.  I personally use it by dropping the folloing in my `~/bin`
+If you're interested in working on the framework itself, the `runner.php` file in the root is where you want to be.  I personally use it by dropping the folloing in my `~/bin`
 
     #File: ~/bin/pestle_dev
     #!/usr/bin/env php
