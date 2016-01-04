@@ -137,7 +137,7 @@ class CommandExistsTest extends PestleBaseTest
     }
     function testCommandsExistgenerate_mage2_command()
     {
-        $results = $this->runHelpCommand('generate_mage2_command');
+        $results = $this->runHelpCommand('generate_pestle_command');
         $this->assertContains('Description', $results);    
         
     }
