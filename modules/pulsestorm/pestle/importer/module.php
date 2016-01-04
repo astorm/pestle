@@ -5,16 +5,9 @@ use ReflectionFunction;
 use ReflectionClass;
 
 function pestle_import($thing_to_import, $as=false)
-{ 
-    
+{     
     $ns_called_from  = getNamespaceCalledFrom();
-
-//     echo "\n";
-//     echo 'Importing:'   . $thing_to_import,"\n";
-//     echo 'Called From:' . $ns_called_from,"\n";
-//     echo "\n";
-    $thing_to_import = trim($thing_to_import, '\\');
-    //include_once 'modules/pulsestorm/magento2/cli/library/module.php';
+    $thing_to_import = trim($thing_to_import, '\\');    
     $function = extractFunction($thing_to_import);    
     includeCode($thing_to_import, $function, $ns_called_from);                 
     return true;
@@ -95,13 +88,13 @@ function includeCodeReflectionStrategy($namespace, $code, $ns_called_from)
     $full_dir   = $cache_dir    . '/' . str_replace('\\','/',strToLower($namespace));
     $filename   = md5($short_name . $code);
     // $full_path  = $full_dir . '/'  . $filename . '.php'; 
-    $full_path  = $cache_dir    . '/reflection-Strategy/'  . $filename . '.php'; 
+    $full_path  = $cache_dir    . '/reflection-strategy/'  . $filename . '.php'; 
     
     functionRegister($short_name, $ns_called_from, $namespace);
 
     if(file_exists($full_path))
     {        
-        require_once getModulePathToFullyNamespacedFunction($namespace);
+        // require_once getModulePathToFullyNamespacedFunction($namespace);
         require_once $full_path;    //require the exported file
         return;
     }
@@ -188,7 +181,8 @@ function replaceFirstInstanceOfFunctionName($code, $short_name)
 
 function getCacheDir()
 {
-    $cache_dir = '/tmp/pestle_cache';
+    $cache_dir = '/tmp/pestle_cache/' . md5(getBaseProjectDir());
+    
     if(!is_dir($cache_dir)){ 
         mkdir($cache_dir, 0755);
     }

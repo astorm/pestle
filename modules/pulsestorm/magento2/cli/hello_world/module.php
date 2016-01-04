@@ -21,5 +21,5 @@ function pestle_cli($argv, $options)
         }
         
     }
-    output("Hello $person");
+    output("Hello Again $person");
 }
