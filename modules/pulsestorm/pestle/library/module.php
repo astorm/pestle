@@ -9,20 +9,6 @@ function getShortClassNameFromClass($class)
     return array_pop($parts);
 }
 
-function getZendPsrLogLevelMap()
-{
-    return [
-        'Zend_Log::EMERG'   => 'Psr\Log\LogLevel::EMERGENCY',   // Emergency: system is unusable
-        'Zend_Log::ALERT'   => 'Psr\Log\LogLevel::ALERT',       // Alert: action must be taken immediately
-        'Zend_Log::CRIT'    => 'Psr\Log\LogLevel::CRITICAL',    // Critical: critical conditions
-        'Zend_Log::ERR'     => 'Psr\Log\LogLevel::ERROR',       // Error: error conditions
-        'Zend_Log::WARN'    => 'Psr\Log\LogLevel::WARNING',     // Warning: warning conditions
-        'Zend_Log::NOTICE'  => 'Psr\Log\LogLevel::NOTICE',      // Notice: normal but significant condition
-        'Zend_Log::INFO'    => 'Psr\Log\LogLevel::INFO',        // Informational: informational messages
-        'Zend_Log::DEBUG'   => 'Psr\Log\LogLevel::DEBUG',       // Debug: debug messages    
-    ];
-}
-
 function parseDocCommentAts($r)
 {
     $comment = $r->getDocComment();
@@ -129,23 +115,6 @@ function bail($message)
 {
     output($message);
     exit(1);
-}
-
-function createBasicClassContents($full_model_name, $method_name, $extends=false)
-{
-    $parts = explode('\\', $full_model_name);
-    $name = array_pop($parts);
-    $namespace = implode('\\', $parts);
-    $contents =  '<' . '?' . 'php' . "\n";
-    $contents .= 'namespace ' . $namespace . ";\n";
-    $contents .= 'class ' . $name ;
-    $contents .= "\n" . '{' . "\n";
-    $contents .= '    public function ' . $method_name . '($parameters)' . "\n";
-    $contents .= '    {' . "\n"; 
-    $contents .= '        var_dump(__METHOD__); exit;' . "\n";
-    $contents .= '    }' . "\n";
-    $contents .= '}' . "\n";
-    return $contents;
 }
 
 function getDocCommentAsString($function)

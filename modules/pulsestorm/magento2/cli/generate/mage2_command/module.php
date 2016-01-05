@@ -4,34 +4,8 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Pestle\Library\output');
-
-function createPathFromNamespace($namespace)
-{
-    $parts = explode('\\', $namespace);
-    $path_dir  = strToLower('modules/' . implode('/', $parts));
-    $path_full = $path_dir . '/module.php';
-    return $path_full;
-}
-
-function createNamespaceFromNamespaceAndCommandName($namespace_module, $command_name)
-{
-    if(strpos($command_name,'generate_') !== false)
-    {
-        $parts = explode('_', $command_name);
-        array_shift($parts);
-        
-        $post_fix = implode(' ', $parts);
-        $post_fix = ucwords($post_fix);
-        $post_fix = str_replace(' ', '\\', $post_fix);
-        $command_name = 'generate\\' . $post_fix;
-    }
-    $namespace_portion = str_replace(' ','_',
-        ucwords(str_replace('_',' ',$command_name)));
-    //$namespace = 'Pulsestorm\Magento2\Cli\\' . $namespace_portion;
-    $namespace_module = trim($namespace_module, '\\');
-    $namespace = $namespace_module . '\\' . $namespace_portion;
-    return $namespace;
-}
+pestle_import('Pulsestorm\Cli\Code_Generation\createPathFromNamespace');
+pestle_import('Pulsestorm\Cli\Code_Generation\createNamespaceFromNamespaceAndCommandName');
 
 /**
 * Generates pestle command boiler plate

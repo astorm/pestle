@@ -9,6 +9,18 @@ function pestle_cli($argv)
     
 }
 
+function addSchemaToXmlString($xmlString, $schema=false)
+{
+    $schema = $schema ? $schema : 
+        '../../../../../lib/internal/Magento/Framework/Module/etc/module.xsd';
+        
+    $xml = str_replace(
+        '<config>',
+        '<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="'.$schema.'">', 
+        $xmlString);
+    return $xml;
+}
+
 function getXmlNamespaceFromPrefix($xml, $prefix)
 {
     $namespaces = $xml->getDocNamespaces();

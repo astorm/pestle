@@ -3,7 +3,7 @@ namespace Pulsestorm\Magento2\Cli\Check_Registration;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Library\input');
-pestle_import('Pulsestorm\Magento2\Cli\Library\templateRegistrationPhp');
+pestle_import('Pulsestorm\Cli\Code_Generation\templateRegistrationPhp');
 /**
 * Short Description
 * Long

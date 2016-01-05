@@ -13,29 +13,7 @@ pestle_import('Pulsestorm\Pestle\Library\bail');
 pestle_import('Pulsestorm\Pestle\Library\getClassFromDeclaration');
 pestle_import('Pulsestorm\Pestle\Library\getExtendsFromDeclaration');
 pestle_import('Pulsestorm\Pestle\Library\getNewClassDeclaration');
-
-function createClassTemplate($class, $extends=false, $implements=false)
-{
-    $class = trim($class, '\\');
-    $parts = explode('\\',$class);
-    $name  = array_pop($parts);
-    
-    $template = '<' . '?' . 'php' . "\n" .
-    'namespace ' . implode('\\',$parts) . ";\n" . 
-    "class $name";
-    if($extends)
-    {
-        $template .= " extends $extends";
-    }
-    if($implements)
-    {
-        $template .= " implements $implements";
-    }    
-    $template .= "\n" . 
-    '{' . '<$body$>' . '}' . "\n";
-
-    return $template;
-}
+pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 
 function getModuleInformation($module_name)
 {
@@ -63,18 +41,6 @@ function askForModuleAndReturnFolder($argv)
         'Magento_Catalog', $argv, 0);
     list($package, $vendor) = explode('_', $module_folder);        
     return getBaseMagentoDir() . "/app/code/$package/$vendor";
-}
-
-function addSchemaToXmlString($xmlString, $schema=false)
-{
-    $schema = $schema ? $schema : 
-        '../../../../../lib/internal/Magento/Framework/Module/etc/module.xsd';
-        
-    $xml = str_replace(
-        '<config>',
-        '<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="'.$schema.'">', 
-        $xmlString);
-    return $xml;
 }
 
 function getBaseMagentoDir($path=false)
@@ -382,16 +348,6 @@ function convertMageOneClassIntoNamespacedClass($path_mage1)
 function inputModuleName()
 {
     return input("Which module?", 'Packagename_Vendorname');
-}
-
-function templateRegistrationPhp($module_name)
-{
-    return '<?php
-    \Magento\Framework\Component\ComponentRegistrar::register(
-        \Magento\Framework\Component\ComponentRegistrar::MODULE,
-        \''.$module_name.'\',
-        __DIR__
-    );';    
 }
 
 /**

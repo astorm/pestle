@@ -9,35 +9,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
 pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
 pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
-
-function templateCommandClass($namespace, $module_name, $command_name)
-{
-    $command_prefix = 'ps';
-    
-    $class_file_string = 
-'<?php
-namespace '.$namespace.'\\'.$module_name.'\Command;
-
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-
-class '.$command_name.' extends Command
-{
-    protected function configure()
-    {
-        $this->setName("'.$command_prefix.':'.strToLower($command_name).'");
-        $this->setDescription("A command the programmer was too lazy to enter a description for.");
-        parent::configure();
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $output->writeln("Hello World");  
-    }
-} ';
-    return $class_file_string;
-}
+pestle_import('Pulsestorm\Cli\Code_Generation\templateCommandClass');
 
 function createPhpClass($module_dir, $namespace, $module_name, $command_name)
 {

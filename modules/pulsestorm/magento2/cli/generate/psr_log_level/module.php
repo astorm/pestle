@@ -2,7 +2,7 @@
 namespace Pulsestorm\Magento2\Cli\Generate\Psr_Log_Level;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
-pestle_import('Pulsestorm\Pestle\Library\getZendPsrLogLevelMap');
+pestle_import('Pulsestorm\Cli\Code_Generation\getZendPsrLogLevelMap');
 
 /**
 * For conversion of Zend Log Level into PSR Log Level

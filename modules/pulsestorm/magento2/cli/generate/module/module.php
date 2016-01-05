@@ -5,8 +5,8 @@ pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
-pestle_import('Pulsestorm\Magento2\Cli\Library\addSchemaToXmlString');
-pestle_import('Pulsestorm\Magento2\Cli\Library\templateRegistrationPhp');
+pestle_import('Pulsestorm\Xml_Library\addSchemaToXmlString');
+pestle_import('Pulsestorm\Cli\Code_Generation\templateRegistrationPhp');
 pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
 
 /**

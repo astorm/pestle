@@ -4,7 +4,7 @@ use Pulsestorm\Pestle\Tests\PestleBaseTest;
 require_once 'PestleBaseTest.php';
 
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\createClassTemplate');
+pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 pestle_import('Pulsestorm\PhpDotNet\glob_recursive');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Importer\getNamespaceCalledFrom');

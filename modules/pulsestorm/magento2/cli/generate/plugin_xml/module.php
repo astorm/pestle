@@ -9,7 +9,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
-pestle_import('Pulsestorm\Magento2\Cli\Library\createClassTemplate');
+pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 pestle_import('Pulsestorm\Magento2\Cli\Path_From_Class\getPathFromClass');
 pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
 

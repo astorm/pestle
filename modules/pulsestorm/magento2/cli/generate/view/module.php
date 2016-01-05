@@ -2,13 +2,14 @@
 namespace Pulsestorm\Magento2\Cli\Generate\View;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
-pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
-pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
-pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
 pestle_import('Pulsestorm\Pestle\Library\getShortClassNameFromClass');
-pestle_import('Pulsestorm\Magento2\Cli\Library\createClassTemplate');
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
+pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
+pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
+pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
+pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
+
 
 function createTemplateFile($module_info, $area, $template)
 {
@@ -20,7 +21,7 @@ function createTemplateFile($module_info, $area, $template)
     
 }
 
-function createHandleFile($module_info, $area, $template, $class)
+function createHandleFile($module_info, $area, $template, $class, $handle)
 {
     $xml = simplexml_load_string(getBlankXml('layout_handle'));
     $name  = strToLower($module_info->name) . 
@@ -34,7 +35,11 @@ function createHandleFile($module_info, $area, $template, $class)
         '@name='     . $name     . ']'
     );
     
-    output($xml->asXml());
+    $path = $module_info->folder . '/view/' . 
+                $area . '/layout/' .  $handle . '.xml';
+
+    writeStringToFile($path, $xml->asXml());                   
+    // output($xml->asXml());
 }
 
 function createBlockClass($module_info, $block_name)
@@ -44,7 +49,7 @@ function createBlockClass($module_info, $block_name)
     
     output("Creating: " . $class_name);
     $contents = createClassTemplate($class_name, '\Magento\Framework\View\Element\Template');
-    $contents = str_replace('<$body$>', "\n".'function _prepareLayout(){}'."\n", $contents);
+    $contents = str_replace('<$body$>', "\n".'    function _prepareLayout(){}'."\n", $contents);
     createClassFile($class_name, $contents);
     return $class_name;
 }
@@ -71,6 +76,6 @@ function pestle_cli($argv)
 
     createTemplateFile($module_info, $area, $template);    
     $class = createBlockClass($module_info, $block_name);
-    createHandleFile($module_info, $area, $template, $class);
+    createHandleFile($module_info, $area, $template, $class, $handle);
     
 }

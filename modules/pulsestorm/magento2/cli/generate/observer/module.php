@@ -1,12 +1,11 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Observer;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Library\createClassTemplate');
+pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\initilizeModuleConfig');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
-pestle_import('Pulsestorm\Pestle\Library\createBasicClassContents');
 
 /**
 * Generates Magento 2 Observer
@@ -58,6 +57,5 @@ function pestle_cli($argv)
     "\n" . 
     '    public function execute(\Magento\Framework\Event\Observer $observer){exit(__FILE__);}' .
     "\n" , $contents);
-    // $contents = createBasicClassContents($model_name, $method_name);
     createClassFile($model_name, $contents);    
 }
