@@ -2,7 +2,7 @@
 namespace Pulsestorm\Pestle\Tests;
 require_once 'PestleBaseTest.php';
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Magento2\Cli\Generate\Mage2_Command\createNamespaceFromNamespaceAndCommandName');
+pestle_import('Pulsestorm\Cli\Code_Generation\createNamespaceFromNamespaceAndCommandName');
         
 // use function Pulsestorm\Magento2\Cli\Generate\Mage2_Command\createNamespaceFromCommandName;
 
