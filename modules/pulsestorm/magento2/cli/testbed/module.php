@@ -1,17 +1,19 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Testbed;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-use Phar;
 pestle_import('Pulsestorm\Pestle\Library\output');
-pestle_import('Pulsestorm\Cli\Build_Command_List\getListOfFilesInModuleFolder');
+pestle_import('Pulsestorm\Pestle\Library\input');
 
 /**
-* Reports on possible 
-*
-* @todo bug where a second "/module/" in the path borks things
+* Test Command
 * @command testbed
+* @argument argument_name Please enter a value for argument_name [the default value]
+* @argument argument_foo Please enter a value for argument_name [the default value]
 */
-function pestle_cli($argv)
+function pestle_cli($arguments, $options)
 {
-    var_dump($argv);
+    foreach($arguments as $key=>$value)
+    {
+        output($key . '::' . $value);
+    }    
 }

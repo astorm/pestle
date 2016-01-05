@@ -13,7 +13,7 @@ function createPathFromNamespace($namespace)
     return $path_full;
 }
 
-function createNamespaceFromCommandName($command_name)
+function createNamespaceFromNamespaceAndCommandName($namespace_module, $command_name)
 {
     if(strpos($command_name,'generate_') !== false)
     {
@@ -27,7 +27,9 @@ function createNamespaceFromCommandName($command_name)
     }
     $namespace_portion = str_replace(' ','_',
         ucwords(str_replace('_',' ',$command_name)));
-    $namespace = 'Pulsestorm\Magento2\Cli\\' . $namespace_portion;
+    //$namespace = 'Pulsestorm\Magento2\Cli\\' . $namespace_portion;
+    $namespace_module = trim($namespace_module, '\\');
+    $namespace = $namespace_module . '\\' . $namespace_portion;
     return $namespace;
 }
 
@@ -40,11 +42,12 @@ function createNamespaceFromCommandName($command_name)
 *
 * @command generate_pestle_command
 * @argument command_name New Command Name? [foo_bar]
+* @argument namespace_module Create in PHP Namespace? [Pulsestorm\Magento2\Cli]
 */
 function pestle_cli($argv)
 {
     $command_name = $argv['command_name'];
-    $namespace = createNamespaceFromCommandName($command_name);
+    $namespace = createNamespaceFromNamespaceAndCommandName($argv['namespace_module'], $command_name);
             
     $command = '<' . '?php' . "\n" .
         'namespace ' . $namespace . ';'  . "\n" .
@@ -60,7 +63,7 @@ function pestle_cli($argv)
         '    output("Hello Sailor");' . "\n" .
         '}' . "\n";
         
-    output("Creating the following class");        
+    output("Creating the following module");        
     output($command);
     
     $path_full = createPathFromNamespace($namespace);

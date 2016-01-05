@@ -36,10 +36,17 @@ function getBlankXml($type)
     throw new Exception("No such type, $type");
 }
 
+function getBlankXmlLayout_handle()
+{
+    return '<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+</page>';
+}
+
 /**
 * Converts Zend Log Level into PSR Log Level
 * @command library
 */
 function pestle_cli($argv)
 {
-}
+}    

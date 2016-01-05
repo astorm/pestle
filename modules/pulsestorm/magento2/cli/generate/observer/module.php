@@ -7,7 +7,6 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\initilizeModuleConfig');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Pestle\Library\createBasicClassContents');
-pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 
 /**
 * Generates Magento 2 Observer
@@ -24,12 +23,6 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 */
 function pestle_cli($argv)
 {
-//     $module = input("Full Module Name?", 'Pulsestorm_Helloworld');        
-//     $event_name     = input('Event Name?', 'controller_action_predispatch');
-//     $observer_name  = input('Observer Name?', strToLower($module . '_listener'));
-//     $model_name     = input('Class Name?', str_replace('_', '\\', $module) . '\\Model\\Observer');
-//     $method_name    = input('Method Name?', 'myMethodName');
-
     $module         = $argv['module'];
     $event_name     = $argv['event_name'];
     $observer_name  = $argv['observer_name'];

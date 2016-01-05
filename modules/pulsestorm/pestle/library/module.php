@@ -3,6 +3,12 @@ namespace Pulsestorm\Pestle\Library;
 use ReflectionFunction;
 use ReflectionClass;
 
+function getShortClassNameFromClass($class)
+{
+    $parts = explode('\\', $class);
+    return array_pop($parts);
+}
+
 function getZendPsrLogLevelMap()
 {
     return [
