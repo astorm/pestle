@@ -38,8 +38,9 @@ function createHandleFile($module_info, $area, $template, $class, $handle)
     $path = $module_info->folder . '/view/' . 
                 $area . '/layout/' .  $handle . '.xml';
 
+    output("Creating: $path");
     writeStringToFile($path, $xml->asXml());                   
-    // output($xml->asXml());
+    
 }
 
 function createBlockClass($module_info, $block_name)

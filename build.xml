@@ -45,5 +45,6 @@
 				</element>
 			</metadata>
 		</pharpackage>
+		<delete dir="./build" /> 		
 	</target>
 </project>

@@ -35,16 +35,17 @@ function getUrlsFromHtml($html)
 function fetchAllUrls()
 {
     $urls = array();
-    $urls['archive']    = getUrlsFromHtml(getUrl('http://alanstorm.com/archives'));
-    $urls['magento']    = getUrlsFromHtml(getUrl('http://alanstorm.com/category/magento'));
-    $urls['oro']        = getUrlsFromHtml(getUrl('http://alanstorm.com/category/orocrm'));
-    $urls['sugarcrm']   = getUrlsFromHtml(getUrl('http://alanstorm.com/category/sugarcrm'));
-    $urls['drupal']     = getUrlsFromHtml(getUrl('http://alanstorm.com/category/drupal'));
-    $urls['webos']      = getUrlsFromHtml(getUrl('http://alanstorm.com/category/webos'));
-    $urls['python']     = getUrlsFromHtml(getUrl('http://alanstorm.com/category/python'));
-    $urls['applescript'] = getUrlsFromHtml(getUrl('http://alanstorm.com/category/applescript'));
-    $urls['modern_php']  = getUrlsFromHtml(getUrl('http://alanstorm.com/category/modern_php'));
-    $urls['laravel']  = getUrlsFromHtml(getUrl('http://alanstorm.com/category/laravel'));
+    $urls['archive']        = getUrlsFromHtml(getUrl('http://alanstorm.com/archives'));
+    $urls['magento']        = getUrlsFromHtml(getUrl('http://alanstorm.com/category/magento'));
+    $urls['magento-2']      = getUrlsFromHtml(getUrl('http://alanstorm.com/category/magento-2'));    
+    $urls['oro']            = getUrlsFromHtml(getUrl('http://alanstorm.com/category/orocrm'));
+    $urls['sugarcrm']       = getUrlsFromHtml(getUrl('http://alanstorm.com/category/sugarcrm'));
+    $urls['drupal']         = getUrlsFromHtml(getUrl('http://alanstorm.com/category/drupal'));
+    $urls['webos']          = getUrlsFromHtml(getUrl('http://alanstorm.com/category/webos'));
+    $urls['python']         = getUrlsFromHtml(getUrl('http://alanstorm.com/category/python'));
+    $urls['applescript']    = getUrlsFromHtml(getUrl('http://alanstorm.com/category/applescript'));
+    $urls['modern_php']     = getUrlsFromHtml(getUrl('http://alanstorm.com/category/modern_php'));
+    $urls['laravel']        = getUrlsFromHtml(getUrl('http://alanstorm.com/category/laravel'));
     return $urls;
 }
 
