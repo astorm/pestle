@@ -59,11 +59,11 @@ function createPathFromNamespace($namespace)
     return $path_full;
 }
 
-function templateRegistrationPhp($module_name)
+function templateRegistrationPhp($module_name, $type='MODULE')
 {
     return '<?php
     \Magento\Framework\Component\ComponentRegistrar::register(
-        \Magento\Framework\Component\ComponentRegistrar::MODULE,
+        \Magento\Framework\Component\ComponentRegistrar::'.$type.',
         \''.$module_name.'\',
         __DIR__
     );';    
@@ -84,6 +84,19 @@ function createBasicClassContents($full_model_name, $method_name, $extends=false
     $contents .= '    }' . "\n";
     $contents .= '}' . "\n";
     return $contents;
+}
+
+function templateInterface($interface, $functions=[])
+{
+    $class      = trim($interface, '\\');
+    $parts      = explode('\\',$class);
+    $name       = array_pop($parts);
+    $template   = '<' . '?' . 'php' . "\n" .
+    'namespace ' . implode('\\',$parts) . ";\n" . 
+    "interface $name \n{\n\n";
+    $template   .= "}";    
+    
+    return $template;
 }
 
 function createClassTemplate($class, $extends=false, $implements=false)
