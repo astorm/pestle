@@ -30,6 +30,25 @@ function getModelClassNameFromModuleInfo($module_info, $model_name)
         '\Model\\' . $model_name;
 }
 
+function templateInstallDataFunction()
+{
+    return "\n" . '    public function install(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
+    {
+        //install data here
+    }' . "\n";
+}
+
+function templateInstallFunction()
+{
+    return "\n" . '    public function install(\Magento\Framework\Setup\ModuleContextInterface $setup, \Magento\Framework\Setup\SchemaSetupInterface $context)
+    {
+        $installer = $setup;
+        $installer->startSetup();
+        //START: install stuff
+        //END:   install stuff
+        $installer->endSetup();
+    }' . "\n";
+}
 
 function templateConstruct($init1=false, $init2=false)
 {
@@ -125,14 +144,45 @@ function createModelInterface($module_info, $model_name)
 
 function createSchemaClass($module_info, $model_name)
 {
-    $path = $module_info->folder . "/Setup/InstallData.php";
-    output("Creating or Editing:" . $path);    
+    $className  = str_replace('_', '\\', $module_info->name) . 
+        '\Setup\InstallSchema';
+    $path       = getPathFromClass($className);
+
+    $template   = createClassTemplate($className, false, 
+        '\Magento\Framework\Setup\InstallSchemaInterface');        
+    $contents   = str_replace('<$body$>', templateInstallFunction(), $template);    
+    if(!file_exists($path))
+    {
+        output("Creating: " . $path);        
+        writeStringToFile($path, $contents);
+    }
+    else
+    {
+        output("File Already Exists: " . $path);
+    }
+    
+    output("TODO: Add actual create table code. " . __METHOD__);
+
 }
 
 function createDataClass($module_info, $model_name)
 {
-    $path = $module_info->folder . "/Setup/InstallSchema.php";
-    output("Creating or Editing:" . $path);    
+    $className  = str_replace('_', '\\', $module_info->name) . 
+        '\Setup\InstallData';
+    $path       = getPathFromClass($className);
+    $template   = createClassTemplate($className, false, 
+        '\Magento\Framework\Setup\InstallDataInterface');        
+    $contents   = str_replace('<$body$>', templateInstallDataFunction(), $template);        
+
+    if(!file_exists($path))
+    {
+        output("Creating: " . $path);        
+        writeStringToFile($path, $contents);
+    }
+    else
+    {
+        output("Data Installer Already Exists: " . $path);
+    }        
 }
 
 /**
