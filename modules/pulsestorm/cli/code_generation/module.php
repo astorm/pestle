@@ -59,6 +59,126 @@ function createPathFromNamespace($namespace)
     return $path_full;
 }
 
+function generateInstallSchemaNewTable($table_name)
+{
+    return '$installer->getConnection()->newTable(
+            $installer->getTable(\''.$table_name.'\')
+    )';
+}
+
+function exportArrayForString($array)
+{
+    ob_start();
+    var_export($array);
+    $output = str_replace(",\n  ",",",ob_get_clean());
+    return $output;
+}
+
+function generateInstallSchemaNewColumn($column)
+{
+    return '->addColumn(
+            \''.$column['name'].'\',
+            '.$column['type_constant'].',
+            '.$column['size'].',
+            '.exportArrayForString($column['attributes']).',
+            \''.$column['comment'].'\'
+        )';     
+}
+
+function generateInstallSchemaAddComment($comment)
+{
+    return '->setComment(
+             \''.$comment.'\'
+         )';
+}
+
+function generateInstallSchemaGetDefaultColumnId($table)
+{
+    $id = [
+        'name'          => $table . '_id',
+        'type_constant' => '\Magento\Framework\DB\Ddl\Table::TYPE_INTEGER',
+        'size'          => 'null',
+        'attributes'    => ['identity' => true, 'nullable' => false, 'primary' => true, 'unsigned' => true],
+        'comment'       => 'Entity ID'
+    ];
+    return $id;
+}
+
+function generateInstallSchemaGetDefaultColumnTitle()
+{
+    $title = [        
+        'name'          => 'title',
+        'type_constant' => '\Magento\Framework\DB\Ddl\Table::TYPE_TEXT',
+        'size'          => 255,
+        'attributes'    => ['nullable' => false],
+        'comment'       => 'Demo Title'
+    ];
+    return $title;
+}
+
+function generateInstallSchemaGetDefaultColumnCreationTime()
+{
+    $creation_time = [        
+        'name'          => 'creation_time',
+        'type_constant' => '\Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP',
+        'size'          => 'null',
+        'attributes'    => [],
+        'comment'       => 'Creation Time'
+    ];            
+    return $creation_time;
+}
+
+function generateInstallSchemaGetDefaultColumnUpdateTime()
+{
+    $update_time = [
+        'name'          =>'update_time',
+        'type_constant' =>'\Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP',
+        'size'          => 'null',
+        'attributes'    => [],
+        'comment'       => 'Modification Time'
+    
+    ];
+    return $update_time;
+}
+
+function generateInstallSchemaGetDefaultColumnIsAction()
+{
+    $is_active = [
+        'name'          => 'is_active',
+        'type_constant' => '\Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT',
+        'size'          => 'null',
+        'attributes'    => ['nullable' => false, 'default' => '1'],
+        'comment'       => 'Is Active'    
+    ];
+    return $is_active;
+}
+function generateInstallSchemaGetDefaultColumns($table)
+{
+    $id            = generateInstallSchemaGetDefaultColumnId($table);
+    $title         = generateInstallSchemaGetDefaultColumnTitle();
+    $creation_time = generateInstallSchemaGetDefaultColumnCreationTime();
+    $update_time   = generateInstallSchemaGetDefaultColumnUpdateTime();
+    $is_active     = generateInstallSchemaGetDefaultColumnIsAction();
+    return [$id, $title, $creation_time, $update_time, $is_active];
+}
+
+function generateInstallSchemaTable($table_name='', $columns=[], $comment='')
+{
+    $block = '$table = ' . generateInstallSchemaNewTable($table_name);
+    $default_columns = generateInstallSchemaGetDefaultColumns($table_name);
+    $columns = array_merge($default_columns, $columns);
+    foreach($columns as $column)
+    {
+        $block .= generateInstallSchemaNewColumn($column);
+    }
+    if($comment)
+    {
+        $block .= generateInstallSchemaAddComment($comment);
+    }
+    return $block .= ';' . "\n" .
+    '$installer->getConnection()->createTable($table);';
+}
+
 function templateRegistrationPhp($module_name, $type='MODULE')
 {
     return '<?php

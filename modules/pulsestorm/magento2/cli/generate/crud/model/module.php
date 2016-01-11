@@ -7,6 +7,7 @@ pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 pestle_import('Pulsestorm\Cli\Code_Generation\templateInterface');
 pestle_import('Pulsestorm\Magento2\Cli\Path_From_Class\getPathFromClass');
+pestle_import('Pulsestorm\Cli\Code_Generation\generateInstallSchemaTable');
 
 define('BASE_COLLECTION_CLASS'  , '\Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection');
 define('BASE_RESOURCE_CLASS'    , '\Magento\Framework\Model\ResourceModel\Db\AbstractDb');
@@ -40,7 +41,7 @@ function templateInstallDataFunction()
 
 function templateInstallFunction()
 {
-    return "\n" . '    public function install(\Magento\Framework\Setup\ModuleContextInterface $setup, \Magento\Framework\Setup\SchemaSetupInterface $context)
+    return "\n" . '    public function install(\Magento\Framework\Setup\SchemaSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
     {
         $installer = $setup;
         $installer->startSetup();
@@ -142,6 +143,11 @@ function createModelInterface($module_info, $model_name)
     output("Creating: $path");
 }
 
+function createTableNameFromModuleInfoAndModelName($module_info, $model_name)
+{
+    return strToLower($module_info->name . '_' . $model_name);
+}
+
 function createSchemaClass($module_info, $model_name)
 {
     $className  = str_replace('_', '\\', $module_info->name) . 
@@ -161,8 +167,19 @@ function createSchemaClass($module_info, $model_name)
         output("File Already Exists: " . $path);
     }
     
-    output("TODO: Add actual create table code. " . __METHOD__);
-
+    $table_name = createTableNameFromModuleInfoAndModelName(
+        $module_info, $model_name);
+    
+    $install_code = generateInstallSchemaTable($table_name);
+    $contents     = file_get_contents($path);
+    $end_setup    = '$installer->endSetup();';
+    $contents     = str_replace($end_setup, 
+        "\n//START table setup\n" .
+        $install_code .
+        "\n//END   table setup\n" .
+        $end_setup, $contents);
+        
+    writeStringToFile($path, $contents);
 }
 
 function createDataClass($module_info, $model_name)
