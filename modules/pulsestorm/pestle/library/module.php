@@ -151,17 +151,36 @@ function notEmpty($item)
     return (boolean) $item;
 }
 
-function input($string, $default='')
-{
-    echo $string . " (".$default.")] ";
+function inputRawPhp($string, $default='')
+{    
     $handle = fopen ("php://stdin","r");
     $line = fgets($handle);        
     fclose($handle);
+    return $line;
+}
+
+function inputReadline()
+{
+    return readline();
+}
+
+function input($string, $default='')
+{
+    echo $string . " (".$default.")] ";
+    if(!function_exists('readline'))
+    {
+        $line = inputRawPhp();
+    }
+    else
+    {
+        $line = inputReadline();
+    }
     if(trim($line))
     {
         return trim($line);
     }
     return $default;
+    
 }
 
 function inputOrIndex($question, $default, $argv, $index)

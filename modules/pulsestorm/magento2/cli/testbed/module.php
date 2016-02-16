@@ -48,41 +48,10 @@ function getSectionXmlNodeFromSectionGroupAndField($xml,$section, $group, $field
     return array_shift($nodes);
 }
 
-function convertAliasToClass($alias)
-{
-    $map = [
-        'adminhtml/system_config_form_field_heading'
-            =>'Magento\Config\Block\System\Config\Form\Field\Heading',
-        'infortis/adminhtml_system_config_form_field_heading'
-            =>'Infortis\Infortis\Block\Adminhtml\System\Config\Form\Field\Heading',
-        'dataporter/system_config_form_field_configimpex'
-            =>'Infortis\Dataporter\Block\System\Config\Form\Field\Configimpex',
-        'ultimo/adminhtml_button_import_cms'
-            =>'Infortis\Ultimo\Block\Adminhtml\Button\Import\Cms',
-        'infortis/adminhtml_system_config_form_field_color'
-            =>'Infortis\Infortis\Block\Adminhtml\System\Config\Form\Field\Color',
-        'infortis/adminhtml_system_config_form_field_tex'
-            =>'Infortis\Infortis\Block\Adminhtml\System\Config\Form\Field\Tex'    
-    ];
-    
-    if(!array_key_exists($alias, $map))
-    {
-        output("What does $alias map to.\n");
-        return;
-    }
-    
-    return $map[$alias];
-}
-
 function backupOldCode($arguments, $options)
 {
 
     $xmls = [
-        '/Users/alanstorm/Sites/magento-1-9-2-2.dev/app/code/local/Infortis/Brands/etc/system.xml',
-        '/Users/alanstorm/Sites/magento-1-9-2-2.dev/app/code/local/Infortis/CloudZoom/etc/system.xml',
-        '/Users/alanstorm/Sites/magento-1-9-2-2.dev/app/code/local/Infortis/Ultimo/etc/system.xml',
-        '/Users/alanstorm/Sites/magento-1-9-2-2.dev/app/code/local/Infortis/UltraMegamenu/etc/system.xml',
-        '/Users/alanstorm/Sites/magento-1-9-2-2.dev/app/code/local/Infortis/UltraSlideshow/etc/system.xml',    
     ];
     
     $frontend_models = getFrontendModelNodesFromMagento1SystemXml($xmls);
@@ -251,24 +220,9 @@ function parseSetupDiCompileReport()
     }
 }
 
-function inProgressParsing()
+function testbedParsing()
 {
-    $contents   = file_get_contents('/Users/alanstorm/Documents/github_private/infortis-ultimo-magento2/app/code/Infortis/Brands/Block/Logo.php');
-    $tokens     = pestle_token_get_all($contents);
-    $namespace  = parseNamespaceFromTokens($tokens);    
-    // var_dump($namespace);
-    $uses       = parseUsesFromTokens($tokens);
-    // var_dump($uses);
-    
-    $classes    = parseClassCodeFromTokens($tokens);
-}
 
-/**
-* Test Command
-* @command testbed
-*/
-function pestle_cli($arguments, $options)
-{
     // inProgressParsing();
     
     $urls = [
@@ -294,4 +248,15 @@ function pestle_cli($arguments, $options)
             echo $match,"\n";
         }
     }
+
+}
+
+/**
+* Test Command
+* @command testbed
+*/
+function pestle_cli($arguments, $options)
+{
+    $test = input("Enter some text");
+    echo $test;
 }

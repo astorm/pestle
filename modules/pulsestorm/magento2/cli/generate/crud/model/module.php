@@ -81,7 +81,7 @@ function createResourceModelClass($module_info, $model_name)
 {
     $path = $module_info->folder . "/Model/ResourceModel/$model_name.php";
     $db_table               = strToLower($module_info->name . '_' . $model_name);
-    $db_id                  = strToLower($model_name) . '_id';
+    $db_id                  = strToLower($db_table) . '_id';
     $class_resource         = getResourceModelClassNameFromModuleInfo($module_info, $model_name);
     $template               = createClassTemplate($class_resource, BASE_RESOURCE_CLASS);    
     $construct              = templateConstruct($db_table, $db_id);
@@ -114,10 +114,10 @@ function createModelClass($module_info, $model_name)
     $cache_tag           = strToLower($module_info->name . '_' . $model_name);
     $class_model         = getModelClassNameFromModuleInfo($module_info, $model_name);
     $class_resource      = getResourceModelClassNameFromModuleInfo($module_info, $model_name);
-    $implements          = getModelInterfaceShortName($model_name) . ', IdentityInterface';
+    $implements          = getModelInterfaceShortName($model_name) . ', \Magento\Framework\DataObject\IdentityInterface';
     $template            = createClassTemplate($class_model, BASE_MODEL_CLASS, $implements);    
     $construct           = templateConstruct($class_resource);
-    
+
     $body                = 
         templateCacheTag($cache_tag)    .      
         $construct                      .
