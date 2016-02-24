@@ -12,7 +12,7 @@ function pestle_cli($argv)
 function addSchemaToXmlString($xmlString, $schema=false)
 {
     $schema = $schema ? $schema : 
-        '../../../../../lib/internal/Magento/Framework/Module/etc/module.xsd';
+        'urn:magento:framework:Module/etc/module.xsd';
         
     $xml = str_replace(
         '<config>',
