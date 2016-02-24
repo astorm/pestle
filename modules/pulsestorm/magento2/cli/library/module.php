@@ -26,6 +26,16 @@ function getModuleInformation($module_name)
     ];
 }
 
+function getBaseModuleDir($module_name)
+{
+    $path = getModuleInformation($module_name)->folder;
+    if(!file_exists($path))
+    {
+        throw new Exception("No such path: $path");
+    }
+    return $path;
+}
+
 function askForModuleAndReturnInfo($argv, $index=0)
 {
     $module_name = inputOrIndex(
