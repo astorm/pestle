@@ -27,7 +27,7 @@ function pestle_cli($argv)
     }
     
     $xml = simplexml_load_string(
-    '<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd"><default></default></config>');
+    '<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd"><default></default></config>');
     foreach($tree as $section=>$groups)
     {
         $section = $xml->default->addChild($section);
