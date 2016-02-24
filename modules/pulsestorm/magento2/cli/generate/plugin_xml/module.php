@@ -18,7 +18,7 @@ function getDiXmlTemplate($config_attributes='xmlns:xsi="http://www.w3.org/2001/
 {   
     if(!$config_attributes)
     {
-        $config_attributes = 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../lib/internal/Magento/Framework/App/etc/routes.xsd"';
+        $config_attributes = 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd"';
     }
     return trim('
 <?xml version="1.0"?>

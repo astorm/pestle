@@ -180,7 +180,7 @@ function resolveAlias($alias, $config, $type='models')
 
 function convertObserverTreeScoped($config, $xml)
 {        
-    $xml_new = simplexml_load_string('<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/Event/etc/events.xsd"></config>');
+    $xml_new = simplexml_load_string('<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd"></config>');
     if(!$config->events)
     {
         return $xml_new;

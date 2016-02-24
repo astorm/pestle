@@ -31,7 +31,7 @@ function pestle_cli($argv)
     $path_xml_event = initilizeModuleConfig(
         $module, 
         'events.xml', 
-        '../../../../../lib/internal/Magento/Framework/Event/etc/events.xsd'
+        'urn:magento:framework:Event/etc/events.xsd'
     );
                     
     $xml = simplexml_load_file($path_xml_event);
