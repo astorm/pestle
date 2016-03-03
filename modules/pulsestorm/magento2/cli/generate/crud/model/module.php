@@ -73,7 +73,7 @@ function createCollectionClass($module_info, $model_name)
     $construct              = templateConstruct($class_model, $class_resource);
 
     $class_contents         = str_replace('<$body$>', $construct, $template);
-    output("Creating:" . $path);
+    output("Creating: " . $path);
     writeStringToFile($path, $class_contents);
 }
 
@@ -86,7 +86,7 @@ function createResourceModelClass($module_info, $model_name)
     $template               = createClassTemplate($class_resource, BASE_RESOURCE_CLASS);    
     $construct              = templateConstruct($db_table, $db_id);
     $class_contents         = str_replace('<$body$>', $construct, $template);    
-    output("Creating:" . $path);    
+    output("Creating: " . $path);
     writeStringToFile($path, $class_contents);    
 }
 
@@ -124,7 +124,7 @@ function createModelClass($module_info, $model_name)
         templateGetIdentities();
 
     $class_contents      = str_replace('<$body$>', $body, $template);    
-    output("Creating:" . $path);    
+    output("Creating: " . $path);
     writeStringToFile($path, $class_contents);    
 }
 
@@ -140,7 +140,7 @@ function createModelInterface($module_info, $model_name)
     $path      = getPathFromClass($interface);
     $contents  = templateInterface($interface,[]);    
     writeStringToFile($path, $contents);
-    output("Creating: $path");
+    output("Creating: " . $path);
 }
 
 function createTableNameFromModuleInfoAndModelName($module_info, $model_name)
