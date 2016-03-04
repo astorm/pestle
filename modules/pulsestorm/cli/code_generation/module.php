@@ -70,8 +70,25 @@ function exportArrayForString($array)
 {
     ob_start();
     var_export($array);
-    $output = str_replace(",\n  ",",",ob_get_clean());
-    return $output;
+    return ob_get_clean();
+}
+
+function processNewColumnAttributes($array)
+{
+    $attrs = exportArrayForString($array);
+
+    $old_array_syntax = "/^array \((.*)\)$/s";
+    $new_array_syntax = "[$1]";
+    $attrs = preg_replace($old_array_syntax, $new_array_syntax, $attrs);
+
+    $escaped_ddl_constant = "/\'(\\\\[^:]+)::([^']+)\'/";
+    $unescaped_ddl_constant = "$1::$2";
+    $attrs = preg_replace($escaped_ddl_constant, $unescaped_ddl_constant, stripslashes($attrs));
+
+    $normalize_whitespace = "/\s+/";
+    $attrs = preg_replace($normalize_whitespace, " ", $attrs);
+
+    return $attrs;
 }
 
 function generateInstallSchemaNewColumn($column)
@@ -80,9 +97,9 @@ function generateInstallSchemaNewColumn($column)
             \''.$column['name'].'\',
             '.$column['type_constant'].',
             '.$column['size'].',
-            '.exportArrayForString($column['attributes']).',
+            '.processNewColumnAttributes($column['attributes']).',
             \''.$column['comment'].'\'
-        )';     
+        )';
 }
 
 function generateInstallSchemaAddComment($comment)
@@ -115,14 +132,17 @@ function generateInstallSchemaGetDefaultColumnTitle()
     ];
     return $title;
 }
-
+function timestampConstant($constant)
+{
+    return "\Magento\Framework\\DB\\Ddl\\Table::$constant";
+}
 function generateInstallSchemaGetDefaultColumnCreationTime()
 {
     $creation_time = [        
         'name'          => 'creation_time',
         'type_constant' => '\Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP',
         'size'          => 'null',
-        'attributes'    => [],
+        'attributes'    => ['nullable' => false, 'default' => '\Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT'],
         'comment'       => 'Creation Time'
     ];            
     return $creation_time;
@@ -134,9 +154,8 @@ function generateInstallSchemaGetDefaultColumnUpdateTime()
         'name'          =>'update_time',
         'type_constant' =>'\Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP',
         'size'          => 'null',
-        'attributes'    => [],
+        'attributes'    => ['nullable' => false, 'default' => '\Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT_UPDATE'],
         'comment'       => 'Modification Time'
-    
     ];
     return $update_time;
 }
