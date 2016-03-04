@@ -22,39 +22,31 @@ class GenerateInstallSchemaTest extends PestleBaseTest
             \'unit_test_id\',
             \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
             null,
-            array (
-  \'identity\' => true,\'nullable\' => false,\'primary\' => true,\'unsigned\' => true,
-),
+            [ \'identity\' => true, \'nullable\' => false, \'primary\' => true, \'unsigned\' => true, ],
             \'Entity ID\'
         )->addColumn(
             \'title\',
             \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
             255,
-            array (
-  \'nullable\' => false,
-),
+            [ \'nullable\' => false, ],
             \'Demo Title\'
         )->addColumn(
             \'creation_time\',
             \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
             null,
-            array (
-),
+            [ \'nullable\' => false, \'default\' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT, ],
             \'Creation Time\'
         )->addColumn(
             \'update_time\',
             \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
             null,
-            array (
-),
+            [ \'nullable\' => false, \'default\' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT_UPDATE, ],
             \'Modification Time\'
         )->addColumn(
             \'is_active\',
             \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
             null,
-            array (
-  \'nullable\' => false,\'default\' => \'1\',
-),
+            [ \'nullable\' => false, \'default\' => \'1\', ],
             \'Is Active\'
         )->setComment(
              \'A testing table\'
