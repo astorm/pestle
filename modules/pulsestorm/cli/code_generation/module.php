@@ -132,10 +132,7 @@ function generateInstallSchemaGetDefaultColumnTitle()
     ];
     return $title;
 }
-function timestampConstant($constant)
-{
-    return "\Magento\Framework\\DB\\Ddl\\Table::$constant";
-}
+
 function generateInstallSchemaGetDefaultColumnCreationTime()
 {
     $creation_time = [        
