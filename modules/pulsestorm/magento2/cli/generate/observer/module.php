@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\initilizeModuleConfig');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
-
+pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 /**
 * Generates Magento 2 Observer
 * This command generates the necessary files and configuration to add 

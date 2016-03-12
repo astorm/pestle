@@ -49,7 +49,7 @@ function createDiIfNeeded($module_dir)
 *
 * @command generate_command
 * @argument module_name In which module? [Pulsestorm_Helloworld]
-* @argument command_name In which module? [Testbed]
+* @argument command_name Command Name? [Testbed]
 */
 function pestle_cli($argv)
 {

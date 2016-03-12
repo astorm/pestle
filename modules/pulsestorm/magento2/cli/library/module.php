@@ -14,6 +14,7 @@ pestle_import('Pulsestorm\Pestle\Library\getClassFromDeclaration');
 pestle_import('Pulsestorm\Pestle\Library\getExtendsFromDeclaration');
 pestle_import('Pulsestorm\Pestle\Library\getNewClassDeclaration');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
+pestle_import('Pulsestorm\Xml_Library\addSchemaToXmlString');
 
 function getModuleInformation($module_name)
 {
