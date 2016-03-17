@@ -1,5 +1,5 @@
 <?php
-namespace Pulsesstorm\Phpdotnet;
+namespace Pulsestorm\Phpdotnet;
 /**
 * Function found on php.net.  
 * @copyright original authors

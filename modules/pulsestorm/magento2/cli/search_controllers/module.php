@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 pestle_import('Pulsestorm\Pestle\Library\output');
-pestle_import('Pulsestorm\PhpDotNet\glob_recursive');
+pestle_import('Pulsestorm\Phpdotnet\glob_recursive');
 pestle_import('Pulsestorm\Cli\Token_Parse\getFunctionFromClass');
 
 
