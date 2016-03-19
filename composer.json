@@ -1,4 +1,6 @@
 {
+    "name": "pulsestorm/pestle",
+
     "require": {
         "michelf/php-markdown": "1.6.0"
     },
