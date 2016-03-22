@@ -85,8 +85,10 @@ before_script:
     # test that magento is installed
     - curl "$PULSESTORM_MAGE2_FAKE_URL/index.php"
     - pestle.phar hello_world
+    - cd ..
 script: 
     # unit tests
     - vendor/bin/phpunit vendor/pulsestorm/pestle/tests
     # integration tests
+    - cd magento2
     - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration/FirstTest.php 
