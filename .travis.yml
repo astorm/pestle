@@ -87,6 +87,6 @@ before_script:
     - pestle.phar hello_world
 script: 
     # unit tests
-    - vendor/bin/phpunit tests/
+    - vendor/bin/phpunit vendor/pulsestorm/pestle/tests
     # integration tests
     - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration/FirstTest.php 
