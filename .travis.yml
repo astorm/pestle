@@ -88,7 +88,7 @@ before_script:
     - cd ..
 script: 
     # unit tests
-    - vendor/bin/phpunit vendor/pulsestorm/pestle/tests
+    - phpunit vendor/pulsestorm/pestle/tests
     # integration tests
     - cd magento2
     - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration/FirstTest.php 
