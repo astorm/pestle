@@ -62,7 +62,7 @@ before_script:
     - sudo chmod 777 /home /home/travis /home/travis/build            
 
     #   configure apache virtual hosts, assumes 000-default.conf is there
-    - sudo cp -f build/travis-ci-apache /etc/apache2/sites-available/000-default.conf
+    - sudo cp -f travis/travis-ci-apache /etc/apache2/sites-available/000-default.conf
     - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
     # restart apache
     - sudo service apache2 restart 
