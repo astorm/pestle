@@ -86,6 +86,7 @@ before_script:
     - curl "$PULSESTORM_MAGE2_FAKE_URL/index.php"
     - pestle.phar hello_world
     - cd ..
+    - composer install
 script: 
     # unit tests
     - phpunit tests
