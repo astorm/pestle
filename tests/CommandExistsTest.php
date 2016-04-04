@@ -8,13 +8,14 @@ class CommandExistsTest extends PestleBaseTest
     {
         return $this->runCommand('help', [$name]);
     }
-    
+
     function testCommandsExistbaz_bar()
     {
         $results = $this->runHelpCommand('baz_bar');
         $this->assertContains('Description', $results);    
         
     }
+    
     function testCommandsExistbuild_command_list()
     {
         $results = $this->runHelpCommand('build_command_list');
@@ -190,6 +191,14 @@ class CommandExistsTest extends PestleBaseTest
         $this->assertContains('Description', $results);    
         
     }
+    
+    function testCommandsExistListAlias()
+    {
+        $results = $this->runHelpCommand('list');
+        $this->assertContains('Description', $results);    
+        
+    }
+            
     function testCommandsExistlist()
     {
         $results = $this->runHelpCommand('list_commands');

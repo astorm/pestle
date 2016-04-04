@@ -4,6 +4,7 @@ use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use ReflectionFunction;
 use Phar;
+use Exception;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
 function isPhar()
@@ -190,10 +191,25 @@ function getReflectedCommand($command_name)
     return $reflected_command;
 }
 
+function applyCommandNameAlias($command_name)
+{
+    //hardcoded for now, home of future aliasing logic
+    switch($command_name)
+    {
+        case 'list':
+            return 'list_commands';
+        default:
+            return $command_name;
+    }
+    
+    throw new Exception('How did you get here?');
+}
+
 function getCommandNameFromParsedArgv($parsed_argv)
 {
     $command_name   = $parsed_argv['command'];
     $command_name   = $command_name ? $command_name : 'help'; 
+    $command_name   = applyCommandNameAlias($command_name);
     return $command_name;
 }
 
