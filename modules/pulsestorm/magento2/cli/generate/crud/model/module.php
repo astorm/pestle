@@ -62,6 +62,210 @@ function templateConstruct($init1=false, $init2=false)
     '    }' . "\n";
 }
 
+function templateRepositoryInterfaceAbstractFunction($modelShortInterface)
+{
+    return "
+    public function save({$modelShortInterface} \$page);
+
+    public function getById(\$id);
+
+    public function getList(SearchCriteriaInterface \$criteria);
+
+    public function delete({$modelShortInterface} \$page);
+
+    public function deleteById(\$id);    
+";    
+}
+
+function templateRepositoryInterfaceUse($longModelInterfaceName)
+{
+    return "
+use {$longModelInterfaceName};
+use Magento\Framework\Api\SearchCriteriaInterface;
+";
+}
+
+function templateComplexInterface($useContents, $methodContents, $interfaceContents)
+{
+    $interfaceContents = preg_replace(
+        '%(namespace.+?;)%',
+        '$1' . "\n" . $useContents,
+        $interfaceContents);
+
+    $interfaceContents = preg_replace(
+        '%\{\s*\}%six',
+        '{' . rtrim($methodContents) . "\n" . '}' . "\n",
+        $interfaceContents
+    );        
+    
+    return $interfaceContents;
+}
+
+function createRepositoryInterfaceContents($module_info, $model_name, $interface)
+{
+    $modelInterface             = getModelInterfaceShortName($model_name);
+    $modelInterfaceLongName     = getModelInterfaceName($module_info, $model_name);
+    
+    $contents                   = templateInterface($interface,[]);   
+    $contentsAbstractFunctions  = templateRepositoryInterfaceAbstractFunction($modelInterface);
+    $contentsUse                = templateRepositoryInterfaceUse($modelInterfaceLongName);
+    
+    $contents = templateComplexInterface($contentsUse, $contentsAbstractFunctions, $contents);
+    
+    return $contents;
+}
+
+function getModelRepositoryName($model_name)
+{
+    return $model_name . 'Repository';    
+}
+
+function templateUseFunctions($repositoryInterface, $thingInterface, $classModel, $collectionModel)
+{        
+    $thingFactory   = $classModel . 'Factory';
+    $resourceModel  = $collectionModel . 'Factory';
+    // $resourceModel       = 'Pulsestorm\HelloGenerate\Model\ResourceModel\Thing\CollectionFactory';
+    
+    return "
+use {$repositoryInterface};
+use {$thingInterface};
+use {$thingFactory};
+use {$resourceModel};
+
+use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Exception\CouldNotDeleteException;
+use Magento\Framework\Api\SearchResultsInterfaceFactory;";
+}
+
+function templateRepositoryFunctions($modelName)
+{
+    $modelNameFactory = $modelName . 'Factory';
+    $modelInterface   = getModelInterfaceShortName($modelName);
+    return '
+    protected $objectFactory;
+    protected $collectionFactory;
+    public function __construct(
+        '.$modelNameFactory.' $objectFactory,
+        CollectionFactory $collectionFactory,
+        SearchResultsInterfaceFactory $searchResultsFactory       
+    )
+    {
+        $this->objectFactory        = $objectFactory;
+        $this->collectionFactory    = $collectionFactory;
+        $this->searchResultsFactory = $searchResultsFactory;
+    }
+    
+    public function save('.$modelInterface.' $object)
+    {
+        try
+        {
+            $object->save();
+        }
+        catch(Exception $e)
+        {
+            throw new CouldNotSaveException($e->getMessage());
+        }
+        return $object;
+    }
+
+    public function getById($id)
+    {
+        $object = $this->objectFactory->create();
+        $object->load($id);
+        if (!$object->getId()) {
+            throw new NoSuchEntityException(__(\'Object with id "%1" does not exist.\', $id));
+        }
+        return $object;        
+    }       
+
+    public function delete('.$modelInterface.' $object)
+    {
+        try {
+            $object->delete();
+        } catch (Exception $exception) {
+            throw new CouldNotDeleteException(__($exception->getMessage()));
+        }
+        return true;    
+    }    
+
+    public function deleteById($id)
+    {
+        return $this->delete($this->getById($id));
+    }    
+
+    public function getList(SearchCriteriaInterface $criteria)
+    {
+        $searchResults = $this->searchResultsFactory->create();
+        $searchResults->setSearchCriteria($criteria);  
+        $collection = $this->collectionFactory->create();
+        foreach ($criteria->getFilterGroups() as $filterGroup) {
+            $fields = [];
+            $conditions = [];
+            foreach ($filterGroup->getFilters() as $filter) {
+                $condition = $filter->getConditionType() ? $filter->getConditionType() : \'eq\';
+                $fields[] = $filter->getField();
+                $conditions[] = [$condition => $filter->getValue()];
+            }
+            if ($fields) {
+                $collection->addFieldToFilter($fields, $conditions);
+            }
+        }  
+        $searchResults->setTotalCount($collection->getSize());
+        $sortOrders = $criteria->getSortOrders();
+        if ($sortOrders) {
+            /** @var SortOrder $sortOrder */
+            foreach ($sortOrders as $sortOrder) {
+                $collection->addOrder(
+                    $sortOrder->getField(),
+                    ($sortOrder->getDirection() == SortOrder::SORT_ASC) ? \'ASC\' : \'DESC\'
+                );
+            }
+        }
+        $collection->setCurPage($criteria->getCurrentPage());
+        $collection->setPageSize($criteria->getPageSize());
+        $objects = [];                                     
+        foreach ($collection as $objectModel) {
+            $objects[] = $objectModel;
+        }
+        $searchResults->setItems($objects);
+        return $searchResults;        
+    }';    
+}
+
+function createRepository($module_info, $model_name)
+{
+    $classCollection    = getCollectionClassNameFromModuleInfo($module_info, $model_name);
+    $classModel         = getModelClassNameFromModuleInfo($module_info, $model_name);
+    $modelInterface     = getModelInterfaceName($module_info, $model_name);
+    $repositoryName     = getModelRepositoryName($model_name);
+    $repositoryFullName = getModelClassNameFromModuleInfo($module_info, $repositoryName);
+    $interface          = getModuleInterfaceName($module_info, $repositoryName, 'Api');    
+    $template           = createClassTemplate($repositoryFullName, false, '\\' . $interface, true);
+    
+    $body               = templateRepositoryFunctions($model_name);
+    $use                = templateUseFunctions($interface, $modelInterface, $classModel, $classCollection);
+    $contents           = $template;
+    $contents           = str_replace('<$body$>', $body, $contents);
+    $contents           = str_replace('<$use$>' , $use,  $contents);
+    
+    $path               = getPathFromClass($repositoryFullName);        
+    output("Creating: " . $path);
+    
+    writeStringToFile($path, $contents);    
+}
+
+function createRepositoryInterface($module_info, $model_name)
+{    
+    $repositoryName = getModelRepositoryName($model_name);
+    $interface      = getModuleInterfaceName($module_info, $repositoryName, 'Api');
+    $path           = getPathFromClass($interface);    
+    $contents       = createRepositoryInterfaceContents($module_info, $model_name, $interface);
+    output("Creating: " . $path);
+    writeStringToFile($path, $contents);
+}
+
 function createCollectionClass($module_info, $model_name)
 {
     $path                   = $module_info->folder . "/Model/ResourceModel/$model_name/Collection.php";
@@ -128,10 +332,18 @@ function createModelClass($module_info, $model_name)
     writeStringToFile($path, $class_contents);    
 }
 
-function getModelInterfaceName($module_info, $model_name)
+function getModuleInterfaceName($module_info, $model_name, $type)
 {
     return $module_info->vendor . '\\' . $module_info->short_name . 
-        '\Model\\' . getModelInterfaceShortName($model_name);
+        '\\' . $type .'\\' . getModelInterfaceShortName($model_name);
+
+}
+
+function getModelInterfaceName($module_info, $model_name)
+{
+    return getModuleInterfaceName($module_info, $model_name, 'Model');
+//     return $module_info->vendor . '\\' . $module_info->short_name . 
+//         '\Model\\' . getModelInterfaceShortName($model_name);
 }
 
 function createModelInterface($module_info, $model_name)
@@ -214,7 +426,9 @@ function pestle_cli($argv)
     $module_name = $argv['module_name'];
     $module_info = getModuleInformation($argv['module_name']);    
     $model_name  = $argv['model_name'];
-    
+
+    createRepositoryInterface($module_info, $model_name);    
+    createRepository($module_info, $model_name);
     createModelInterface($module_info, $model_name);
     createCollectionClass($module_info, $model_name);
     createResourceModelClass($module_info, $model_name);

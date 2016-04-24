@@ -235,15 +235,19 @@ function templateInterface($interface, $functions=[])
     return $template;
 }
 
-function createClassTemplate($class, $extends=false, $implements=false)
+function createClassTemplate($class, $extends=false, $implements=false, $includeUse=false)
 {
     $class = trim($class, '\\');
     $parts = explode('\\',$class);
     $name  = array_pop($parts);
     
     $template = '<' . '?' . 'php' . "\n" .
-    'namespace ' . implode('\\',$parts) . ";\n" . 
-    "class $name";
+    'namespace ' . implode('\\',$parts) . ";\n";
+    if($includeUse)
+    {
+        $template .= '<$use$>' . "\n";
+    }
+    $template .= "class $name";
     if($extends)
     {
         $template .= " extends $extends";
