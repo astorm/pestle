@@ -268,7 +268,13 @@ function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block)
     $c=0;
     foreach($parsed_doc_block['argument'] as $argument)
     {
-        list($argument_name, $text)       = explode(' ', $argument,2);
+        $parts          = explode(' ', $argument,2);
+        if(count($parts) !== 2)
+        {
+            throw new Exception("@argument $argument invalid -- needs argument name AND description");
+        }
+        $argument_name  = $parts[0];
+        $text           = $parts[1];
         $text_parts = parseQuestionAndDefaultFromText($text, $new_arguments);
         $question = $text_parts['question'];
         $default  = trim($text_parts['default']);
