@@ -13,65 +13,98 @@ pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
 pestle_import('Pulsestorm\Magento2\Cli\Path_From_Class\getPathFromClass');
 pestle_import('Pulsestorm\Cli\Code_Generation\createControllerClassTemplate');
 pestle_import('Pulsestorm\Cli\Code_Generation\createControllerClass');
+pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 
-/**
-* Creates a Route XML
-* generate_route module area id 
-* @command generate_route
-*/
-function pestle_cli($argv)
-{    
-    $module_info = askForModuleAndReturnInfo($argv);
-    $module      = $module_info->name;
-    
+function createControllerClassName($module,$area='frontend')
+{
+    $class = str_replace('_','\\',$module) . '\Controller';
+    if($area === 'adminhtml')
+    {
+        $class .= '\Adminhtml';
+    }
+    $class .= '\Index\Index';
+    return $class;
+}
+
+function getRouterIdFromArea($area)
+{
     $legend      = [
-        'frontend'=>'standard',
+        'frontend' =>'standard',
         'adminhtml'=>'admin'
     ];
     $areas       = array_keys($legend);
-    $area        = inputOrIndex(
-        'Which area? [frontend, adminhtml]','frontend',
-        $argv, 1
-    );    
-    
-    $router_id   = $legend[$area];
-    
     if(!in_array($area, $areas))
     {
-        throw new Exception("Invalid areas");
-    }
-    
-    $frontname   = inputOrIndex(
-        'Frontname/Route ID?', null,
-        $argv, 2
-    );
-    $route_id    = $frontname;
+        throw new Exception("Could not find router id for area");
+    }    
 
+    return $legend[$area];    
+}
+
+function createRoutesXmlFile($module_info, $area, $frontname, $router_id, $route_id)
+{
+    $module = $module_info->name;
     $path = $module_info->folder . '/etc/'. $area . '/routes.xml';
     if(!file_exists($path))
     {
         $xml = simplexml_load_string(getBlankXml('routes'));
         writeStringToFile($path, $xml->asXml());
     }
+    $xml = simplexml_load_file($path);   
 
-    $xml = simplexml_load_file($path);
-        
     simpleXmlAddNodesXpath($xml,
         "router[@id=$router_id]/" .
         "route[@id=$route_id,@frontName=$frontname]/" .
         "module[@name=$module]");
     
     writeStringToFile($path, formatXmlString($xml->asXml()));
-    
-    $class = str_replace('_','\\',$module) . '\Controller\Index\Index';
+    output($path);
+             
+    return $xml;
+}
+
+function createControllerClassForRoute($module, $area, $acl)
+{
+    $class = createControllerClassName($module, $area, $acl);
     $controllerClass = createControllerClass(
         $class, 
         $area
-    );
-    
-    $path_controller = getPathFromClass($class);
-    
+    );    
+    $path_controller = getPathFromClass($class);    
     writeStringToFile($path_controller, $controllerClass);
-    output($path);   
+    
     output($path_controller);
+}
+
+/**
+* Creates a Route XML
+* generate_route module area id 
+* @command generate_route
+* @argument module_name Which Module? [Pulsestorm_HelloWorld]
+* @argument area Which Area (frontend, adminhtml)? [frontend]
+* @argument frontname Frontname/Route ID? [pulsestorm_helloworld]
+*/
+function pestle_cli($argv)
+{    
+    $module      = $argv['module_name'];
+    $area        = $argv['area'];    
+    $frontname   = $argv['frontname'];    
+    
+    $module_info = getModuleInformation($module);        
+    $router_id   = getRouterIdFromArea($area);
+    $route_id    = $frontname;
+
+    $xml = createRoutesXmlFile(
+        $module_info, $area, $frontname, $router_id, $route_id
+    );        
+    
+    $acl = $module . '::' . $frontname . '_menu';
+    createControllerClassForRoute($module, $area, $acl);
+    
+    if($area === 'adminhtml')
+    {
+        output("Don't forget your menu.xml and acl.xml");
+        output('action="'.$frontname.'/index/index"');
+        output('id="' . $acl);
+    }
 }

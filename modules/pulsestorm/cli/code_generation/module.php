@@ -276,7 +276,7 @@ function getZendPsrLogLevelMap()
     ];
 }
 
-function createControllerClass($class, $area)
+function createControllerClass($class, $area, $acl='ACL RULE HERE')
 {
     $extends = '\Magento\Framework\App\Action\Action';
     if($area === 'adminhtml')
@@ -285,10 +285,15 @@ function createControllerClass($class, $area)
     }
     $template = createControllerClassTemplate($class, $extends);
     
+    $context_hint  = '\Magento\Framework\App\Action\Context';
+    if($area === 'adminhtml')
+    {
+        $context_hint = '\Magento\Backend\App\Action\Context';
+    }    
     $body = '
     protected $resultPageFactory;
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
+        ' . $context_hint . ' $context,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory)
     {
         $this->resultPageFactory = $resultPageFactory;        
@@ -298,9 +303,17 @@ function createControllerClass($class, $area)
     public function execute()
     {
         return $this->resultPageFactory->create();  
-    }' . "\n";
-    
-    
+    }';
+    if($area === 'adminhtml')
+    {
+        $body .= '    
+    protected function _isAllowed()
+    {
+        return $this->_authorization->isAllowed(\''.$acl.'\');
+    }            
+        ';        
+    }
+    $body .= "\n";
     return str_replace('<$body$>', $body, $template);
 }
 
