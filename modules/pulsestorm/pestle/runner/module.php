@@ -257,7 +257,7 @@ function parseQuestionAndDefaultFromText($text, $new_arguments=[])
     
     return $return;
 }
-function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block)
+function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block, $reflected_command)
 {
     if(!array_key_exists('argument', $parsed_doc_block))
     {
@@ -279,14 +279,25 @@ function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block)
         $question = $text_parts['question'];
         $default  = trim($text_parts['default']);
 
-        $new_arguments[$argument_name] = inputOrIndex(
-            $question,$default,$arguments,$c);
+        if(strpos($question, '@callback ') === 0)
+        {
+            $parts = explode('@callback ', $question);
+            $callback = $reflected_command->getNamespaceName() . '\\' . 
+                array_pop($parts);
+            $r = new ReflectionFunction($callback);                
+            $new_arguments[$argument_name] = $r->invokeArgs([$arguments]);
+        }
+        else
+        {
+            $new_arguments[$argument_name] = inputOrIndex(
+                $question,$default,$arguments,$c);
+        }
         $c++;
     }
     return $new_arguments;
 }
 
-function limitOptionsIfPresentInDocBlock($options, $parsed_doc_block)
+function limitOptionsIfPresentInDocBlock($options, $parsed_doc_block, $reflected_command)
 {
     if(!array_key_exists('option', $parsed_doc_block))
     {
@@ -307,13 +318,13 @@ function limitOptionsIfPresentInDocBlock($options, $parsed_doc_block)
     return $final_options;
 }
 
-function getArgumentsAndOptionsFromParsedArgvAndDocComment($parsed_argv, $doc_block)
+function getArgumentsAndOptionsFromParsedArgvAndDocComment($parsed_argv, $doc_block, $reflected_command)
 {
     $arguments      = limitArgumentsIfPresentInDocBlock(
-        $parsed_argv['arguments'], $doc_block);
+        $parsed_argv['arguments'], $doc_block, $reflected_command);
                         
     $options        = limitOptionsIfPresentInDocBlock(
-        $parsed_argv['options'], $doc_block);
+        $parsed_argv['options'], $doc_block, $reflected_command);
         
     return [
         $arguments,
@@ -350,7 +361,7 @@ function main($argv)
     $doc_block      = parseDocBlockIntoParts($command->getDocComment());
 
     list($arguments, $options) = 
-        getArgumentsAndOptionsFromParsedArgvAndDocComment($parsed_argv, $doc_block);
+        getArgumentsAndOptionsFromParsedArgvAndDocComment($parsed_argv, $doc_block, $command);
     
     $command->invokeArgs([$arguments, $options]);
 }
