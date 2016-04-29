@@ -103,8 +103,8 @@ function pestle_cli($argv)
     
     if($area === 'adminhtml')
     {
-        output("Don't forget your menu.xml and acl.xml");
-        output('action="'.$frontname.'/index/index"');
-        output('id="' . $acl);
+        output("    Don't forget your menu.xml and acl.xml");
+        output('    action="'.$frontname.'/index/index"');
+        output('    id="' . $acl);
     }
 }
