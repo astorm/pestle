@@ -1,11 +1,12 @@
-<?php 
-class FirstTest extends PHPUnit_Framework_TestCase
+<?php
+
+namespace Pulsestorm\Pestle\TestsIntegration;
+
+require_once 'PestleTestIntegration.php';
+
+class HelloWorldTest extends PestleTestIntegration
 {
-    protected function runCommand($cmd)
-    {
-        return `pestle.phar $cmd`;
-    }
-    
+
     public function testSetup()
     {
         $results = trim($this->runCommand('hello_world'));
