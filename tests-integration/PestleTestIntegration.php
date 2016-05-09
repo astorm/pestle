@@ -20,6 +20,8 @@ class PestleTestIntegration extends PHPUnit_Framework_TestCase
      */
     protected $packageName;
 
+    protected $removeApp = false;
+
     /**
      * Setup the integration tests.
      */
@@ -27,7 +29,10 @@ class PestleTestIntegration extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->createFakeMagentoInstance();
+        if (!file_exists('app')) {
+            $this->createFakeMagentoInstance();
+            $this->removeApp = true;
+        }
     }
 
     /**
@@ -37,7 +42,9 @@ class PestleTestIntegration extends PHPUnit_Framework_TestCase
     {
         parent::tearDown();
 
-        $this->deleteDirectoryTree('app');
+        if ($this->removeApp) {
+            $this->deleteDirectoryTree('app');
+        }
     }
 
     /**
@@ -78,6 +85,17 @@ class PestleTestIntegration extends PHPUnit_Framework_TestCase
     public function testPestleIsAvailable()
     {
         $this->assertNotFalse($this->getPestlePackage());
+    }
+
+    /**
+     * Check the di.xml exists, if it does not then something is
+     * wrong with the install.
+     *
+     * @test
+     */
+    public function testDiXmlExists()
+    {
+        $this->assertFileExists('app/etc/di.xml');
     }
 
     /**
