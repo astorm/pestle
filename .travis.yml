@@ -92,4 +92,4 @@ script:
     - phpunit tests
     # integration tests
     - cd magento2
-    - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration/FirstTest.php 
+    - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration
