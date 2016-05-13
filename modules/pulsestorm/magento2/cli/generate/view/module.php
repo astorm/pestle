@@ -49,13 +49,23 @@ function createHandleFile($module_info, $area, $template, $class, $handle, $layo
     
 }
 
-function createBlockClass($module_info, $block_name)
+function createBlockClass($module_info, $block_name, $area='frontname')
 {
     $class_name = str_replace('_', '\\', $module_info->name) . 
-        '\Block\\' . ucwords($block_name);
+        '\Block\\';
+    if($area === 'adminhtml')
+    {
+        $class_name .= '\Adminhtml\\';
+    }        
+    $class_name .= ucwords($block_name);
     
     output("Creating: " . $class_name);
-    $contents = createClassTemplate($class_name, '\Magento\Framework\View\Element\Template');
+    $baseClass = '\Magento\Framework\View\Element\Template';
+    if($area === 'adminhtml')
+    {
+        $baseClass = '\Magento\Backend\Block\Template';
+    }
+    $contents = createClassTemplate($class_name, $baseClass);
     $contents = str_replace('<$body$>', "\n".'    function _prepareLayout(){}'."\n", $contents);
     createClassFile($class_name, $contents);
     return $class_name;
