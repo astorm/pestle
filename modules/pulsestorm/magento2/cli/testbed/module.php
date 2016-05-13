@@ -251,12 +251,182 @@ function testbedParsing()
 
 }
 
+function exampleOfACallback($arguments, $index)
+{
+    return 'Value of Argument';
+}
+
+function getOldToNewClassMap()
+{
+    $files = [
+//         'app/code/Package/Module/Model/System//Config/Backend/Design/Color/Validatetransparent.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Category/Grid/Columncount.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Css/Background/Attachment.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Css/Background/Positionx.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Css/Background/Positiony.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Css/Background/Repeat.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Design/Font/Family/Google.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Design/Font/Family/Groupcustomgoogle.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Design/Font/Google/Subset.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Design/Font/Size/Basic.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Design/Icon/Color/Bw.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Design/Icon/Color/Bwhover.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Design/Section/Sidepadding.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Design/Section/Sidepaddingvalue.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Js/Jquery/Easing.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Layout/Element/Displayonhover.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Layout/Element/Replacewithblock.php',
+//         'app/code/Package/Module/Model/System//Config/Source/Layout/Screen/Width/Widecustom.php'
+
+        'app/code/Package/Module/Model/System/Config/Backend/Header/Centralcolunits.php',
+        'app/code/Package/Module/Model/System/Config/Backend/Header/Leftcolunits.php',
+        'app/code/Package/Module/Model/System/Config/Backend/Header/Rightcolunits.php',
+        'app/code/Package/Module/Model/System/Config/Backend/Productpage/Imgcolunits.php',
+        'app/code/Package/Module/Model/System/Config/Source/Category/Altimagecolumn.php',
+        'app/code/Package/Module/Model/System/Config/Source/Category/Grid/Columncount.php',
+        'app/code/Package/Module/Model/System/Config/Source/Category/Grid/Columncountmobile.php',
+        'app/code/Package/Module/Model/System/Config/Source/Category/Grid/Columncountmobile.php',
+        'app/code/Package/Module/Model/System/Config/Source/Category/Grid/Columncountmobile.php',
+        'app/code/Package/Module/Model/System/Config/Source/Category/Grid/Hovereffect/Below.php',
+        'app/code/Package/Module/Model/System/Config/Source/Category/Grid/Hovereffect/Below.php',
+        'app/code/Package/Module/Model/System/Config/Source/Category/Grid/Size.php',
+        'app/code/Package/Module/Model/System/Config/Source/Design/Tex/Names.php',
+        'app/code/Package/Module/Model/System/Config/Source/Design/Tex/Names.php',
+        'app/code/Package/Module/Model/System/Config/Source/Design/Tex/Names.php',
+        'app/code/Package/Module/Model/System/Config/Source/Design/Tex/Names.php',
+        'app/code/Package/Module/Model/System/Config/Source/Design/Tex/Names.php',
+        'app/code/Package/Module/Model/System/Config/Source/Design/Tex/Names.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Position/Primary.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Position/Primarymenucontainer.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Position/Primarytop.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Position/Primarytop.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Position/Primarytop.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Position/Primarytopusermenu.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Position/Primarytopusermenuinsidemenu.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Position/Primarytopusermenuinsidemenu.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Position/Primarytopusermenuinsidemenu.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Usermenu/LineBreak/Position.php',
+        'app/code/Package/Module/Model/System/Config/Source/Header/Usermenu/Position.php',
+        'app/code/Package/Module/Model/System/Config/Source/Navshadow.php',
+        'app/code/Package/Module/Model/System/Config/Source/Product/Position/All.php',
+        'app/code/Package/Module/Model/System/Config/Source/Product/Position/All.php',
+        'app/code/Package/Module/Model/System/Config/Source/Product/Position/All.php',
+        'app/code/Package/Module/Model/System/Config/Source/Product/Related/Template.php',
+        'app/code/Package/Module/Model/System/Config/Source/Product/Tabs/Mode.php',        
+
+
+        ];
+
+    $classes = array_map(function($item){
+        $map = [
+            'app/code/'=>'',
+            '//'=>'/',
+            '/'=>'\\',
+            '.php'=>''
+        ];
+        $item = str_replace(array_keys($map), array_values($map), $item);
+        return $item;
+    }, $files);        
+    
+    $old_to_new = [];
+    foreach($classes as $class)
+    {
+        $old_to_new[$class] = str_replace('Package\Module', 'Package\Module', $class);
+    }
+    return $old_to_new;
+}
+
+function classToPath($string)
+{
+    $map = [
+        '\\'=>'/'
+    ];
+    return 'app/code/' . str_replace(
+        array_keys($map), array_values($map), $string) . '.php'; 
+}
+
+function movingClasses()
+{
+
+    $oldToNew = getOldToNewClassMap();
+    $pathSystemXml = 'app/code/Package/Module/etc/adminhtml/system.xml';
+    $systemXmlContents    = file_get_contents($pathSystemXml);
+    $newSystemXmlContents = $systemXmlContents;
+    foreach($oldToNew as $old=>$new)
+    {
+        $newSystemXmlContents = str_replace($old, $new,$newSystemXmlContents);    
+        $old_path = classToPath($old);
+        $new_path = classToPath($new); 
+        
+        //creates directory
+        $dir = dirname($new_path);
+        if(!is_dir($dir))
+        {
+            output("Creating Dir: " . $dir);
+            `mkdir -p $dir`;
+        }  
+        
+        //moves file           
+        if(file_exists($old_path))
+        {
+            output("Moving $old_path");
+            `mv $old_path $new_path`;
+        }
+        
+        //changes namespace
+        if(file_exists($new_path))
+        {
+            $contents = file_get_contents($new_path);
+            $contents_new = preg_replace(
+                '%namespace Package\\\Module%',
+                 'namespace Package\Module',
+                 $contents);
+            if($contents_new !== $contents)
+            {
+                output("Rewriting $new_path");
+                file_put_contents($new_path, $contents_new);
+            }                 
+        }                
+    }
+    if($newSystemXmlContents !== $systemXmlContents)
+    {
+        output("Rewriting $pathSystemXml");
+        file_put_contents($pathSystemXml, $newSystemXmlContents);
+    }
+    output("done");              
+}
+
+function eavQuery()
+{
+    $id = 37;
+    $tables = [
+        'catalog_product_entity_datetime',
+        'catalog_product_entity_decimal',
+        'catalog_product_entity_int',
+        'catalog_product_entity_text',
+        'catalog_product_entity_varchar'];
+    
+    $sql = '';
+    foreach($tables as $table)
+    {
+        $sql .= "
+    SELECT eav_attribute.attribute_code, main_table.value_id, main_table.attribute_id, main_table.store_id, main_table.entity_id, value 
+    FROM $table main_table  
+    LEFT JOIN eav_attribute ON eav_attribute.attribute_id = main_table.attribute_id
+    WHERE entity_id IN ($id)        
+    UNION
+        ";
+    }
+    
+    output("\n", $sql);
+}
+
 /**
 * Test Command
 * @command testbed
+* @argument foobar @callback exampleOfACallback
 */
 function pestle_cli($arguments, $options)
 {
-    $test = input("Enter some text");
-    echo $test;
+    output("Hello World");
 }

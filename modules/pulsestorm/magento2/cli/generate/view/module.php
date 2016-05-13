@@ -21,7 +21,7 @@ function createTemplateFile($module_info, $area, $template)
     
 }
 
-function createHandleFile($module_info, $area, $template, $class, $handle)
+function createHandleFile($module_info, $area, $template, $class, $handle, $layout)
 {
     $xml = simplexml_load_string(getBlankXml('layout_handle'));
     $name  = strToLower($module_info->name) . 
@@ -35,6 +35,12 @@ function createHandleFile($module_info, $area, $template, $class, $handle)
         '@name='     . $name     . ']'
     );
     
+    $xml['layout'] = $layout;
+    if($layout === '' || $area === 'adminhtml')
+    {
+        unset($xml['layout']);
+    }
+
     $path = $module_info->folder . '/view/' . 
                 $area . '/layout/' .  $handle . '.xml';
 
@@ -64,6 +70,7 @@ function createBlockClass($module_info, $block_name)
 * @argument handle Which Handle? [<$module_name$>_index_index]
 * @argument block_name Block Name? [Main]
 * @argument template Template File? [content.phtml]
+* @argument layout Layout (ignored for adminhtml) ? [1column]
 */
 function pestle_cli($argv)
 {
@@ -72,11 +79,12 @@ function pestle_cli($argv)
     $handle         = $argv['handle'];
     $block_name     = $argv['block_name'];            
     $template       = $argv['template'];            
+    $layout         = $argv['layout'];
     
     $module_info    = getModuleInformation($module_name);
 
     createTemplateFile($module_info, $area, $template);    
     $class = createBlockClass($module_info, $block_name);
-    createHandleFile($module_info, $area, $template, $class, $handle);
+    createHandleFile($module_info, $area, $template, $class, $handle, $layout);
     
 }

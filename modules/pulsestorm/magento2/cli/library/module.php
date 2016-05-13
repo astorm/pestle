@@ -143,12 +143,7 @@ function createClassFile($model_name, $contents)
     
     if(file_exists($path))
     {
-        output($path, "\n" . 'File already exists');
-        $results = trim(strToLower(input("Continue without overwriting?",'Yes')));
-        if(!$results || $results[0] != 'y')
-        {
-            bail("Bailing");
-        }
+        output($path, "\n" . 'File already exists, skipping');
         return;
     }
     if(!is_dir(dirname($path)))
