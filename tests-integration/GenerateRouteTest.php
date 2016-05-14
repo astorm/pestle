@@ -29,7 +29,7 @@ class GenerateRouteTest extends PestleTestIntegration
      *
      * @test
      */
-    public function testRoutesFileExists()
+    public function xtestRoutesFileExists()
     {
         $result = file_exists(__DIR__.'/../app/code/Pulsestorm/HelloWorld/etc/frontend/routes.xml');
         $this->assertTrue($result);
@@ -40,7 +40,7 @@ class GenerateRouteTest extends PestleTestIntegration
      *
      * @test
      */
-    public function testControllerFileExists()
+    public function xtestControllerFileExists()
     {
         $result = file_exists(__DIR__.'/../app/code/Pulsestorm/HelloWorld/Controller/Index/Index.php');
         $this->assertTrue($result);

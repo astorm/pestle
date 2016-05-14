@@ -28,7 +28,7 @@ class GenerateModuleTest extends PestleTestIntegration
      *
      * @test
      */
-    public function testModuleFileExists()
+    public function xtestModuleFileExists()
     {
         $result = file_exists(__DIR__.'/../app/code/Pulsestore/Testbed/etc/module.xml');
         $this->assertTrue($result);
@@ -39,7 +39,7 @@ class GenerateModuleTest extends PestleTestIntegration
      *
      * @test
      */
-    public function testRegistrationFileExists()
+    public function xtestRegistrationFileExists()
     {
         $result = file_exists(__DIR__.'/../app/code/Pulsestore/Testbed/registration.php');
         $this->assertTrue($result);
