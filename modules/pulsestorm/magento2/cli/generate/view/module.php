@@ -55,7 +55,7 @@ function createBlockClass($module_info, $block_name, $area='frontname')
         '\Block\\';
     if($area === 'adminhtml')
     {
-        $class_name .= '\Adminhtml\\';
+        $class_name .= 'Adminhtml\\';
     }        
     $class_name .= ucwords($block_name);
     
@@ -94,7 +94,7 @@ function pestle_cli($argv)
     $module_info    = getModuleInformation($module_name);
 
     createTemplateFile($module_info, $area, $template);    
-    $class = createBlockClass($module_info, $block_name);
+    $class = createBlockClass($module_info, $block_name, $area);
     createHandleFile($module_info, $area, $template, $class, $handle, $layout);
     
 }
