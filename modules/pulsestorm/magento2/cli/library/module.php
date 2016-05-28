@@ -265,15 +265,22 @@ function getVariableNameFromNamespacedClass($class)
     $parts = explode('\\', $class);
     $parts = array_slice($parts, 2);
     
-    $var = implode('', $parts);
-    $var[0] = strToLower($var);
+    $var = implode('', $parts);    
+    
+    if($var)
+    {
+        $var[0] = strToLower($var);
+    }
     
     return '$' . $var;
 }
 
-function getDiLinesFromMage2ClassName($class)
+function getDiLinesFromMage2ClassName($class, $var=false)
 {
-    $var  = getVariableNameFromNamespacedClass($class);
+    if(!$var)
+    {
+        $var  = getVariableNameFromNamespacedClass($class);
+    }
     $parameter  = '\\' . trim($class,'\\') . ' ' . $var . ',';
     $property   = 'protected ' . $var . ';';
     $assignment = '$this->' . ltrim($var, '$') . ' = ' . $var . ';';

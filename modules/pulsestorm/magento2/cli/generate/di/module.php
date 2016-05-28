@@ -135,30 +135,10 @@ function defineStates()
     define('FOUND_CONSTRUCT_OPEN_BRACKET' , 5);
     // define('FOUND_', X);
 }
-/**
-* Injects a dependency into a class constructor
-* This command modifies a preexisting class, adding the provided 
-* dependency to that class's property list, `__construct` parameters 
-* list, and assignment list.
-*
-*    pestle.phar generate_di app/code/Pulsestorm/Generate/Command/Example.php 'Magento\Catalog\Model\ProductFactory' 
-*
-* @command generate_di
-* @argument file Which PHP class file are we injecting into?
-* @argument class Which class to inject? [Magento\Catalog\Model\ProductFactory]
-*
-*/
-function pestle_cli($argv)
-{
-    defineStates();
-    $file = realpath($argv['file']);
-    if(!$file)
-    {
-        exit("Could not find $file.\n");
-    }     
-    $class = $argv['class'];
 
-    $di_lines = (object) getDiLinesFromMage2ClassName($class);
+function injectDependencyArgumentIntoFile($class, $file, $propName=false)
+{
+    $di_lines = (object) getDiLinesFromMage2ClassName($class, $propName);
     $di_lines->parameter = trim(trim($di_lines->parameter,','));        
     
     $indent   = getClassIndent();
@@ -187,7 +167,13 @@ function pestle_cli($argv)
             $state = FOUND_OPENING_CLASS_BRACKET;
             $tmp = new stdClass;
             //$tmp->token_value = "\n" . $indent . '#Property Here' . "\n";
-            $tmp->token_value = "\n" . $indent . $di_lines->property . "\n";
+            $comment = $indent . '/**' . "\n" .
+                $indent . '* Injected Dependency Description' . "\n" .
+                $indent . '* ' . "\n" .                                
+                $indent . '* @var \\'.$class.'' . "\n" .
+                $indent . '*/' . "\n";
+                $tmp->token_value = "\n" . $comment .            
+                    $indent . $di_lines->property . "\n";
             
             $new_tokens[] = $tmp;           
         }
@@ -230,5 +216,31 @@ function pestle_cli($argv)
     
     $contents = implodeTokensIntoContents($new_tokens);
     output("Injecting $class into $file");
-    writeStringToFile($file, $contents);    
+    writeStringToFile($file, $contents); 
+}
+
+/**
+* Injects a dependency into a class constructor
+* This command modifies a preexisting class, adding the provided 
+* dependency to that class's property list, `__construct` parameters 
+* list, and assignment list.
+*
+*    pestle.phar generate_di app/code/Pulsestorm/Generate/Command/Example.php 'Magento\Catalog\Model\ProductFactory' 
+*
+* @command generate_di
+* @argument file Which PHP class file are we injecting into?
+* @argument class Which class to inject? [Magento\Catalog\Model\ProductFactory]
+*
+*/
+function pestle_cli($argv)
+{
+    defineStates();
+    $file = realpath($argv['file']);
+    if(!$file)
+    {
+        exit("Could not find $file.\n");
+    }     
+    $class = $argv['class'];
+
+    injectDependencyArgumentIntoFile($class, $file);       
 }
