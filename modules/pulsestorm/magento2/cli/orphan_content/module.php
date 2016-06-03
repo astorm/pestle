@@ -173,7 +173,8 @@ function removeIrrelevantDataFromUrls($urls)
         '/station_identification_2014',
         '/magento_ultimate_module_creator_review',
         '/magento_ultimate_module_creator_review',
-        '/an_open_letter_to_magentos_leaders'
+        '/an_open_letter_to_magentos_leaders',
+        '/magento_2_book_review_theme_web_page_assets'
     ));
 
     foreach($urls as $type=>$array)
