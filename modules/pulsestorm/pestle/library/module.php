@@ -151,7 +151,7 @@ function notEmpty($item)
     return (boolean) $item;
 }
 
-function inputRawPhp($string, $default='')
+function inputRawPhp()
 {    
     $handle = fopen ("php://stdin","r");
     $line = fgets($handle);        
