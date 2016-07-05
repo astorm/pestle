@@ -186,8 +186,7 @@ function generateUiComponentXmlFile($gridId, $databaseIdName, $module_info)
     generateListingToolbar($xml);   
     
     $path = $module_info->folder . 
-        '/view/adminhtml/ui_component/' . $gridId . '.xml';
-        
+        '/view/adminhtml/ui_component/' . $gridId . '.xml';        
     output("Creating New $path");
     writeStringToFile($path, formatXmlString($xml->asXml()));
     return $xml;
@@ -292,7 +291,7 @@ function generateDataProviderClass($moduleInfo, $gridId, $collectionFactory)
 }
 
 /**
-* One Line Description
+* Generates a Magento 2.1 ui grid listing and support classes.
 *
 * @command magento2:generate:ui:grid
 * @argument module Which Module? [Pulsestorm_Gridexample]
