@@ -261,6 +261,8 @@ function generatePageActionClass($moduleInfo, $gridId, $idColumn)
     $contents = createClassTemplateWithUse($pageActionsClassName, '\Magento\Ui\Component\Listing\Columns\Column');            
     $contents = str_replace('<$use$>','',$contents);
     $contents = str_replace('<$body$>', $prepareDataSource, $contents);
+    
+    output("Creating: $pageActionsClassName");
     $return   = createClassFile($pageActionsClassName,$contents);             
     return $return;
 }
@@ -282,10 +284,11 @@ function generateDataProviderClass($moduleInfo, $gridId, $collectionFactory)
         $this->collection = $collectionFactory->create();
     }' . "\n";        
     
-    $contents           = createClassTemplateWithUse($providerClass);
+    $contents           = createClassTemplateWithUse($providerClass, '\\Magento\Ui\DataProvider\AbstractDataProvider');
     $contents           = str_replace('<$use$>', '',  $contents);
     $contents           = str_replace('<$body$>', $constructor,  $contents);    
     
+    output("Creating: $providerClass");
     $return             = createClassFile($providerClass,$contents);    
     return $contents;
 }
@@ -303,17 +306,14 @@ function pestle_cli($argv)
 {
     $module_info      = getModuleInformation($argv['module']);
 
-    #$gridId           = 'pulsestorm_commercebug_log';
-    #$databaseIdName   = 'pulsestorm_commercebug_log_id';
-
-    output("TODO: Generate page action class with single editing URL");
     generateUiComponentXmlFile(
         $argv['grid_id'], $argv['db_id_column'], $module_info);                                        
         
     generateDataProviderClass(
-        $module_info, $argv['grid_id'], $argv['collection_resource']);
+        $module_info, $argv['grid_id'], $argv['collection_resource'] . 'Factory');
         
     generatePageActionClass(
         $module_info, $argv['grid_id'], $argv['db_id_column']);                    
         
+    output("Don't forget to add this to your layout XML with <uiComponent name=\"{$argv['grid_id']}\"/> ");        
 }
