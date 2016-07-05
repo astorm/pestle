@@ -235,6 +235,13 @@ function templateInterface($interface, $functions=[])
     return $template;
 }
 
+function createClassTemplateWithUse($class, $extends=false, $implements=false, $includeUse=false)
+{
+    $template = createClassTemplate($class, $extends, $implements, $includeUse);
+    $template = preg_replace('%namespace.+?;%',"$0\n<\$use\$>",$template);
+    return $template;
+}
+
 function createClassTemplate($class, $extends=false, $implements=false, $includeUse=false)
 {
     $class = trim($class, '\\');

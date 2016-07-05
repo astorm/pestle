@@ -174,7 +174,8 @@ function removeIrrelevantDataFromUrls($urls)
         '/magento_ultimate_module_creator_review',
         '/magento_ultimate_module_creator_review',
         '/an_open_letter_to_magentos_leaders',
-        '/magento_2_book_review_theme_web_page_assets'
+        '/magento_2_book_review_theme_web_page_assets',
+        '/patreon_for_magento_2_content'
     ));
 
     foreach($urls as $type=>$array)

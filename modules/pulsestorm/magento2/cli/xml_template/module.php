@@ -37,6 +37,11 @@ function getBlankXmlMenu()
 </config>';    
 }
 
+function getBlankXmlUiGrid()
+{
+    return '<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd"></listing>';
+}
+
 function getBlankXmlTheme()
 {
     return '<theme xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Config/etc/theme.xsd"></theme>';
@@ -62,10 +67,10 @@ function getBlankXml($type)
     $function = 'Pulsestorm\Magento2\Cli\Xml_Template';
     $function .= '\getBlankXml' . ucWords(strToLower($type));
     if(function_exists($function))
-    {
+    {        
         return call_user_func($function);
     }
-    throw new Exception("No such type, $type");
+    throw new Exception("No such type, $type ($function)");
 }
 
 function getBlankXmlLayout_handle()
