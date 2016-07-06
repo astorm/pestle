@@ -82,7 +82,7 @@ function generateDatasourceNode($xml, $dataSourceName, $providerClass, $database
     return $dataSource;
 }
 
-function addBaseColumItemNodes($config, $width, $indexField)
+function addBaseColumnItemNodes($config, $width, $indexField)
 {
     addItem($config, 'resizeEnabled', 'boolean', 'false');
     addItem($config, 'resizeDefaultWidth', 'string', $width);
@@ -111,7 +111,7 @@ function addActionsColumnToColumns($columns, $pageActionsClassName, $idColumn)
     $actionsColumn->addAttribute('class',$pageActionsClassName);
     $data = addArgument($actionsColumn, 'data','array');
     $config = addItem($data, 'config', 'array');
-    addBaseColumItemNodes($config, '107', $idColumn);        
+    addBaseColumnItemNodes($config, '107', $idColumn);        
     return $actionsColumn;
 }
 
@@ -123,7 +123,7 @@ function generateColumnsNode($xml, $columnsName, $pulsestorm_commercebug_log_id,
     $data = addArgument($sectionColumns, 'data', 'array');
     $config = addItem($data, 'config', 'array');
         
-    addBaseColumItemNodes($config, '55', $pulsestorm_commercebug_log_id);            
+    addBaseColumnItemNodes($config, '55', $pulsestorm_commercebug_log_id);            
     addIdColumnToColumns($columns, $data, $pulsestorm_commercebug_log_id);
     addActionsColumnToColumns($columns, $pageActionsClassName, $pulsestorm_commercebug_log_id);
                 
@@ -299,7 +299,7 @@ function generateDataProviderClass($moduleInfo, $gridId, $collectionFactory)
 * @command magento2:generate:ui:grid
 * @argument module Which Module? [Pulsestorm_Gridexample]
 * @argument grid_id Create a unique ID for your Listing/Grid! [pulsestorm_gridexample_log]
-* @argument collection_resource What Resource Collection Model should your lising use? [Magento\Cms\Model\ResourceModel\Page\Collection]
+* @argument collection_resource What Resource Collection Model should your listing use? [Magento\Cms\Model\ResourceModel\Page\Collection]
 * @argument db_id_column What's the ID field for you model? [pulsestorm_gridexample_log_id]
 */
 function pestle_cli($argv)
