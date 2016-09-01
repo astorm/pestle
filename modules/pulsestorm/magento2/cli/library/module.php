@@ -15,6 +15,7 @@ pestle_import('Pulsestorm\Pestle\Library\getExtendsFromDeclaration');
 pestle_import('Pulsestorm\Pestle\Library\getNewClassDeclaration');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 pestle_import('Pulsestorm\Xml_Library\addSchemaToXmlString');
+pestle_import('Pulsestorm\Xml_Library\getXmlNamespaceFromPrefix');
 
 function getModuleInformation($module_name)
 {
@@ -361,6 +362,54 @@ function convertMageOneClassIntoNamespacedClass($path_mage1)
 function inputModuleName()
 {
     return input("Which module?", 'Packagename_Vendorname');
+}
+
+function addSpecificChild($childNodeName, $node, $name, $type, $text=false)
+{
+    $namespace = getXmlNamespaceFromPrefix($node, 'xsi');
+    $child = $node->addChild($childNodeName);
+    $child->addAttribute('name',$name);
+    $child->addAttribute('xsi:type',$type,$namespace);
+    if($text)
+    {
+        $child[0] = $text;
+    }
+    return $child;
+}
+
+function addArgument($node, $name, $type, $text=false)
+{
+    return addSpecificChild('argument', $node, $name, $type, $text);
+}
+
+function addItem($node, $name, $type, $text=false)
+{
+    return addSpecificChild('item', $node, $name, $type, $text);
+}
+
+function validateAs($xml, $type)
+{
+    if($xml->getName() !== $type)
+    {
+        output("Not a <$type/> node, looks like a <{$xml->getName()}/> node, bailing.");
+        exit;
+    }
+
+}
+
+function validateAsListing($xml)
+{
+    return validateAs($xml, 'listing');
+}
+
+function getOrCreateColumnsNode($xml)
+{
+    $columns = $xml->columns;
+    if(!$columns)
+    {
+        $columns = $xml->addChild('columns');
+    }
+    return $columns;
 }
 
 /**

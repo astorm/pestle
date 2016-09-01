@@ -421,10 +421,474 @@ function eavQuery()
     output("\n", $sql);
 }
 
+function getDatasourceClass($xml)
+{
+    $nodes = $xml->xpath('/listing/dataSource//argument[@name="class"]');
+    $node = array_shift($nodes);
+    return (string) $node;
+}
+
+function getFilesArray($folder)
+{
+    $files = `find $folder -name '*.xml'`;
+    $files = preg_split('%[\r\n]%',$files);   
+    $new   = [];
+    foreach($files as $file)
+    {
+        $new[$file] = $file;
+    } 
+
+    return $new;
+}
+
+function loadXmlListingsFiles($files)
+{
+    $xmls   = array_map(function($file){
+        $xml = @simplexml_load_file($file);
+        return $xml;
+    }, $files);
+    $xmls = array_filter($xmls, function($xml){
+        if(!$xml) { return false;}
+        return $xml->getName() === 'listing';
+    });
+    return $xmls;
+}
+
+function getDataProviderClassesFromListing($xmls)
+{
+    $return = [];
+    foreach($xmls as $file=>$xml)
+    {
+        $dataProviderClass = getDatasourceClass($xml);
+        $return[$file] = $dataProviderClass;
+    }
+    $return = array_filter($return);
+    return $return;
+}
+
+function getMaxClassLength($dataProviders)
+{
+    $max = 0;
+    foreach($dataProviders as $file=>$class)
+    {
+        $length = strlen($class);
+        if($length > $max)
+        {
+            $max = $length;
+        }
+    }
+    return $max;
+}
+
+function getUniqueNameOfColumnsChildren($xmls, $columnsSubNode='columns')
+{
+    foreach($xmls as $file=>$xml)
+    {
+        $allColumns = $xml->xpath('//'.$columnsSubNode);
+        
+        foreach($allColumns as $columns)
+        {
+            foreach($columns->children() as $child)
+            {
+                $names[] = $child->getName();
+            }
+        }
+    }
+    $names = array_filter(array_unique($names), function($item){
+        return $item !== 'argument';
+    });;
+    
+    $known          = ['column','selectionsColumn','actionsColumn'];
+    sort($known);
+    sort($names);  
+    if($names !== $known)
+    {
+        output("New column type I don't know about, bailing");
+        exit;
+    }
+    return $names;       
+}
+
+function reportDataProviderToListingXmlFileMap($xmls)
+{
+    // find grid listing => data provider class name mappings            
+    $dataProviders  = getDataProviderClassesFromListing($xmls);
+    $max            = getMaxClassLength($dataProviders);
+    foreach($dataProviders as $file=>$class)
+    {
+        $indent = str_pad(' ',($max + 5) - strlen($class));
+        output($class . $indent . basename($file));
+    }
+}
+
+function bailIfNonDataArgument($columns)
+{
+    foreach($columns as $column)
+    {
+        foreach($column->children() as $item)
+        {
+            if((string) $item['name'] !== 'data' || $item->getName() !== 'argument')
+            {
+                output("A <column/> sub-node that's not a data argument?! Bailing");
+                exit;
+            }                
+        }
+    }
+}
+
+function getConfigFieldNamesForColumnNodes($xmls, $columnsSubNode='column')
+{
+    foreach($xmls as $file=>$xml)
+    {        
+        $columns = $xml->xpath('//' . $columnsSubNode);
+        bailIfNonDataArgument($columns);
+        
+        foreach($columns as $column)
+        {            
+            foreach($column->argument->children() as $node)
+            {
+                if(!in_array($node['name'], ['options','config']))
+                {
+                    var_dump($node->asXml());
+                    var_dump(__FUNCTION__);
+                    exit;
+                }                
+                if((string)$node['name'] !== 'config')
+                {
+                    continue;
+                }
+                $tmp = [];
+                foreach($node->children() as $item)
+                {
+                    $tmp[] = (string) $item['name'];                    
+                }
+                sort($tmp);                
+                $configs[] = $tmp;
+            }            
+        }        
+    } 
+    
+    usort($configs, function($a, $b){
+        if(count($a) > count($b))
+        {
+            return 1;
+        }
+        if(count($a) < count($b))
+        {
+            return -1;
+        }
+        return 0;
+    });
+    
+    return $configs;    
+}
+
+function reportOnOptionsArgumentAndDataTypes($xmls)
+{
+    foreach($xmls as $file=>$xml)
+    {                
+        // output($file);    
+        $columns = $xml->xpath('//column');
+        bailIfNonDataArgument($columns);
+        
+        foreach($columns as $column)
+        {
+            // output($column->asXml());
+            // output($column->getName());
+            // output($column->getName());
+            $doc = simplexml_load_string('<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' . $column->asXml() . '</root>');
+            $hasOptionsItem = $doc->xpath('//item[@name="options"]');
+            if(count($hasOptionsItem) === 0)
+            {
+                continue;
+            }
+            
+            $dataTypes = $doc->xpath('//item[@name="dataType"]');
+            if(count($dataTypes) !== 1)            
+            {
+                output("More than one datatype, bailing");
+                var_dump($dataTypes);
+                exit;
+            }
+            $dataType = array_shift($dataTypes);
+            $dataType = (string) $dataType;
+            
+            if($dataType !== 'select')
+            {
+                output($file);
+                output($dataType);
+                output($column->asXml());
+            }
+            
+        }
+    }     
+}
+
+function reportValidateDateComponents($xmls)
+{
+    foreach($xmls as $file=>$xml)
+    {                
+        $columns = $xml->xpath('//column');
+        // bailIfNonDataArgument($columns);
+        
+        foreach($columns as $column)
+        {
+            $doc = simplexml_load_string(
+                '<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' .
+                $column->asXml() . 
+                '</root>');
+                
+            $dataTypes = $doc->xpath('//item[@name="dataType"]');
+            $node      = array_shift($dataTypes);
+            if(!$node){ continue;}
+            if ( (string)$node !== 'date') { continue;}
+            // output($column->asXml());
+            
+            if((string)$column['class'] !== 'Magento\Ui\Component\Listing\Columns\Date')
+            {
+                output("Date column with incorrect(?) class, bailing");
+                exit;
+            }
+            $components = $doc->xpath('//item[@name="component"]');
+            $component  = array_shift($components);
+            if(!$component)
+            {
+                output("There's no component configured, bailing");
+                exit;
+            }
+            if((string) $component !== 'Magento_Ui/js/grid/columns/date')
+            {
+                output("There's an incorrect(?) component configured, bailing");
+                exit;
+            }
+            
+        }
+    } 
+}
+
+function reportOnNamedDataConfig($xmls, $name)
+{
+    foreach($xmls as $file=>$xml)
+    {                
+        $columns = $xml->xpath('//column/argument/item[@name="config"]/item[@name="'.$name.'"]');
+        foreach($columns as $column)
+        {
+            output($column->asXml());
+        }
+    } 
+}
+
+function reportUniqueCombinations($xmls, $uniqueConfigCombinations, $columnsSubNode='column')
+{
+    foreach($uniqueConfigCombinations as $string)
+    {
+        output('$toCheck="'.$string.'";');
+    }
+    
+    foreach($xmls as $file=>$xml)
+    {        
+        $columns = $xml->xpath('//'. $columnsSubNode);
+        bailIfNonDataArgument($columns);
+        
+        foreach($columns as $column)
+        {            
+            foreach($column->argument->children() as $node)
+            {
+                if(!in_array($node['name'], ['options','config']))
+                {
+                    var_dump($node->asXml());
+                    var_dump(__FUNCTION__);
+                    exit;
+                }                
+                if((string)$node['name'] !== 'config')
+                {
+                    continue;
+                }
+                $names = [];
+                foreach($node->children() as $item)
+                {
+                    $names[] = (string) $item['name'];                    
+                }
+                sort($names); 
+                
+                //START <columns>
+                $toCheck = 'filter,label';                
+                $toCheck = 'dataType,label';
+                $toCheck = 'label,sortOrder';
+                $toCheck = "filter,label,sorting";
+                $toCheck="filter,label,visible";
+                $toCheck="editor,filter,label";
+                $toCheck="bodyTmpl,label,sortable";
+                $toCheck="filter,label,sortOrder";
+                $toCheck="label,sortOrder,visible";
+                // $toCheck="label,sortOrder,sortable";
+                // $toCheck="dataType,filter,label";
+                // $toCheck="bodyTmpl,label,sortOrder";
+                // $toCheck="bodyTmpl,filter,label,visible";
+                // $toCheck="component,dataType,filter,label";
+                // $toCheck="bodyTmpl,label,sortable,visible";
+                // $toCheck="filter,label,sortOrder,sorting";
+                $toCheck="add_field,filter,label,sortOrder";
+                // $toCheck="editor,filter,label,visible";
+                // $toCheck="add_field,label,sortOrder,visible";
+                // $toCheck="editor,filter,label,sortOrder";
+                // $toCheck="add_field,dataType,label,sortOrder";
+                // $toCheck="dataType,filter,label,sortOrder";
+                // $toCheck="dataType,label,sortOrder,visible";
+                // $toCheck="component,dataType,filter,label,sortOrder";
+                // $toCheck="component,dataType,filter,label,sorting";
+                // $toCheck="component,dataType,filter,label,visible";
+                // $toCheck="add_field,component,dataType,label,sortOrder";
+                // $toCheck="editor,filter,label,sortOrder,visible";
+                // $toCheck="component,dataType,editor,filter,label";
+                // $toCheck="component,dataType,dateFormat,filter,label";
+                $toCheck="escape,filter,label,nl2br,sortOrder,truncate";
+                // $toCheck="component,dataType,filter,label,sortOrder,visible";
+                // $toCheck="component,dataType,editor,filter,label,sortOrder";
+                // $toCheck="add_field,component,dataType,filter,label,sortOrder";
+                // $toCheck="component,dataType,editor,filter,label,visible";
+                $toCheck="add_field,altField,component,has_preview,label,sortOrder,sortable";
+                // $toCheck="add_field,component,dataType,filter,label,sortOrder,visible";
+                // $toCheck="component,dataType,editor,filter,label,sortOrder,visible";
+                $toCheck="add_field,align,altField,component,has_preview,label,sortOrder,sortable";
+                $toCheck="component,dataType,dateFormat,editor,filter,label,timezone,visible";
+                // $toCheck="component,dataType,dateFormat,filter,label,sortOrder,timezone,visible";
+                // END   </columns>
+                
+                //START <actionsColumn>
+                // $toCheck="indexField";
+                // $toCheck="indexField,sortOrder";
+                // $toCheck="editUrlPath,indexField";
+                // $toCheck="indexField,urlEntityParamName,viewUrlPath";
+                // $toCheck="indexField,resizeDefaultWidth,resizeEnabled";                
+                //END   </actionsColumn>                 
+                
+                //START <selectionsColumn>                               
+                $toCheck="indexField";
+                $toCheck="indexField,sortOrder";
+                $toCheck="indexField,preserveSelectionsOnFilter,sortOrder";
+                $toCheck="indexField,resizeDefaultWidth,resizeEnabled";                
+                //END   </selectionsColumn>
+                if(implode(',', $names) === $toCheck)
+                {
+                    output($file);
+                    output($column->asXml());
+                    output('+--------------------------------------------------+');
+                }
+            }            
+        }        
+    } 
+}
+
+function getUniqueCombinationsFromConfigs($configs)
+{
+    $uniqueConfigCombinations = array_values(
+        array_unique(array_map(function($item){
+            return implode(',', $item);
+        }, $configs))
+    );
+    
+    return $uniqueConfigCombinations;
+}
+
+function getAllConfigItemsFromConfigs($configs)
+{
+    $allConfigItems = array_values(array_unique(
+        array_reduce($configs, function($carry, $item){
+            $carry = $carry ? $carry : [];
+            return array_merge($carry, $item);
+        })
+    ));
+    return $allConfigItems;
+}
+
+function getUniqueCombinationsFromXmls($xmls, $columnsSubNode)
+{
+    $configs        = getConfigFieldNamesForColumnNodes($xmls, $columnsSubNode);
+    $allConfigItems = getAllConfigItemsFromConfigs($configs);    
+    $uniqueConfigCombinations = getUniqueCombinationsFromConfigs($configs);
+    return $uniqueConfigCombinations;
+}
+
+function whenDidIBuy()
+{
+
+    $files = glob('/Users/alanstorm/Desktop/when-did-I-buy/*');
+    foreach($files as $file)
+    {
+        output($file);
+        $handle = fopen($file, 'r');
+        $del    = "\t";
+        if(strpos($file, ".TXT") === false)
+        {
+            $del = ",";
+        }
+        while($row = fgetcsv($handle, 1024, $del))
+        {
+            output($row[2]);
+//             if(count($row) === 0){ continue;}
+//             if(!isset($row[2]))
+//             {
+//                 var_dump($row);
+//                 exit;
+//             }
+
+//             if(count($row) < 5)
+//             {
+//                 var_dump($file);
+//                 var_dump($row);
+//                 exit;
+//             }            
+        }        
+    }
+    exit;
+}
+
+function randomUiComponentStuff()
+{
+
+    $folder         = $arguments['folder'];
+    $files          = getFilesArray($folder);
+    //* @argument foobar @callback exampleOfACallback    
+    $xmls           = loadXmlListingsFiles($files);
+    $names          = getUniqueNameOfColumnsChildren($xmls);    
+    
+    
+             
+    // reportValidateDateComponents($xmls);     
+    // reportOnOptionsArgumentAndDataTypes($xmls);         
+    // reportOnNamedDataConfig($xmls, 'component');
+    // reportOnNamedDataConfig($xmls, 'filter');
+    // reportUniqueCombinations($xmls);
+    // var_dump($names);
+    
+    // $uniqueConfigCombinations = getUniqueCombinationsFromXmls($xmls, 'column');
+    // reportUniqueCombinations($xmls, $uniqueConfigCombinations);
+
+    //$uniqueConfigCombinations = getUniqueCombinationsFromXmls($xmls, 'actionsColumn');
+    //reportUniqueCombinations($xmls, $uniqueConfigCombinations, 'actionsColumn');
+    
+    $uniqueConfigCombinations = getUniqueCombinationsFromXmls($xmls, 'selectionsColumn');
+    reportUniqueCombinations($xmls, $uniqueConfigCombinations, 'selectionsColumn');    
+    exit;
+    // var_dump($names);
+    
+    foreach($xmls as $file=>$xml)
+    {
+        $nodes = $xml->xpath('//actionsColumn/argument/item[@name="config"]/item');
+        $nodes = $xml->xpath('//selectionsColumn/argument/item[@name="config"]/item');
+        foreach($nodes as $node)
+        {
+            output((string)$node['name']);            
+        }
+    } 
+    //reportDataProviderToListingXmlFileMap($xmls);    
+}
+
 /**
 * Test Command
 * @command testbed
-* @argument foobar @callback exampleOfACallback
+* @argument folder Which Folder?
 */
 function pestle_cli($arguments, $options)
 {

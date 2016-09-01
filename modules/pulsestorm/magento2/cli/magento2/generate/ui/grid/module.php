@@ -10,30 +10,8 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse');
-
-function addSpecificChild($childNodeName, $node, $name, $type, $text=false)
-{
-    $namespace = getXmlNamespaceFromPrefix($node, 'xsi');
-    $child = $node->addChild($childNodeName);
-    $child->addAttribute('name',$name);
-    $child->addAttribute('xsi:type',$type,$namespace);
-    if($text)
-    {
-        $child[0] = $text;
-    }
-    return $child;
-}
-
-function addArgument($node, $name, $type, $text=false)
-{
-    return addSpecificChild('argument', $node, $name, $type, $text);
-}
-
-function addItem($node, $name, $type, $text=false)
-{
-    return addSpecificChild('item', $node, $name, $type, $text);
-}
-
+pestle_import('Pulsestorm\Magento2\Cli\Library\addArgument');
+pestle_import('Pulsestorm\Magento2\Cli\Library\addItem');
 function generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName)
 {
     $fullIdentifier = $gridId . '.' . $dataSourceName;
