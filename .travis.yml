@@ -10,6 +10,7 @@ env:
     - PULSESTORM_MAGE2_ADMIN_PASSWORD=ih3artmagento            
     - PULSESTORM_MAGE2_ADMIN_DBNAME=magento_2_travis                
     - PULSESTORM_PESTLE_URL=http://pestle.pulsestorm.net  
+    # https://github.com/astorm/pestle/
     - PULSESTORM_COMPOSER_REPOSITORY_TO_TEST=git@github.com:astorm/pestle.git
     - PULSESTORM_COMPOSER_PACKAGE_TO_TEST=pulsestorm/pestle
 addons:
@@ -36,6 +37,10 @@ before_script:
     #- sudo ls /etc/apache2/sites-enabled
     #- pwd    
     #    
+    # composer started complaining about not having this
+    - mkdir ~/.composer
+    - echo "{}" > ~/.composer/composer.json
+    
     # get latest composer 
     - composer selfupdate
     # disable xdebug for perf    
