@@ -11,6 +11,12 @@
 				<include name="modules/" /> 
 			</fileset>
 		</copy>
+
+		<copy todir="./build">
+			<fileset dir=".">
+				<include name="library/" /> 
+			</fileset>
+		</copy>		
 		<copy todir="./build/vendor">
             <fileset dir="vendor" id="vendor_dir">
                 <include name="**"/>

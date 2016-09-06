@@ -35,7 +35,5 @@ if(isset($argv[0]))
         return;
     }
 }
-var_dump($argv);
-var_dump(__FILE__);
-exit;
+
 include __DIR__ . '/all.php';
