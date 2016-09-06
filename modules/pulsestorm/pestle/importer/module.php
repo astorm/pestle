@@ -46,6 +46,16 @@ function extractFunctionNameAndNamespace($full)
     ];
 }
 
+function getPathFromFunctionName($function_name)
+{
+    $function_name = strToLower($function_name);
+    $parts         = explode('\\', $function_name);
+    $short_name    = array_pop($parts);
+    $namespace     = implode('/',$parts);
+    $file          = $namespace . '/module.php';
+    return getBaseProjectDir() . '/modules/' . $file;
+}
+
 function includeModule($function_name)
 {
     $function_name = strToLower($function_name);
@@ -53,7 +63,7 @@ function includeModule($function_name)
     $short_name    = array_pop($parts);
     $namespace     = implode('/',$parts);
     $file          = $namespace . '/module.php';
-    return require_once(getBaseProjectDir() . '/modules/' . $file);
+    return require_once(getPathFromFunctionName($function_name));
 }
 
 function functionCollidesWithPhpGlobalSpace($namespace)

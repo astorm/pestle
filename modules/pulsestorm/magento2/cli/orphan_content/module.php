@@ -8,11 +8,6 @@ function getUrl($url)
     return `curl --silent $url`;
 }
 
-function output($string)
-{
-    echo $string,"\n";
-}
-
 function getUrlsFromHtml($html)
 {
     $urls = array();
