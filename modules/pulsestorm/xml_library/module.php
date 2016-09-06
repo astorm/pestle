@@ -1,6 +1,7 @@
 <?php
 namespace Pulsestorm\Xml_Library;
 use DomDocument;
+use Exception;
 /**
 * @command library
 */
@@ -32,7 +33,19 @@ function getXmlNamespaceFromPrefix($xml, $prefix)
     throw new Exception("Unkonwn namespace in " . __FILE__);
 }
 
+function simpleXmlAddNodesXpathReturnOriginal($xml, $path)
+{
+    $result = simpleXmlAddNodesXpathWorker($xml, $path);
+    return $result['original'];
+}
+
 function simpleXmlAddNodesXpath($xml, $path)
+{
+    $result = simpleXmlAddNodesXpathWorker($xml, $path);
+    return $result['child'];
+}
+
+function simpleXmlAddNodesXpathWorker($xml, $path)
 {
     $path = trim($path,'/');
     $node = $xml;
@@ -78,7 +91,11 @@ function simpleXmlAddNodesXpath($xml, $path)
         }
 //         exit;
     }
-    return $node;
+
+    return [
+        'original'=>$xml,
+        'child'=>$node
+    ];
 }
 
 function formatXmlString($string)

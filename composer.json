@@ -1,6 +1,6 @@
 {
     "name": "pulsestorm/pestle",
-
+    "description":"A CLI framework for module based PHP code. Also has numerous Magento 2 code generation commands. ",
     "require": {
         "michelf/php-markdown": "1.6.0"
     },
