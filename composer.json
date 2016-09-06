@@ -10,6 +10,6 @@
         "phing/phing": "2.*"        
     },
     "autoload": {
-        "files": ["library/all.php"]
+        "files": ["library/autoload.php"]
     }
 }
