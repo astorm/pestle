@@ -1,5 +1,5 @@
 <?php
-if(isset($_SERVER['PULSESTORM_COMPOSER_REPOSITORY_TO_TEST'])    //should the autoloader bail?
+if(isset($_SERVER['PULSESTORM_COMPOSER_REPOSITORY_TO_TEST']))    //should the autoloader bail?
 {
     return;
 }
