@@ -1,4 +1,6 @@
 <?php
+//this files pulls in the pestle PHP library, unless we're running in 
+//test mode, from travis, or via the phar.  It is ugly and we appologize.
 
 //travis run
 if(isset($_SERVER['PULSESTORM_COMPOSER_REPOSITORY_TO_TEST']))    //should the autoloader bail?
@@ -22,4 +24,18 @@ if(strpos($last, 'phpunit') !== false)
     return;
 }
 
+//running as pestle_dev, pestle.phar, or pestle
+global $argv;
+if(isset($argv[0]))
+{    
+    $parts = explode('/', $argv[0]);
+    $last = array_pop($parts);
+    if(in_array($last, ['pestle', 'pestle_dev', 'pestle.phar']))
+    {
+        return;
+    }
+}
+var_dump($argv);
+var_dump(__FILE__);
+exit;
 include __DIR__ . '/all.php';
