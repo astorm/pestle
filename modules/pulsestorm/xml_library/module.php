@@ -32,6 +32,12 @@ function getXmlNamespaceFromPrefix($xml, $prefix)
     throw new Exception("Unkonwn namespace in " . __FILE__);
 }
 
+/**
+ * @param \SimpleXMLElement $xml
+ * @param string $path
+ * @return \SimpleXMLElement
+ * @throws \Exception
+ */
 function simpleXmlAddNodesXpath($xml, $path)
 {
     $path = trim($path,'/');
@@ -78,7 +84,7 @@ function simpleXmlAddNodesXpath($xml, $path)
         }
 //         exit;
     }
-    return $node;
+    return $xml;
 }
 
 function formatXmlString($string)
