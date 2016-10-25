@@ -47,14 +47,99 @@ function pestle_cli($argv)
         });
     }
     output('');
+    
+    if(count($commands) > 1)
+    {
+        outputTitle();
+        outputCredits();
+        outputUsage();
+        output('');
+        outputAvaiableCommands($commands);
+        return;    
+    }
+    
+    //only single commands left
     foreach($commands as $command)
     {
-        output("Name");
-        output("    ", $command['command']);
+        output("Usage: ");
+        output("    $ pestle.phar ", $command['command']);
         output('');
-        output("Description");
+        output('Arguments:');
+        output('');        
+        output('Options:');
+        output('');
+        
+        output("Help:");
         output(preg_replace('%^%m','    $0',wordwrap($command['help'],70)));
         output('');
         output('');
     }
+}
+
+function getWhitespaceForCommandList($commands, $command_name)
+{
+    static $longest;
+    if(!$longest)
+    {
+        $longest = 0;
+        foreach($commands as $command)
+        {
+            $length = strlen($command['command']);
+            if($length > $longest)
+            {
+                $longest = $length;
+            }
+        }
+    }
+    
+    $numberOfSpaces = ($longest - strlen($command_name)) + 2;
+    return str_repeat(' ', $numberOfSpaces);
+}
+function outputAvaiableCommands($commands)
+{
+    output('Available commands:');
+    foreach($commands as $command)
+    {
+        if(in_array(trim($command['command']), ['library']))
+        {
+            continue;
+        }
+//         output("Name");
+        output('  ', $command['command'],
+            getWhitespaceForCommandList($commands, $command['command']), 
+            substr(preg_replace('%[\r\n]%',' ',$command['help']),0, 30)
+        );
+//         output('');
+//         output("Description");
+//         output(preg_replace('%^%m','    $0',wordwrap($command['help'],70)));
+//         output('');
+//         output('');
+    }
+}
+
+function outputUsage()
+{
+    output('Usage:');
+    output('  pestle command_name [options] [arguments]');
+}
+
+function outputCredits()
+{
+    output('pestle by Pulse Storm LLC');
+    output('');
+}
+
+function outputTitle()
+{
+    $logo = <<<LOGO
+                  _   _      
+                 | | | |     
+  _ __   ___  ___| |_| | ___ 
+ | '_ \ / _ \/ __| __| |/ _ \
+ | |_) |  __/\__ \ |_| |  __/
+ | .__/ \___||___/\__|_|\___|
+ | |                         
+ |_|    
+LOGO;
+    output($logo);
 }
