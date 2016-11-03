@@ -67,3 +67,5 @@ Our specific strategy around this may change in the future, but our plan is for 
 Do you have strong options about this sort of compilation/"transpiling"/module-importing?  We're love to have you involved in the project. Yell at us in a GitHub issues and/or pull request.  
 
 Want to learn more?  We'll [be using the wiki](https://github.com/astorm/pestle/wiki) for documentation until we outgrow it. 
+
+
