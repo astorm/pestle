@@ -39,6 +39,19 @@ If you're interested in working on the framework itself, you can use the `runner
     <?php
     require_once('/Users/alanstorm/Documents/github/astorm/pestle/runner.php');    
 
+Troubleshooting Upgrades
+--------------------------------------------------
+If you've upgraded pestle and you're seeing the following exception
+
+> PHP Fatal error:  Cannot redeclare Pulsestorm\Magento2\Cli\Help\pestle_cli()
+
+Try removing the following temp folder.
+
+    /tmp/pestle_cache
+    
+We know this isn't ideal, and we're working on a more permanat fix.     
+
+
 Example Command
 --------------------------------------------------
 
