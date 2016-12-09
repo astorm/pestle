@@ -163,9 +163,9 @@ function templateRepositoryFunctions($modelName)
         {
             $object->save();
         }
-        catch(Exception $e)
+        catch(\Exception $e)
         {
-            throw new CouldNotSaveException($e->getMessage());
+            throw new CouldNotSaveException(__($e->getMessage()));
         }
         return $object;
     }
@@ -184,7 +184,7 @@ function templateRepositoryFunctions($modelName)
     {
         try {
             $object->delete();
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
         return true;    
