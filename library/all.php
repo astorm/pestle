@@ -130,6 +130,16 @@ function createNamespaceFromNamespaceAndCommandName($namespace_module, $command_
         $post_fix = str_replace(' ', '\\', $post_fix);
         $command_name = 'generate\\' . $post_fix;
     }
+    
+    if(strpos($command_name,':') !== false)
+    {
+        $parts = explode(':', $command_name);        
+        $post_fix = implode(' ', $parts);
+        $post_fix = ucwords($post_fix);
+        $post_fix = str_replace(' ', '\\', $post_fix);
+        $command_name = $post_fix;
+    }
+        
     $namespace_portion = str_replace(' ','_',
         ucwords(str_replace('_',' ',$command_name)));
     //$namespace = 'Pulsestorm\Magento2\Cli\\' . $namespace_portion;
@@ -2623,9 +2633,14 @@ function pestle_cli($argv)
     \Pulsestorm\Pestle\Library\writeStringToFile($path, \Pulsestorm\Xml_Library\formatXmlString($xml->asXml()));
     \Pulsestorm\Pestle\Library\output("Created $path");
 }
-}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Generate\Command{
 use function Pulsestorm\Pestle\Importer\pestle_import;
+use Exception;
 
 
 
@@ -2666,7 +2681,7 @@ function createDiIfNeeded($module_dir)
 * This command generates the necessary files and configuration 
 * for a new command for Magento 2's bin/magento command line program.
 *
-*   pestle.phar Pulsestorm_Generate Example
+*   pestle.phar generate_command Pulsestorm_Generate Example
 * 
 * Creates
 * app/code/Pulsestorm/Generate/Command/Example.php
@@ -2716,7 +2731,11 @@ function pestle_cli($argv)
     \Pulsestorm\Pestle\Library\writeStringToFile($path_di_xml, $xml_di);       
     
 }
-}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Generate\Config_Helper{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 use Exception;
@@ -2782,6 +2801,11 @@ class Config
 ');  
 
     \Pulsestorm\Pestle\Library\output($template);  
+}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
 }}
 namespace Pulsestorm\Magento2\Cli\Generate\Crud\Model{
 use function Pulsestorm\Pestle\Importer\pestle_import;
@@ -2947,9 +2971,9 @@ function templateRepositoryFunctions($modelName)
         {
             $object->save();
         }
-        catch(Exception $e)
+        catch(\Exception $e)
         {
-            throw new CouldNotSaveException($e->getMessage());
+            throw new CouldNotSaveException(__($e->getMessage()));
         }
         return $object;
     }
@@ -2968,7 +2992,7 @@ function templateRepositoryFunctions($modelName)
     {
         try {
             $object->delete();
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
         return true;    
@@ -3224,7 +3248,11 @@ function pestle_cli($argv)
 
 
 }
-}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Generate\Di{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -3464,11 +3492,16 @@ function pestle_cli($argv)
     $file = realpath($argv['file']);
     if(!$file)
     {
-        exit("Could not find $file.\n");
+        exit("Could not find " . $argv['file'] . ".\n");
     }     
     $class = $argv['class'];
 
     injectDependencyArgumentIntoFile($class, $file);       
+}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
 }}
 namespace Pulsestorm\Magento2\Cli\Generate\Install{
 use function Pulsestorm\Pestle\Importer\pestle_import;
@@ -3515,7 +3548,11 @@ function pestle_cli($argv)
         \Pulsestorm\Pestle\Library\output($cmd);
     }, $cmds);
 }
-}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Generate\Layout_Xml{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -3534,6 +3571,11 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 function pestle_cli($argv)
 {
     \Pulsestorm\Pestle\Library\output("Needs to be implemented");
+}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
 }}
 namespace Pulsestorm\Magento2\Cli\Generate\Mage2_Command{
 use function Pulsestorm\Pestle\Importer\pestle_import;
@@ -3768,7 +3810,11 @@ function pestle_cli($argv)
     \Pulsestorm\Pestle\Library\output("Writing: $path");
     \Pulsestorm\Pestle\Library\output("Done.");
 }
-}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Generate\Module{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -3823,6 +3869,11 @@ function pestle_cli($argv)
     $register = \Pulsestorm\Cli\Code_Generation\templateRegistrationPhp($full_module_name);    
     \Pulsestorm\Pestle\Library\writeStringToFile($reg_path, $register);
     \Pulsestorm\Pestle\Library\output("Created: " . $reg_path);    
+}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
 }}
 namespace Pulsestorm\Magento2\Cli\Generate\Observer{
 use function Pulsestorm\Pestle\Importer\pestle_import;
@@ -3884,7 +3935,11 @@ function pestle_cli($argv)
     "\n" , $contents);
     \Pulsestorm\Magento2\Cli\Library\createClassFile($model_name, $contents);    
 }
-}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Generate\Plugin_Xml{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -3972,12 +4027,10 @@ function pestle_cli($argv)
     \Pulsestorm\Pestle\Library\output("Created file $path_plugin");
 }
 
-
-
-
-
-
-}
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Generate\Psr_Log_Level{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -3998,6 +4051,11 @@ function pestle_cli($argv)
     {
         \Pulsestorm\Pestle\Library\output($key . "\t\t" . $value);
     }
+}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
 }}
 namespace Pulsestorm\Magento2\Cli\Generate\Registration{
 use function Pulsestorm\Pestle\Importer\pestle_import;
@@ -4028,7 +4086,11 @@ function pestle_cli($argv)
     
     \Pulsestorm\Pestle\Library\output(\Pulsestorm\Cli\Code_Generation\templateRegistrationPhp($module_name));
 }
-}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Generate\Route{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 use Exception;
@@ -4137,6 +4199,11 @@ function pestle_cli($argv)
         \Pulsestorm\Pestle\Library\output('    action="'.$frontname.'/index/index"');
         \Pulsestorm\Pestle\Library\output('    id="' . $acl);
     }
+}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
 }}
 namespace Pulsestorm\Magento2\Cli\Generate\Theme{
 use function Pulsestorm\Pestle\Importer\pestle_import;
@@ -4251,7 +4318,11 @@ function pestle_cli($argv)
     \Pulsestorm\Pestle\Library\output($base_folder);
     \Pulsestorm\Pestle\Library\output("Done");
 }
-}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Generate\View{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -4351,7 +4422,11 @@ function pestle_cli($argv)
     createHandleFile($module_info, $area, $template, $class, $handle, $layout);
     
 }
-}
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}}
 namespace Pulsestorm\Magento2\Cli\Hello_Argument{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -4931,12 +5006,51 @@ function getWhitespaceForCommandList($commands, $command_name)
     $numberOfSpaces = ($longest - strlen($command_name)) + 2;
     return str_repeat(' ', $numberOfSpaces);
 }
+
+/**
+ * We started pestle without the magento2:generate namespace
+ * These commands were the original generation commands. We
+ * eventually replaced them with magento2:generate:module style
+ * commands by having the magento2:generate:module command
+ * call into the original generate_module module's pestle_cli
+ * function.  The generate_module style commands still exist, 
+ * for backwards compatability with code and docs, but we hide
+ * them from the list.  
+ */
+function getCommandsToHide()
+{
+    return [
+        'generate_module',
+        'generate_acl',
+        'generate_command',
+        'generate_config_helper',
+        'generate_crud_model',
+        'generate_di',
+        'generate_install',
+        'generate_layout_xml',
+        'generate_menu',
+        'generate_observer',
+        'generate_plugin_xml',
+        'generate_psr_log_level',
+        'generate_registration',
+        'generate_route',
+        'generate_theme',
+        'generate_view',     
+    ];
+}
+
 function outputAvaiableCommands($commands)
 {
+    $toHide = getCommandsToHide();
     \Pulsestorm\Pestle\Library\output('Available commands:');
     foreach($commands as $command)
     {
         if(in_array(trim($command['command']), ['library']))
+        {
+            continue;
+        }
+        
+        if(in_array($command['command'], $toHide))
         {
             continue;
         }
@@ -4979,6 +5093,245 @@ function outputTitle()
 LOGO;
     \Pulsestorm\Pestle\Library\output($logo);
 }}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Acl{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* One Line Description
+*
+* @command magento2:generate:acl
+* @argument module_name Which Module? [Pulsestorm_HelloWorld]
+* @argument rule_ids Rule IDs? [<$module_name$>::top,<$module_name$>::config,]
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Acl\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Command{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* Generates bin/magento command files
+* This command generates the necessary files and configuration 
+* for a new command for Magento 2's bin/magento command line program.
+*
+*   pestle.phar magento2:generate:command Pulsestorm_Generate Example
+* 
+* Creates
+* app/code/Pulsestorm/Generate/Command/Example.php
+* app/code/Pulsestorm/Generate/etc/di.xml
+*
+* @command magento2:generate:command
+* @argument module_name In which module? [Pulsestorm_Helloworld]
+* @argument command_name Command Name? [Testbed]
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Command\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Config_Helper{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* Generates a help class for reading Magento's configuration
+*
+* This command will generate the necessary files and configuration 
+* needed for reading Magento 2's configuration values.
+* 
+* @command magento2:generate:config_helper
+* @todo needs to be implemented
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Config_Helper\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Crud_Model{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* One Line Description
+*
+* @command magento2:generate:crud_model
+* @argument module_name Which module? [Pulsestorm_HelloGenerate]
+* @argument model_name  What model name? [Thing]
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Crud\Model\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Di{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+/**
+* Injects a dependency into a class constructor
+* This command modifies a preexisting class, adding the provided 
+* dependency to that class's property list, `__construct` parameters 
+* list, and assignment list.
+*
+*    pestle.phar magento2:generate:di app/code/Pulsestorm/Generate/Command/Example.php 'Magento\Catalog\Model\ProductFactory' 
+*
+* @command magento2:generate:di
+* @argument file Which PHP class file are we injecting into?
+* @argument class Which class to inject? [Magento\Catalog\Model\ProductFactory]
+*
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Di\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Install{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* One Line Description
+*
+* @command magento2:generate:install
+* @argument id_key Identity Key? [magento_2_new]
+* @argument umask Default Umask? [000]
+* @argument repo Composer Repo [https://repo.magento.com/]
+* @argument composer_package Starting Package? [magento/project-community-edition]
+* @argument folder Folder? [magento-2-source]
+* @argument admin_first_name Admin First Name? [Alan]
+* @argument admin_last_name Admin Last Name? [Storm]
+* @argument admin_password Admin Password? [password12345]
+* @argument admin_email Admin Email? [astorm@alanstorm.com]
+* @argument admin_user Admin Username? [astorm@alanstorm.com]
+* @argument db_host Database Host? [127.0.0.1]
+* @argument db_user Database User? [root]
+* @argument db_pass Database Password? [password12345]
+* @argument email Admin Email? [astorm@alanstorm.com]
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Install\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Menu{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+function selectParentMenu($arguments, $index)
+{
+    if(array_key_exists($index, $arguments))
+    {
+        return $arguments[$index];
+    }
+        
+    $parent     = '';
+    $continue   = input('Is this a new top level menu? (Y/N)','N');
+    if(strToLower($continue) === 'n')
+    {
+        $parent = choseMenuFromTop();
+    }
+    return $parent;
+}
+
+/**
+* One Line Description
+*
+* @command magento2:generate:menu
+* @argument module_name Module Name? [Pulsestorm_HelloGenerate]
+* @argument parent @callback selectParentMenu
+* @argument id Menu Link ID [<$module_name$>::unique_identifier]
+* @argument resource ACL Resource [<$id$>]
+* @argument title Link Title [My Link Title]
+* @argument action Three Segment Action [frontname/index/index]
+* @argument sortOrder Sort Order? [10]
+*/
+
+function pestle_cli($argv)
+{
+    // output("Hi");
+    return \Pulsestorm\Magento2\Cli\Generate\Menu\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Module{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* Generates new module XML, adds to file system
+* This command generates the necessary files and configuration
+* to add a new module to a Magento 2 system.
+*
+*    pestle.phar magento2:generate:module Pulsestorm TestingCreator 0.0.1
+*
+* @argument namespace Vendor Namespace? [Pulsestorm]
+* @argument name Module Name? [Testbed]
+* @argument version Version? [0.0.1]
+* @command magento2:generate:module
+*/
+function pestle_cli($argv)
+{
+    \Pulsestorm\Magento2\Cli\Generate\Module\exported_pestle_cli($argv);
+}
+
+function test()
+{
+    \Pulsestorm\Pestle\Library\output("Hello There. " . __FILE__);
+}}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Observer{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* Generates Magento 2 Observer
+* This command generates the necessary files and configuration to add 
+* an event observer to a Magento 2 system.
+*
+*    pestle.phar magento2:generate:observer Pulsestorm_Generate controller_action_predispatch pulsestorm_generate_listener3 'Pulsestorm\Generate\Model\Observer3'
+*
+* @command magento2:generate:observer
+* @argument module Full Module Name? [Pulsestorm_Generate]
+* @argument event_name Event Name? [controller_action_predispatch]
+* @argument observer_name Observer Name? [<$module$>_listener]
+* @argument model_name Class Name? [<$module$>\Model\Observer]
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Observer\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Plugin_Xml{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+/**
+* Generates plugin XML
+* This command generates the necessary files and configuration 
+* to "plugin" to a preexisting Magento 2 object manager object. 
+*
+*     pestle.phar magento2:generate:plugin_xml Pulsestorm_Helloworld 'Magento\Framework\Logger\Monolog' 'Pulsestorm\Helloworld\Plugin\Magento\Framework\Logger\Monolog'
+* 
+* @argument module_name Create in which module? [Pulsestorm_Helloworld]
+* @argument class Which class are you plugging into? [Magento\Framework\Logger\Monolog]
+* @argument class_plugin What's your plugin class name? [<$module_name$>\Plugin\<$class$>]
+* @command magento2:generate:plugin_xml
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Plugin_Xml\exported_pestle_cli($argv);
+}
+}
 namespace Pulsestorm\Magento2\Cli\Magento2_Generate_Preference{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -5079,6 +5432,88 @@ function pestle_cli($argv)
 //         $module_info, $argv['grid_id'], $argv['db_id_column']);                    
 //         
 //     output("Don't forget to add this to your layout XML with <uiComponent name=\"{$argv['grid_id']}\"/> ");        
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Psr_Log_Level{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* For conversion of Zend Log Level into PSR Log Level
+* 
+* This command generates a list of Magento 1 log levels, 
+* and their PSR log level equivalents.
+*
+* @command magento2:generate:psr_log_level
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Psr_Log_Level\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Registration{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* Generates registration.php
+* This command generates the PHP code for a 
+* Magento module registration.php file.
+* 
+*     $ pestle.phar magento2:generate:registration Foo_Bar
+*     <?php
+*         \Magento\Framework\Component\ComponentRegistrar::register(
+*             \Magento\Framework\Component\ComponentRegistrar::MODULE,
+*             'Foo_Bar',
+*             __DIR__
+*         );
+* 
+* @command magento2:generate:registration
+* @argument module_name Which Module? [Vendor_Module] 
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Registration\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Route{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* Creates a Route XML
+* generate_route module area id 
+* @command magento2:generate:route
+* @argument module_name Which Module? [Pulsestorm_HelloWorld]
+* @argument area Which Area (frontend, adminhtml)? [frontend]
+* @argument frontname Frontname/Route ID? [pulsestorm_helloworld]
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Route\exported_pestle_cli($argv);
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Theme{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* Generates Theme Configuration
+*
+* @command magento2:generate:theme
+* @argument package Theme Package Name? [Pulsestorm]
+* @argument theme Theme Name? [blank]
+* @argument area Area? (frontend, adminhtml) [frontend]
+* @argument parent Parent theme (enter 'null' for none) [Magento/blank]
+*
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\Theme\exported_pestle_cli($argv);
 }
 }
 namespace Pulsestorm\Magento2\Cli\Magento2_Generate_Ui_Add_Column_Actions{
@@ -5499,6 +5934,27 @@ function pestle_cli($argv)
         $module_info, $argv['grid_id'], $argv['db_id_column']);                    
         
     \Pulsestorm\Pestle\Library\output("Don't forget to add this to your layout XML with <uiComponent name=\"{$argv['grid_id']}\"/> ");        
+}
+}
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\View{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+/**
+* Generates view files (layout handle, phtml, Block, etc.)
+*
+* @command magento2:generate:view
+* @argument module_name Which Module? [Pulsestorm_HelloGenerate]
+* @argument area Which Area? [frontend]
+* @argument handle Which Handle? [<$module_name$>_index_index]
+* @argument block_name Block Name? [Main]
+* @argument template Template File? [content.phtml]
+* @argument layout Layout (ignored for adminhtml) ? [1column]
+*/
+function pestle_cli($argv)
+{
+    return \Pulsestorm\Magento2\Cli\Generate\View\exported_pestle_cli($argv);
 }
 }
 namespace Pulsestorm\Magento2\Cli\Magento2_Search_Requirejs{
@@ -7739,7 +8195,7 @@ function createItem($xml, $post)
         $nodeSeries['nicename']   = $post->series['seriesSlug'];
 
         $wp_postmeta          = $item->addChild('wp:postmeta','','wp');         
-        $series_meta          = (function($slug, $info){
+        $series_meta_callback = function($slug, $info){
             $filtered = array_filter($info['articles'], function($array) use ($slug){
                 return $slug === $array['link'];
             });
@@ -7752,7 +8208,9 @@ function createItem($xml, $post)
                 'place_in_series'=>array_shift($keys),
                 'info'=>array_shift($filtered)
             ];
-        })($post->slug, $post->series);
+        };                
+        $series_meta          = call_user_func($series_meta_callback,$post->slug, $post->series);
+        
         $wp_postmeta->addMetaKey('_series_part',$series_meta['place_in_series']);
         
     }
@@ -8057,7 +8515,7 @@ function taskGetPostInformationContentCourier()
         // output("    DATE: $date");
         $tmp->date = $date;
         
-        $tmp->category = (function($slug) use ($categories){
+        $category_callback = function($slug) use ($categories){
             foreach($categories as $category=>$urls)
             {
                 if(!in_array($slug, $urls))
@@ -8067,7 +8525,9 @@ function taskGetPostInformationContentCourier()
                 return $category;
             }
             return null;
-        })($slug);
+        };
+        
+        $tmp->category = call_user_func($category_callback, $slug);
         
         $tmp->series = (function($slug) use ($series){
             foreach($series as $seriesSlug=>$info)
