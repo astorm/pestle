@@ -106,7 +106,7 @@ function getCommandsToHide()
 //         'generate_crud_model',
 //         'generate_di',
 //         'generate_install',
-//         'generate_layout_xml',
+        'generate_layout_xml',
         'generate_menu',
 //         'generate_observer',
         'generate_plugin_xml',

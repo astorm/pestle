@@ -18,3 +18,8 @@ function pestle_cli($argv)
 {
     output("Needs to be implemented");
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}
