@@ -43,6 +43,16 @@ function createNamespaceFromNamespaceAndCommandName($namespace_module, $command_
         $post_fix = str_replace(' ', '\\', $post_fix);
         $command_name = 'generate\\' . $post_fix;
     }
+    
+    if(strpos($command_name,':') !== false)
+    {
+        $parts = explode(':', $command_name);        
+        $post_fix = implode(' ', $parts);
+        $post_fix = ucwords($post_fix);
+        $post_fix = str_replace(' ', '\\', $post_fix);
+        $command_name = $post_fix;
+    }
+        
     $namespace_portion = str_replace(' ','_',
         ucwords(str_replace('_',' ',$command_name)));
     //$namespace = 'Pulsestorm\Magento2\Cli\\' . $namespace_portion;
