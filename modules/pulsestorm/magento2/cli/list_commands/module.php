@@ -113,7 +113,7 @@ function getCommandsToHide()
 //         'generate_psr_log_level',
 //         'generate_registration',
         'generate_route',
-//         'generate_theme',
+        'generate_theme',
         'generate_view',     
     ];
 }
