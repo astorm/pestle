@@ -8,7 +8,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Plugin_Xml\exported_pestle_cli')
 * This command generates the necessary files and configuration 
 * to "plugin" to a preexisting Magento 2 object manager object. 
 *
-*     pestle.phar generate_plugin_xml Pulsestorm_Helloworld 'Magento\Framework\Logger\Monolog' 'Pulsestorm\Helloworld\Plugin\Magento\Framework\Logger\Monolog'
+*     pestle.phar magento2:generate:plugin_xml Pulsestorm_Helloworld 'Magento\Framework\Logger\Monolog' 'Pulsestorm\Helloworld\Plugin\Magento\Framework\Logger\Monolog'
 * 
 * @argument module_name Create in which module? [Pulsestorm_Helloworld]
 * @argument class Which class are you plugging into? [Magento\Framework\Logger\Monolog]

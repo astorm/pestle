@@ -9,7 +9,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Observer\exported_pestle_cli');
 * This command generates the necessary files and configuration to add 
 * an event observer to a Magento 2 system.
 *
-*    pestle.phar generate_observer Pulsestorm_Generate controller_action_predispatch pulsestorm_generate_listener3 'Pulsestorm\Generate\Model\Observer3'
+*    pestle.phar magento2:generate:observer Pulsestorm_Generate controller_action_predispatch pulsestorm_generate_listener3 'Pulsestorm\Generate\Model\Observer3'
 *
 * @command magento2:generate:observer
 * @argument module Full Module Name? [Pulsestorm_Generate]

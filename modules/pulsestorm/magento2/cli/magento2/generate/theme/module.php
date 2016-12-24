@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Generate\Theme\exported_pestle_cli');
 
 /**
-* One Line Description
+* Generates Theme Configuration
 *
 * @command magento2:generate:theme
 * @argument package Theme Package Name? [Pulsestorm]

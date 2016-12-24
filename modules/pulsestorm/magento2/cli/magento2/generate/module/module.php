@@ -9,7 +9,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Module\exported_pestle_cli');
 * This command generates the necessary files and configuration
 * to add a new module to a Magento 2 system.
 *
-*    pestle.phar Pulsestorm TestingCreator 0.0.1
+*    pestle.phar magento2:generate:module Pulsestorm TestingCreator 0.0.1
 *
 * @argument namespace Vendor Namespace? [Pulsestorm]
 * @argument name Module Name? [Testbed]

@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Generate\View\exported_pestle_cli');
 
 /**
-* One Line Description
+* Generates view files (layout handle, phtml, Block, etc.)
 *
 * @command magento2:generate:view
 * @argument module_name Which Module? [Pulsestorm_HelloGenerate]
