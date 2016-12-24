@@ -178,3 +178,8 @@ function pestle_cli($argv)
     output("Writing: $path");
     output("Done.");
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

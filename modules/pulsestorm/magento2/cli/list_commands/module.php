@@ -95,12 +95,41 @@ function getWhitespaceForCommandList($commands, $command_name)
     $numberOfSpaces = ($longest - strlen($command_name)) + 2;
     return str_repeat(' ', $numberOfSpaces);
 }
+
+function getCommandsToHide()
+{
+    return [
+        'generate_module',
+//         'generate_acl',
+//         'generate_command',
+//         'generate_config_helper',
+//         'generate_crud_model',
+//         'generate_di',
+//         'generate_install',
+//         'generate_layout_xml',
+//         'generate_menu',
+//         'generate_observer',
+//         'generate_plugin_xml',
+//         'generate_psr_log_level',
+//         'generate_registration',
+//         'generate_route',
+//         'generate_theme',
+//         'generate_view',     
+    ];
+}
+
 function outputAvaiableCommands($commands)
 {
+    $toHide = getCommandsToHide();
     output('Available commands:');
     foreach($commands as $command)
     {
         if(in_array(trim($command['command']), ['library']))
+        {
+            continue;
+        }
+        
+        if(in_array($command['command'], $toHide))
         {
             continue;
         }

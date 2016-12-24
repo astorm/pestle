@@ -92,3 +92,8 @@ function pestle_cli($argv)
     writeStringToFile($path_di_xml, $xml_di);       
     
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

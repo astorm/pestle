@@ -65,3 +65,8 @@ class Config
 
     output($template);  
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

@@ -86,8 +86,7 @@ function pestle_cli($argv)
     output("Created file $path_plugin");
 }
 
-
-
-
-
-
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

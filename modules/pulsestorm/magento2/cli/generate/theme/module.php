@@ -112,3 +112,8 @@ function pestle_cli($argv)
     output($base_folder);
     output("Done");
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

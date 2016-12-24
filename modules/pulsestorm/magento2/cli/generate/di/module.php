@@ -244,3 +244,8 @@ function pestle_cli($argv)
 
     injectDependencyArgumentIntoFile($class, $file);       
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

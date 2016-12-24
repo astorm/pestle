@@ -20,3 +20,8 @@ function pestle_cli($argv)
         output($key . "\t\t" . $value);
     }
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

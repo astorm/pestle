@@ -59,3 +59,8 @@ function pestle_cli($argv)
     "\n" , $contents);
     createClassFile($model_name, $contents);    
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

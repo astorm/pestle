@@ -41,3 +41,8 @@ function pestle_cli($argv)
     writeStringToFile($path, formatXmlString($xml->asXml()));
     output("Created $path");
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

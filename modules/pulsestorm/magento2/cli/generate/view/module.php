@@ -98,3 +98,8 @@ function pestle_cli($argv)
     createHandleFile($module_info, $area, $template, $class, $handle, $layout);
     
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

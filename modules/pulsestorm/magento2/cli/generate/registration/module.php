@@ -28,3 +28,8 @@ function pestle_cli($argv)
     
     output(templateRegistrationPhp($module_name));
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}

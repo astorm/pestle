@@ -108,3 +108,8 @@ function pestle_cli($argv)
         output('    id="' . $acl);
     }
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}
