@@ -42,7 +42,7 @@ function createDiIfNeeded($module_dir)
 * This command generates the necessary files and configuration 
 * for a new command for Magento 2's bin/magento command line program.
 *
-*   pestle.phar Pulsestorm_Generate Example
+*   pestle.phar generate_command Pulsestorm_Generate Example
 * 
 * Creates
 * app/code/Pulsestorm/Generate/Command/Example.php
