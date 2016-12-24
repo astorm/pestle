@@ -114,7 +114,7 @@ function getCommandsToHide()
 //         'generate_registration',
         'generate_route',
 //         'generate_theme',
-//         'generate_view',     
+        'generate_view',     
     ];
 }
 
