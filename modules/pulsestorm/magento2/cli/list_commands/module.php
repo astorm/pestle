@@ -102,7 +102,7 @@ function getCommandsToHide()
         'generate_module',
         'generate_acl',
 //         'generate_command',
-//         'generate_config_helper',
+        'generate_config_helper',
         'generate_crud_model',
         'generate_di',
         'generate_install',
