@@ -54,3 +54,8 @@ function pestle_cli($argv)
     writeStringToFile($reg_path, $register);
     output("Created: " . $reg_path);    
 }
+
+function exported_pestle_cli($argv)
+{
+    return pestle_cli($argv);
+}
