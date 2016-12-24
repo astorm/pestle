@@ -96,12 +96,22 @@ function getWhitespaceForCommandList($commands, $command_name)
     return str_repeat(' ', $numberOfSpaces);
 }
 
+/**
+ * We started pestle without the magento2:generate namespace
+ * These commands were the original generation commands. We
+ * eventually replaced them with magento2:generate:module style
+ * commands by having the magento2:generate:module command
+ * call into the original generate_module module's pestle_cli
+ * function.  The generate_module style commands still exist, 
+ * for backwards compatability with code and docs, but we hide
+ * them from the list.  
+ */
 function getCommandsToHide()
 {
     return [
         'generate_module',
         'generate_acl',
-//         'generate_command',
+        'generate_command',
         'generate_config_helper',
         'generate_crud_model',
         'generate_di',
