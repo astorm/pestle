@@ -109,7 +109,7 @@ function getCommandsToHide()
 //         'generate_layout_xml',
         'generate_menu',
 //         'generate_observer',
-//         'generate_plugin_xml',
+        'generate_plugin_xml',
         'generate_psr_log_level',
         'generate_registration',
         'generate_route',
