@@ -238,7 +238,7 @@ function pestle_cli($argv)
     $file = realpath($argv['file']);
     if(!$file)
     {
-        exit("Could not find $file.\n");
+        exit("Could not find " . $argv['file'] . ".\n");
     }     
     $class = $argv['class'];
 
