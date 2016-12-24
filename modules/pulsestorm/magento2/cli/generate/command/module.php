@@ -1,6 +1,7 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\Generate\Command;
 use function Pulsestorm\Pestle\Importer\pestle_import;
+use Exception;
 pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
