@@ -3,7 +3,7 @@ namespace Pulsestorm\Cli\Monty_Hall_Problem;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 
-function doorMonteyReveals($winningDoor, $doorChosen)
+function doorMontyReveals($winningDoor, $doorChosen)
 {
     $doors        = [1=>1,2=>2,3=>3];
     unset($doors[$winningDoor]);
@@ -11,15 +11,15 @@ function doorMonteyReveals($winningDoor, $doorChosen)
     return array_pop($doors);
 }
 
-function switchDoor($doorChosen, $monteysDoor)
+function switchDoor($doorChosen, $montysDoor)
 {
-    if($doorChosen === $monteysDoor)
+    if($doorChosen === $montysDoor)
     {
         exit("Error at " . __LINE__);
     }
     $doors        = [1=>1,2=>2,3=>3];
     unset($doors[$doorChosen]);
-    unset($doors[$monteysDoor]);
+    unset($doors[$montysDoor]);
     return array_pop($doors);    
 }
 
@@ -33,7 +33,7 @@ function vaidateStrategyAndShouldWeKeepOurDoor($strategy)
     return $keepDoor;
 }
 
-function runStrategy($keepDoor, $doorChosen, $monteysDoor, $strategy)
+function runStrategy($keepDoor, $doorChosen, $montysDoor, $strategy)
 {
     if($keepDoor)
     {
@@ -41,7 +41,7 @@ function runStrategy($keepDoor, $doorChosen, $monteysDoor, $strategy)
     }
     else
     {
-        $doorChosen = switchDoor($doorChosen, $monteysDoor);
+        $doorChosen = switchDoor($doorChosen, $montysDoor);
         output("You changed to door:            $doorChosen");
     }
     return $doorChosen;
@@ -70,7 +70,7 @@ function getStartingGameState()
         rand(1,3),  //'winningDoor'=>
         rand(1,3),  //'doorChosen' =>
     ];
-    $start[] = doorMonteyReveals(
+    $start[] = doorMontyReveals(
         $start[0], $start[1]);
         
     return $start;        
@@ -79,12 +79,12 @@ function getStartingGameState()
 function runGame($argv, $keepDoor)
 {
     //game start
-    list($winningDoor, $doorChosen, $monteysDoor) = getStartingGameState();
+    list($winningDoor, $doorChosen, $montysDoor) = getStartingGameState();
     output("You have chosen door:           $doorChosen");
-    output("Montey reveals the zonk door:   $monteysDoor");
+    output("Monty reveals the zonk door:   $montysDoor");
     
     //change or keep your door
-    $doorChosen = runStrategy($keepDoor, $doorChosen, $monteysDoor, $argv['strategy']);
+    $doorChosen = runStrategy($keepDoor, $doorChosen, $montysDoor, $argv['strategy']);
     
     //run game end state, get won/loss
     $won = runEndGame($winningDoor, $doorChosen);
@@ -114,16 +114,16 @@ function runSimulation($argv, $results, $keepDoor, $times)
 }
 
 /**
-* Runs Simulation of "Montey Hall Problem"
+* Runs Simulation of "Monty Hall Problem"
 *
 * You have three doors.  One has a prize behind it.  The other
 * two have no prizes behind it.  You pick a door.  The game 
-* show host, Montey Hall, shows you that one of the remaining 
+* show host, Monty Hall, shows you that one of the remaining 
 * doors has no prize behind it.  
 * 
 * Should you switch doors?
 *
-* Assumes there's only one winning door, and that Montey will always
+* Assumes there's only one winning door, and that Monty will always
 * reveal a zonk door.  Also, The **New** Lets Make a Deal from the 80s (the 
 * one I'm familiar with would sometimes change this up with a 
 * "medium prize" door.  Also assumes that the door picking is completely 
