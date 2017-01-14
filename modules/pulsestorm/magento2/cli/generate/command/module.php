@@ -75,7 +75,8 @@ function pestle_cli($argv)
     $xml_type_commandlist = array_shift($nodes);
     if(!$xml_type_commandlist)
     {
-        throw new Exception("Could not find CommandList node");
+        $xml_type_commandlist          = $xml_di->addChild('type');
+        $xml_type_commandlist['name']  = 'Magento\Framework\Console\CommandList';        
     }
     
     $argument = simpleXmlAddNodesXpath($xml_type_commandlist, 
