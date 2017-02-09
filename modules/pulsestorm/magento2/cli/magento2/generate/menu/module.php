@@ -3,6 +3,7 @@ namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Menu;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Library\input');
+pestle_import('Pulsestorm\Magento2\Cli\Generate\Menu\choseMenuFromTop');
 pestle_import('Pulsestorm\Magento2\Cli\Generate\Menu\exported_pestle_cli');
 
 function selectParentMenu($arguments, $index)
