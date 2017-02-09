@@ -52,7 +52,7 @@ function pestle_cli($argv)
     echo `mkdir -p output`;
     echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.tex`;
     echo `pandoc output/in-progress-no-frills.tex -s -o output/in-progress-no-frills.pdf `;
-    echo `pandoc /tmp/working.md-s -o output/in-progress-no-frills.html `;
+    echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.html `;
     echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.epub`;
     echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.epub3`;                
     
@@ -61,4 +61,16 @@ function pestle_cli($argv)
     $zip = $date . '.zip';
     echo `zip -r $zip output`;
     
+    $result     = `wc -w /tmp/working.md`;
+    $parts      = preg_split('%\s{1,1000}%', trim($result));
+    $word_count = array_pop($parts);
+    
+    $word_count = preg_split('%\s{1,100}%', trim($result));
+        
+    $word_count = array_shift($word_count);
+    
+    $cmd = "echo \"$date $word_count\" >> wordcount.txt";
+    `$cmd`;
+    readfile('wordcount.txt');
+    // echo `cat wordcount.txt`;
 }

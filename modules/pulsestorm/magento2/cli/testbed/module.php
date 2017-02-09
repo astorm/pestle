@@ -888,9 +888,24 @@ function randomUiComponentStuff()
 /**
 * Test Command
 * @command testbed
-* @argument folder Which Folder?
+* @Xargument folder Which Folder?
 */
 function pestle_cli($arguments, $options)
 {
-    output("Hello World");
+    $files = glob('/Users/alanstorm/Documents/tumblr-backup/2017-02-03/*');
+    foreach($files as $file)
+    {
+        $xml = simplexml_load_file($file);
+        foreach($xml->posts->post as $post)
+        {
+            $title = (string)$post->{'regular-title'};
+            $title = $title ? $title : (string)$post->{'link-text'};
+            // output((string)$post['title'] . "\t" . (string)$post->url);
+            output( 
+                $title                  . "\t"  .
+                (string)$post['url']    . "\t"  .
+                (string) $post['unix-timestamp']
+            );
+        }
+    }
 }
