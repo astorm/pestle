@@ -16,7 +16,11 @@ function getMenuXmlFiles()
     $base = getBaseMagentoDir();
     // $results = `find $base/vendor -name menu.xml`;
     // $results = explode("\n", $results);
-    $results = glob_recursive("$base/vendor/menu.xml");            
+    $results = glob_recursive("$base/vendor/menu.xml");  
+    if(file_exists("$base/app/code"))
+    {
+        $results = array_merge($results, glob_recursive("$base/app/code/menu.xml"));
+    }          
     $results = array_filter($results);    
     return $results;
 }
