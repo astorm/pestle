@@ -17,13 +17,18 @@ function getModelShortName($module_fullname, $model_class)
 function createControllerClassBodyForSave($module_info)
 {
     output('@TODO: Make this dynamic/real');
+    
+    $aclRule    = 'Pulsestorm_Pestleform::replies';
+    $modelClass = '\Pulsestorm\Pestleform\Model\Reply';
+    $dbID       = 'pulsestorm_pestleform_reply_id';
+    $persistKey = 'pulsestorm_pestleform_reply';
     return '
     /**
      * Authorization level of a basic admin session
      *
      * @see _isAllowed()
      */
-    const ADMIN_RESOURCE = \'Pulsestorm_Pestleform::replies\';
+    const ADMIN_RESOURCE = \''.$aclRule.'\';
 
     /**
      * @var DataPersistorInterface
@@ -55,16 +60,16 @@ function createControllerClassBodyForSave($module_info)
         $resultRedirect = $this->resultRedirectFactory->create();
         if ($data) {
             if (isset($data[\'is_active\']) && $data[\'is_active\'] === \'true\') {
-                $data[\'is_active\'] = \Pulsestorm\Pestleform\Model\Reply::STATUS_ENABLED;
+                $data[\'is_active\'] = '.$modelClass.'::STATUS_ENABLED;
             }
-            if (empty($data[\'pulsestorm_pestleform_reply_id\'])) {
-                $data[\'pulsestorm_pestleform_reply_id\'] = null;
+            if (empty($data[\''.$dbID.'\'])) {
+                $data[\''.$dbID.'\'] = null;
             }
 
-            /** @var \Pulsestorm\Pestleform\Model\Reply $model */
-            $model = $this->_objectManager->create(\'Pulsestorm\Pestleform\Model\Reply\');
+            /** @var '.$modelClass.' $model */
+            $model = $this->_objectManager->create(\''.$modelClass.'\');
 
-            $id = $this->getRequest()->getParam(\'pulsestorm_pestleform_reply_id\');
+            $id = $this->getRequest()->getParam(\''.$dbID.'\');
             if ($id) {
                 $model->load($id);
             }
@@ -74,9 +79,9 @@ function createControllerClassBodyForSave($module_info)
             try {
                 $model->save();
                 $this->messageManager->addSuccess(__(\'You saved the thing.\'));
-                $this->dataPersistor->clear(\'pulsestorm_pestleform_reply\');
+                $this->dataPersistor->clear(\''.$persistKey.'\');
                 if ($this->getRequest()->getParam(\'back\')) {
-                    return $resultRedirect->setPath(\'*/*/edit\', [\'pulsestorm_pestleform_reply_id\' => $model->getId(), \'_current\' => true]);
+                    return $resultRedirect->setPath(\'*/*/edit\', [\''.$dbID.'\' => $model->getId(), \'_current\' => true]);
                 }
                 return $resultRedirect->setPath(\'*/*/\');
             } catch (LocalizedException $e) {
@@ -85,17 +90,16 @@ function createControllerClassBodyForSave($module_info)
                 $this->messageManager->addException($e, __(\'Something went wrong while saving the data.\'));
             }
 
-            $this->dataPersistor->set(\'pulsestorm_pestleform_reply\', $data);
-            return $resultRedirect->setPath(\'*/*/edit\', [\'pulsestorm_pestleform_reply_id\' => $this->getRequest()->getParam(\'pulsestorm_pestleform_reply_id\')]);
+            $this->dataPersistor->set(\''.$persistKey.'\', $data);
+            return $resultRedirect->setPath(\'*/*/edit\', [\''.$dbID.'\' => $this->getRequest()->getParam(\''.$dbID.'\')]);
         }
         return $resultRedirect->setPath(\'*/*/\');
     }    
 ';
 }
 
-function createControllerClassBody($module_info)
+function createControllerClassBody($module_info, $aclRule)
 {
-    output('@TODO: Make this dynamic/real');
     return '
     protected $resultPageFactory;
     public function __construct(
@@ -113,12 +117,12 @@ function createControllerClassBody($module_info)
     
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed(\'Pulsestorm_Pestleform::replies\');
+        return $this->_authorization->isAllowed(\''.$aclRule.'\');
     }         
 ';
 }
 
-function createControllerFiles($module_info)
+function createControllerFiles($module_info, $aclRule)
 {
     output('@TODO: generate controller contents');
     // $moduleBasePath = getModuleBasePath();
@@ -131,7 +135,7 @@ function createControllerFiles($module_info)
     foreach($classes as $desc=>$className)
     {        
         $contents = createClassWithUse($className, '\Magento\Backend\App\Action', '', 
-            createControllerClassBody($module_info));
+            createControllerClassBody($module_info, $aclRule));
         if($desc === 'controllerSaveClassName')
         {
             $contents = createControllerClassBodyForSave($module_info);
@@ -141,11 +145,26 @@ function createControllerFiles($module_info)
     }
 }
 
+function createCollectionClassNameFromModelName($modelClass)
+{
+    $parts = explode('\\', $modelClass);
+    if($parts[2] !== 'Model')
+    {
+        throw new \Exception("Model name that, while valid, doesn't conform to what we expect");
+    }
+    $first      = array_slice($parts, 0, 3);
+    $first[]    = 'ResourceModel';
+    
+    $second     = array_slice($parts, 3);
+    $second[]   = 'CollectionFactory';
+    $new        = array_merge($first, $second);
+    return implode('\\', $new);
+}
+
 function createDataProviderUseString($module_info, $modelClass)
 {
-    output('@TODO Be dynamic here, not static');
-    $collectionClassName = 'Pulsestorm\Pestleform\Model\ResourceModel\Reply\CollectionFactory';
-    
+    $collectionClassName = createCollectionClassNameFromModelName($modelClass);
+        
     return 'use '.$collectionClassName.';
 use Magento\Framework\App\Request\DataPersistorInterface;';
 }
@@ -447,14 +466,15 @@ function createUiComponentXmlFile($module_info, $modelClass)
 * @command magento2:generate:ui:form
 * @argument module Which Module? [Pulsestorm_Formexample]
 * @argument model Model Class? [Pulsestorm\Formexample\Model\Thing]
+* @argument aclRule ACL Rule for Controllers? [Pulsestorm_Formexample::ruleName]
 */
 function pestle_cli($argv)
 {
     $module_info      = getModuleInformation($argv['module']);
-
     output("In Progress, see @todo");
-
-    createControllerFiles($module_info);
+    
+    
+    createControllerFiles($module_info, $argv['aclRule']);
     createDataProvider($module_info, $argv['model']);
     createLayoutXmlFiles($module_info, $argv['model']);
     createUiComponentXmlFile($module_info, $argv['model']);    
