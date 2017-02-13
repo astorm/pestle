@@ -281,11 +281,24 @@ function createCollectionClass($module_info, $model_name)
     writeStringToFile($path, $class_contents);
 }
 
+function createDbTableNameFromModuleInfoAndModelShortName($module_info, $model_name)
+{
+    return strToLower($module_info->name . '_' . $model_name);
+}
+
+function createDbIdFromModuleInfoAndModelShortName($module_info, $model_name)
+{
+    return createDbTableNameFromModuleInfoAndModelShortName(
+        $module_info, $model_name) . '_id';
+}
+
 function createResourceModelClass($module_info, $model_name)
 {
     $path = $module_info->folder . "/Model/ResourceModel/$model_name.php";
-    $db_table               = strToLower($module_info->name . '_' . $model_name);
-    $db_id                  = strToLower($db_table) . '_id';
+    // $db_table               = strToLower($module_info->name . '_' . $model_name);
+    $db_table               = createDbTableNameFromModuleInfoAndModelShortName($module_info, $model_name);
+    // $db_id                  = strToLower($db_table) . '_id';
+    $db_id                  = createDbIdFromModuleInfoAndModelShortName($module_info, $model_name);    
     $class_resource         = getResourceModelClassNameFromModuleInfo($module_info, $model_name);
     $template               = createClassTemplate($class_resource, BASE_RESOURCE_CLASS);    
     $construct              = templateConstruct($db_table, $db_id);

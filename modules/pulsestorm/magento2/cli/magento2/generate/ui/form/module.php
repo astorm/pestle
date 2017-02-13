@@ -7,21 +7,34 @@ pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse');
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
-
-function getModelShortName($module_fullname, $model_class)
+pestle_import('Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName');
+function getModelShortName($modelClass)
 {
-    $regex = '%^' . $module_fullname . '_Model_%six';
-    return preg_replace($regex, '', $model_class);
+    $parts = explode('\\', $modelClass);
+    $parts = array_slice($parts, 3);
+    return implode('_', $parts);
 }
 
-function createControllerClassBodyForSave($module_info)
+function getModuleNameFromClassName($modelClass)
 {
-    output('@TODO: Make this dynamic/real');
+    $parts = explode('\\', $modelClass);
+    $parts = array_slice($parts, 0,2);
+    return implode('_', $parts);
+}
+
+function getPersistKeyFromModelClassName($modelClass)
+{
+    $key = strToLower(getModuleNameFromClassName($modelClass) 
+        . '_' 
+        . getModelShortName($modelClass));
     
-    $aclRule    = 'Pulsestorm_Pestleform::replies';
-    $modelClass = '\Pulsestorm\Pestleform\Model\Reply';
-    $dbID       = 'pulsestorm_pestleform_reply_id';
-    $persistKey = 'pulsestorm_pestleform_reply';
+    return $key;        
+}
+
+function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
+{
+    $dbID       = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
+    $persistKey = getPersistKeyFromModelClassName($modelClass);
     return '
     /**
      * Authorization level of a basic admin session
@@ -122,9 +135,8 @@ function createControllerClassBody($module_info, $aclRule)
 ';
 }
 
-function createControllerFiles($module_info, $aclRule)
+function createControllerFiles($module_info, $modelClass, $aclRule)
 {
-    output('@TODO: generate controller contents');
     // $moduleBasePath = getModuleBasePath();
     $prefix = $module_info->vendor . '\\' . $module_info->short_name;
     $classes = [
@@ -138,7 +150,7 @@ function createControllerFiles($module_info, $aclRule)
             createControllerClassBody($module_info, $aclRule));
         if($desc === 'controllerSaveClassName')
         {
-            $contents = createControllerClassBodyForSave($module_info);
+            $contents = createControllerClassBodyForSave($module_info, $modelClass, $aclRule);
         }       
         output("Creating: $className");
         $return             = createClassFile($className,$contents);        
@@ -171,7 +183,7 @@ use Magento\Framework\App\Request\DataPersistorInterface;';
 
 function createDataProviderClassBodyString($module_info, $modelClass)
 {
-    output('@TODO Be dynamic here, not static, change/remove CMS stuff');
+    $persistKey = getPersistKeyFromModelClassName($modelClass);
     return '
 
     protected $collection;
@@ -237,12 +249,12 @@ function createDataProviderClassBodyString($module_info, $modelClass)
             $this->loadedData[$item->getId()] = $item->getData();
         }
 
-        $data = $this->dataPersistor->get(\'pulsestorm_pestleform_reply\');
+        $data = $this->dataPersistor->get(\''.$persistKey.'\');
         if (!empty($data)) {
             $item = $this->collection->getNewEmptyItem();
             $item->setData($data);
             $this->loadedData[$item->getId()] = $item->getData();
-            $this->dataPersistor->clear(\'pulsestorm_pestleform_reply\');
+            $this->dataPersistor->clear(\''.$persistKey.'\');
         }
 
         return $this->loadedData;
@@ -257,12 +269,15 @@ function createClassWithUse($className, $parentClass, $useString, $bodyString)
     return $contents;
 }
 
+function createDataProviderClassNameFromModelClassName($modelClass)
+{
+    return $modelClass . '\DataProvider';
+}
 
 function createDataProvider($module_info, $modelClass)
 {
-    output('@TODO: generate data provider class contents');
     // $moduleBasePath = getModuleBasePath();
-    $dataProviderClassName = $modelClass . '\DataProvider';
+    $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);
     $contents           = createClassWithUse(
         $dataProviderClassName, 
         '\Magento\Ui\DataProvider\AbstractDataProvider',
@@ -353,10 +368,7 @@ function createLayoutXmlFiles($module_info, $modelClass)
         
         output("Creating $fileName");
         writeStringToFile($fileName, formatXmlString($xml->asXml()));
-    }
-    
-    output('@TODO: Do something about /index/ in URLs, handles');
-    output('@TODO: Are the layout files the right schema?.');
+    }        
 }
 
 function createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelClass)
@@ -369,43 +381,84 @@ function createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelCl
 
 }
 
+function generateButtonClassAndReturnName($modelClass, $buttonName)
+{
+    $prefix = str_replace('_','\\',getModuleNameFromClassName($modelClass)) . '\\Block\\Adminhtml\\' .
+        getModelShortName($modelClass) . '\\Edit';
+    $className = $prefix .= str_replace(' ', '_', 
+        ucWords(str_replace('_', ' ', $buttonName))) . '\\Button';        
+    
+    $contents = createClassTemplateWithUse($modelClass, 'GenericButton', 
+        'ButtonProviderInterface');
+    $contents   = str_replace('<$use$>','Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface',$contents);
+    $contents   = str_replace('<$body$>','//implement me',$contents);
+    
+    output('@TODO: generate generic button class where?');        
+    output('@TODO: finish generating class bodies');        
+    exit($contents);        
+    return $className;
+}
+
+function createButtonXml($modelClass)
+{
+    $buttons = [        
+        'back'              => generateButtonClassAndReturnName($modelClass,'back'),
+        'delete'            => generateButtonClassAndReturnName($modelClass,'delete'),
+        'reset'             => generateButtonClassAndReturnName($modelClass,'reset'),
+        'save'              => generateButtonClassAndReturnName($modelClass,'save'),
+        'save_and_continue' => generateButtonClassAndReturnName($modelClass,'save_and_continue')                                        
+//         'back'              => $prefix . '\BackButton',
+//         'delete'            => $prefix . '\DeleteButton',
+//         'reset'             => $prefix . '\ResetButton',
+//         'save'              => $prefix . '\SaveButton',
+//         'save_and_continue' => $prefix . '\SaveAndContinueButton',                                
+    ];
+    $buttonXml = "\n";
+    foreach($buttons as $name=>$class)
+    {
+        $buttonXml .= '<item name="'.$name.'" xsi:type="string">'.$class.'</item>' . "\n";
+    }
+    
+    return $buttonXml;
+}
+
 function createUiComponentXmlFile($module_info, $modelClass)
 {
-    $moduleBasePath      = $module_info->folder;
-    $uiComponentBasePath = $moduleBasePath . '/view/adminhtml/ui_component'; 
+    output('@TODO: All those buttons -- we need our own?');
     
+    $moduleBasePath      = $module_info->folder;
+    $uiComponentBasePath = $moduleBasePath . '/view/adminhtml/ui_component';     
     $uiComponentName     = createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelClass);
-    $uiComponentFilePath = $uiComponentBasePath . '/' . $uiComponentName . '.xml';    
-    output('@TODO: All those buttons -- what to do?');
-    output('@TODO: Source -- is that needed?');
+    $uiComponentFilePath = $uiComponentBasePath . '/' . $uiComponentName . '.xml';        
+    $dbID       = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
+    $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);          
+    
+    $buttonXml = createButtonXml($modelClass);
+         
     $xml = simplexml_load_string(
 '<?xml version="1.0" encoding="UTF-8"?>
 <form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
-            <item name="provider" xsi:type="string">pulsestorm_pestleform_replies_form.pulsestorm_pestleform_replies_form_data_source</item>
-            <item name="deps" xsi:type="string">pulsestorm_pestleform_replies_form.pulsestorm_pestleform_replies_form_data_source</item>
+            <item name="provider" xsi:type="string">'.$uiComponentName.'.'.$uiComponentName.'_data_source</item>
+            <item name="deps" xsi:type="string">'.$uiComponentName.'.'.$uiComponentName.'_data_source</item>
         </item>
         <item name="label" xsi:type="string" translate="true">Object Information</item>
         <item name="config" xsi:type="array">
             <item name="dataScope" xsi:type="string">data</item>
-            <item name="namespace" xsi:type="string">pulsestorm_pestleform_replies_form</item>
+            <item name="namespace" xsi:type="string">'.$uiComponentName.'</item>
         </item>
         <item name="template" xsi:type="string">templates/form/collapsible</item>
         <item name="buttons" xsi:type="array">
-            <item name="back" xsi:type="string">Magento\Cms\Block\Adminhtml\Page\Edit\BackButton</item>
-            <item name="delete" xsi:type="string">Magento\Cms\Block\Adminhtml\Page\Edit\DeleteButton</item>
-            <item name="reset" xsi:type="string">Magento\Cms\Block\Adminhtml\Page\Edit\ResetButton</item>
-            <item name="save" xsi:type="string">Magento\Cms\Block\Adminhtml\Page\Edit\SaveButton</item>
-            <item name="save_and_continue" xsi:type="string">Magento\Cms\Block\Adminhtml\Page\Edit\SaveAndContinueButton</item>
+            '.$buttonXml.'
         </item>
     </argument>
-    <dataSource name="pulsestorm_pestleform_replies_form_data_source">
+    <dataSource name="'.$uiComponentName.'_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">Pulsestorm\Pestleform\Model\Reply\DataProvider</argument>
-            <argument name="name" xsi:type="string">pulsestorm_pestleform_replies_form_data_source</argument>
-            <argument name="primaryFieldName" xsi:type="string">pulsestorm_pestleform_reply_id</argument>
-            <argument name="requestFieldName" xsi:type="string">pulsestorm_pestleform_reply_id</argument>
+            <argument name="class" xsi:type="string">'.$dataProviderClassName.'</argument>
+            <argument name="name" xsi:type="string">'.$uiComponentName.'_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">'.$dbID.'</argument>
+            <argument name="requestFieldName" xsi:type="string">'.$dbID.'</argument>
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="submit_url" xsi:type="url" path="*/*/save"/>
@@ -425,14 +478,13 @@ function createUiComponentXmlFile($module_info, $modelClass)
                 <item name="collapsible" xsi:type="boolean">true</item>                
             </item>
         </argument>
-        <field name="pulsestorm_pestleform_reply_id">
+        <field name="'.$dbID.'">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="visible" xsi:type="boolean">false</item>
                     <item name="dataType" xsi:type="string">text</item>
-                    <item name="formElement" xsi:type="string">input</item>
-                    <item name="source" xsi:type="string">page</item>
-                    <item name="dataScope" xsi:type="string">pulsestorm_pestleform_reply_id</item>
+                    <item name="formElement" xsi:type="string">input</item>                    
+                    <item name="dataScope" xsi:type="string">'.$dbID.'</item>
                 </item>
             </argument>
         </field>
@@ -442,7 +494,6 @@ function createUiComponentXmlFile($module_info, $modelClass)
                     <item name="dataType" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">Title</item>
                     <item name="formElement" xsi:type="string">input</item>
-                    <item name="source" xsi:type="string">page</item>
                     <item name="sortOrder" xsi:type="number">20</item>
                     <item name="dataScope" xsi:type="string">title</item>
                     <item name="validation" xsi:type="array">
@@ -453,12 +504,8 @@ function createUiComponentXmlFile($module_info, $modelClass)
         </field>
     </fieldset>
 </form>'    
-    );    
-    
-    output('@TODO: Make this dynamic/real');
+    );        
     writeStringToFile($uiComponentFilePath, formatXmlString($xml->asXml()));
- 
-    output("@TODO: Contents of UI Component File");
 }
 /**
 * One Line Description
@@ -472,11 +519,11 @@ function pestle_cli($argv)
 {
     $module_info      = getModuleInformation($argv['module']);
     output("In Progress, see @todo");
+    output('@TODO: Do something about /index/ in URLs, handles');
+    output('@TODO: <item name="source" xsi:type="string">page</item>? Needed?');
     
-    
-    createControllerFiles($module_info, $argv['aclRule']);
+    createControllerFiles($module_info, $argv['model'], $argv['aclRule']);
     createDataProvider($module_info, $argv['model']);
     createLayoutXmlFiles($module_info, $argv['model']);
-    createUiComponentXmlFile($module_info, $argv['model']);    
-    
+    createUiComponentXmlFile($module_info, $argv['model']);        
 }
