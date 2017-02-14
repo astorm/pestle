@@ -20,8 +20,15 @@ function generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName)
     $js_config  = addItem($argument,'js_config','array');
     $provider   = addItem($js_config, 'provider', 'string', $fullIdentifier);      
     $deps       = addItem($js_config, 'deps', 'string', $fullIdentifier);      
-    $argument   = addItem($argument, 'spinner', 'string', $columnsName);         
-        
+    $spinner    = addItem($argument, 'spinner', 'string', $columnsName);         
+    
+    $buttons    = addItem($argument, 'buttons', 'array');
+    $add        = addItem($buttons, 'add', 'array');
+    addItem($add, 'name', 'string', 'add');
+    addItem($add, 'label', 'string', 'Add New');
+    addItem($add, 'class', 'string', 'primary');
+    addItem($add, 'url', 'string', '*/*/new');
+
     return $argument;
 }
 
@@ -213,7 +220,8 @@ function generatePageActionClass($moduleInfo, $gridId, $idColumn)
     $pageActionsClassName = generatePageActionClassNameFromPackageModuleAndGridId(
         $moduleInfo->vendor, $moduleInfo->short_name, $gridId);
         
-    $editUrl              = 'adminhtml/'.$gridId.'/viewlog';        
+    // $editUrl              = 'adminhtml/'.$gridId.'/viewlog';        
+    $editUrl              = $gridId . '/index/edit';        
     $prepareDataSource    = '
     public function prepareDataSource(array $dataSource)
     {
@@ -227,7 +235,7 @@ function generatePageActionClass($moduleInfo, $gridId, $idColumn)
                 }
                 $item[$name]["view"] = [
                     "href"=>$this->getContext()->getUrl(
-                        "'.$editUrl.'",["id"=>$id]),
+                        "'.$editUrl.'",["'.$idColumn.'"=>$id]),
                     "label"=>__("Edit")
                 ];
             }

@@ -31,6 +31,48 @@ function getPersistKeyFromModelClassName($modelClass)
     return $key;        
 }
 
+function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
+{    
+    $dbID       = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));    
+    return '    
+    public function execute()
+    {
+        // check if we know what should be deleted
+        $id = $this->getRequest()->getParam(\'object_id\');
+        /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
+        $resultRedirect = $this->resultRedirectFactory->create();
+        if ($id) {
+            $title = "";
+            try {
+                // init model and delete
+                $model = $this->_objectManager->create(\''.$modelClass.'\');
+                $model->load($id);
+                $model->delete();
+                // display success message
+                $this->messageManager->addSuccess(__(\'You have deleted the object.\'));
+                // go to grid
+                return $resultRedirect->setPath(\'*/*/\');
+            } catch (\Exception $e) {
+                // display error message
+                $this->messageManager->addError($e->getMessage());
+                // go back to edit form
+                return $resultRedirect->setPath(\'*/*/edit\', [\''.$dbID.'\' => $id]);
+            }
+        }
+        // display error message
+        $this->messageManager->addError(__(\'We can not find an object to delete.\'));
+        // go to grid
+        return $resultRedirect->setPath(\'*/*/\');
+        
+    }    
+    
+    protected function _isAllowed()
+    {
+        return $this->_authorization->isAllowed(\''.$aclRule.'\');
+    }      
+';    
+}
+
 function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
 {
     $dbID       = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
@@ -150,11 +192,28 @@ function createControllerFiles($module_info, $modelClass, $aclRule)
             createControllerClassBody($module_info, $aclRule));
         if($desc === 'controllerSaveClassName')
         {
-            $contents = createControllerClassBodyForSave($module_info, $modelClass, $aclRule);
+            $useString = '
+                use Magento\Backend\App\Action;
+                use Pulsestorm\Pestleform\Model\Page;
+                use Magento\Framework\App\Request\DataPersistorInterface;
+                use Magento\Framework\Exception\LocalizedException;
+            ';
+            $contents = createClassWithUse($className, '\Magento\Backend\App\Action', $useString,
+                createControllerClassBodyForSave($module_info, $modelClass, $aclRule));   
         }       
         output("Creating: $className");
-        $return             = createClassFile($className,$contents);        
+        createClassFile($className,$contents);        
     }
+    
+    $deleteClassName = $prefix . '\Controller\Adminhtml\Index\Delete';
+    $useString       = '';
+    $contents = createClassWithUse(
+        $deleteClassName, '\Magento\Backend\App\Action', $useString,
+        createControllerClassBodyForDelete($module_info, $modelClass, $aclRule));
+    
+    output("Creating: $deleteClassName");
+    createClassFile($deleteClassName,$contents); 
+
 }
 
 function createCollectionClassNameFromModelName($modelClass)
@@ -258,6 +317,7 @@ function createDataProviderClassBodyString($module_info, $modelClass)
         }
 
         return $this->loadedData;
+    }
 ';        
 }
 
@@ -381,26 +441,153 @@ function createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelCl
 
 }
 
-function generateButtonClassAndReturnName($modelClass, $buttonName)
+function generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule)
+{
+
+    $genericButtonClassName     = $prefix . '\\GenericButton';
+    $genericButtonClassContents = createClassTemplateWithUse($genericButtonClassName);
+    $genericButtonClassContents = str_replace('<$use$>' ,'', $genericButtonClassContents);
+    
+    output('@TODO: move getBackUrl and getDelete URL out of here?');
+    $genericContents = '
+    //putting all the button methods in here.  No "right", but the whole
+    //button/GenericButton thing seems -- not that great -- to begin with
+    public function __construct(
+        \Magento\Backend\Block\Widget\Context $context
+    ) {
+        $this->context = $context;    
+    }
+    
+    public function getBackUrl()
+    {
+        return $this->getUrl(\'*/*/\');
+    }    
+    
+    public function getDeleteUrl()
+    {
+        return $this->getUrl(\'*/*/delete\', [\'object_id\' => $this->getObjectId()]);
+    }   
+    
+    public function getUrl($route = \'\', $params = [])
+    {
+        return $this->context->getUrlBuilder()->getUrl($route, $params);
+    }    
+    
+    public function getObjectId()
+    {
+        return $this->context->getRequest()->getParam(\''.$dbID.'\');
+    }     
+';    
+    $genericButtonClassContents = str_replace('<$body$>',$genericContents, $genericButtonClassContents);    
+    createClassFile($genericButtonClassName,$genericButtonClassContents);                   
+    return $genericButtonClassName;
+}
+
+function generateButtonClassPrefix($modelClass)
 {
     $prefix = str_replace('_','\\',getModuleNameFromClassName($modelClass)) . '\\Block\\Adminhtml\\' .
         getModelShortName($modelClass) . '\\Edit';
-    $className = $prefix .= str_replace(' ', '_', 
-        ucWords(str_replace('_', ' ', $buttonName))) . '\\Button';        
-    
-    $contents = createClassTemplateWithUse($modelClass, 'GenericButton', 
-        'ButtonProviderInterface');
-    $contents   = str_replace('<$use$>','Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface',$contents);
-    $contents   = str_replace('<$body$>','//implement me',$contents);
-    
-    output('@TODO: generate generic button class where?');        
-    output('@TODO: finish generating class bodies');        
-    exit($contents);        
-    return $className;
+    return $prefix;
 }
 
-function createButtonXml($modelClass)
+function getAllButtonDataStrings()
 {
+    output('@TODO: getButtonData in delete may need to be ignored for "new" actions?');
+        
+    $singleQuoteForJs = "\\''";
+    return [
+        'back'=> '[
+            \'label\' => __(\'Back\'),
+            \'on_click\' => sprintf("location.href = \'%s\';", $this->getBackUrl()),
+            \'class\' => \'back\',
+            \'sort_order\' => 10    
+        ]',
+        'delete'=> '[
+                \'label\' => __(\'Delete Object\'),
+                \'class\' => \'delete\',
+                \'on_click\' => \'deleteConfirm( '.$singleQuoteForJs.' . __(
+                    \'Are you sure you want to do this?\'
+                ) . \''.'\\'.'\', ' . $singleQuoteForJs . ' . $this->getDeleteUrl() . \''.'\\'.'\')\',
+                \'sort_order\' => 20,
+            ]',
+        'reset'=> '[
+            \'label\' => __(\'Reset\'),
+            \'class\' => \'reset\',
+            \'on_click\' => \'location.reload();\',
+            \'sort_order\' => 30
+        ]',        
+        'save'=> '[
+            \'label\' => __(\'Save Object\'),
+            \'class\' => \'save primary\',
+            \'data_attribute\' => [
+                \'mage-init\' => [\'button\' => [\'event\' => \'save\']],
+                \'form-role\' => \'save\',
+            ],
+            \'sort_order\' => 90,
+        ]',                
+        'save_and_continue'=> '[
+            \'label\' => __(\'Save and Continue Edit\'),
+            \'class\' => \'save\',
+            \'data_attribute\' => [
+                \'mage-init\' => [
+                    \'button\' => [\'event\' => \'saveAndContinueEdit\'],
+                ],
+            ],
+            \'sort_order\' => 80,
+        ]',                        
+    ];    
+}
+
+function getButtonDataStringForButton($buttonName)
+{
+    $buttons = getAllButtonDataStrings();
+    if(!isset($buttons[$buttonName]))
+    {
+        output("Bailing -- I don't know how to create a [$buttonName] button");
+        exit;
+    }
+    return $buttons[$buttonName];
+}
+
+function createButtonClassContents($buttonName)
+{
+    $buttonData = '[
+            \'label\' => __(\'Back\'),
+            \'on_click\' => sprintf("location.href = \'%s\';", $this->getBackUrl()),
+            \'class\' => \'back\',
+            \'sort_order\' => 10    
+        ]';
+    $buttonData = getButtonDataStringForButton($buttonName);
+    $contents = '     
+    public function getButtonData()
+    {
+        return '. $buttonData .';
+    }' . "\n";
+    return $contents;
+    // return '//implement me for ' . $buttonName;
+}
+function generateButtonClassAndReturnName($modelClass, $buttonName)
+{            
+    $prefix = generateButtonClassPrefix($modelClass);
+    $buttonClassName = $prefix .= '\\' . str_replace(' ', '', 
+        ucWords(str_replace('_', ' ', $buttonName))) . 'Button';        
+    
+    $contents = createClassTemplateWithUse($buttonClassName, 'GenericButton', 
+        'ButtonProviderInterface');
+    $contents   = str_replace('<$use$>','use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;',$contents);
+    $contents   = str_replace('<$body$>',createButtonClassContents($buttonName),$contents);
+    createClassFile($buttonClassName,$contents);            
+    
+    return $buttonClassName;
+}
+
+function createButtonXml($module_info, $modelClass, $aclRule)
+{
+    //handle generic button
+    $prefix = generateButtonClassPrefix($modelClass);
+    $dbID   = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));    
+    generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule);    
+    
     $buttons = [        
         'back'              => generateButtonClassAndReturnName($modelClass,'back'),
         'delete'            => generateButtonClassAndReturnName($modelClass,'delete'),
@@ -422,10 +609,8 @@ function createButtonXml($modelClass)
     return $buttonXml;
 }
 
-function createUiComponentXmlFile($module_info, $modelClass)
-{
-    output('@TODO: All those buttons -- we need our own?');
-    
+function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
+{    
     $moduleBasePath      = $module_info->folder;
     $uiComponentBasePath = $moduleBasePath . '/view/adminhtml/ui_component';     
     $uiComponentName     = createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelClass);
@@ -433,7 +618,7 @@ function createUiComponentXmlFile($module_info, $modelClass)
     $dbID       = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
     $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);          
     
-    $buttonXml = createButtonXml($modelClass);
+    $buttonXml = createButtonXml($module_info, $modelClass, $aclRule);
          
     $xml = simplexml_load_string(
 '<?xml version="1.0" encoding="UTF-8"?>
@@ -525,5 +710,5 @@ function pestle_cli($argv)
     createControllerFiles($module_info, $argv['model'], $argv['aclRule']);
     createDataProvider($module_info, $argv['model']);
     createLayoutXmlFiles($module_info, $argv['model']);
-    createUiComponentXmlFile($module_info, $argv['model']);        
+    createUiComponentXmlFile($module_info, $argv['model'], $argv['aclRule']);
 }
