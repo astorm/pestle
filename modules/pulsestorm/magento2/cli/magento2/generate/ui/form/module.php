@@ -723,7 +723,7 @@ function pestle_cli($argv)
 {
     $module_info      = getModuleInformation($argv['module']);
     output("In Progress, see @todo");
-    output('@TODO: Rest Button is not working');
+    output('@TODO: Reset Button is not working');
     createControllerFiles($module_info, $argv['model'], $argv['aclRule']);
     createDataProvider($module_info, $argv['model']);
     createLayoutXmlFiles($module_info, $argv['model']);

@@ -12,8 +12,10 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse');
 pestle_import('Pulsestorm\Magento2\Cli\Library\addArgument');
 pestle_import('Pulsestorm\Magento2\Cli\Library\addItem');
-function generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName)
+function generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName, $collection)
 {
+    $shortName = getShortModelNameFromResourceModelCollection(
+        $collection);    
     $fullIdentifier = $gridId . '.' . $dataSourceName;
     
     $argument   = addArgument($xml, 'data', 'array');
@@ -27,7 +29,7 @@ function generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName)
     addItem($add, 'name', 'string', 'add');
     addItem($add, 'label', 'string', 'Add New');
     addItem($add, 'class', 'string', 'primary');
-    addItem($add, 'url', 'string', '*/*/new');
+    addItem($add, 'url', 'string', '*/'.$shortName.'/new');
 
     return $argument;
 }
@@ -155,7 +157,7 @@ function generateRequestIdName()
     return 'id';
 }
 
-function generateUiComponentXmlFile($gridId, $databaseIdName, $module_info)
+function generateUiComponentXmlFile($gridId, $databaseIdName, $module_info, $collection)
 {
     $pageActionsClassName = generatePageActionClassNameFromPackageModuleAndGridId(
         $module_info->vendor, $module_info->short_name, $gridId);
@@ -165,7 +167,7 @@ function generateUiComponentXmlFile($gridId, $databaseIdName, $module_info)
     $columnsName      = generateColumnsNameFromGridId($gridId);
 
     $xml             = simplexml_load_string(getBlankXml('uigrid'));        
-    $argument        = generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName);        
+    $argument        = generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName, $collection);        
     $dataSource      = generateDatasourceNode($xml, $dataSourceName, $providerClass, $databaseIdName, $requestIdName);    
     $columns         = generateColumnsNode($xml, $columnsName, $databaseIdName, $pageActionsClassName);
     generateListingToolbar($xml);   
@@ -311,7 +313,7 @@ function pestle_cli($argv)
 
 
     generateUiComponentXmlFile(
-        $argv['grid_id'], $argv['db_id_column'], $module_info);                                        
+        $argv['grid_id'], $argv['db_id_column'], $module_info, $argv['collection_resource']);                                        
         
     generateDataProviderClass(
         $module_info, $argv['grid_id'], $argv['collection_resource'] . 'Factory');
