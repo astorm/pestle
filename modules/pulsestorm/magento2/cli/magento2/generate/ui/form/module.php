@@ -31,6 +31,18 @@ function getPersistKeyFromModelClassName($modelClass)
     return $key;        
 }
 
+function createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule)
+{
+    return '
+    public function execute()
+    {
+        $resultRedirect = $this->resultRedirectFactory->create();
+        $resultRedirect->setPath(\'*/index/index\');
+        return $resultRedirect;
+    }     
+';
+}
+
 function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
 {    
     $dbID       = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));    
@@ -179,12 +191,13 @@ function createControllerClassBody($module_info, $aclRule)
 
 function createControllerFiles($module_info, $modelClass, $aclRule)
 {
+    $shortName = getModelShortName($modelClass);
     // $moduleBasePath = getModuleBasePath();
     $prefix = $module_info->vendor . '\\' . $module_info->short_name;
     $classes = [
-        'controllerEditClassname' => $prefix . '\Controller\Adminhtml\Index\Edit',
-        'controllerNewClassName'  => $prefix . '\Controller\Adminhtml\Index\NewAction',
-        'controllerSaveClassName' => $prefix . '\Controller\Adminhtml\Index\Save'
+        'controllerEditClassname' => $prefix . '\Controller\Adminhtml\\'.$shortName.'\Edit',
+        'controllerNewClassName'  => $prefix . '\Controller\Adminhtml\\'.$shortName.'\NewAction',
+        'controllerSaveClassName' => $prefix . '\Controller\Adminhtml\\'.$shortName.'\Save'
     ];
     foreach($classes as $desc=>$className)
     {        
@@ -205,14 +218,22 @@ function createControllerFiles($module_info, $modelClass, $aclRule)
         createClassFile($className,$contents);        
     }
     
-    $deleteClassName = $prefix . '\Controller\Adminhtml\Index\Delete';
+    $deleteClassName = $prefix . '\Controller\Adminhtml\\'.$shortName.'\Delete';
     $useString       = '';
     $contents = createClassWithUse(
         $deleteClassName, '\Magento\Backend\App\Action', $useString,
         createControllerClassBodyForDelete($module_info, $modelClass, $aclRule));
-    
     output("Creating: $deleteClassName");
     createClassFile($deleteClassName,$contents); 
+        
+    $indexRedirectClassName = $prefix . '\Controller\Adminhtml\\'.$shortName.'\Index';
+    $useString       = '';
+    $contents = createClassWithUse(
+        $indexRedirectClassName, '\Magento\Backend\App\Action', $useString,
+        createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule));
+    output("Creating: $deleteClassName");
+    createClassFile($indexRedirectClassName,$contents);             
+
 
 }
 
@@ -410,7 +431,8 @@ function createLayoutXmlFiles($module_info, $modelClass)
     $prefixFilename = implode('_', [
         strToLower($module_info->name),
         createShortPluralModelName($modelClass),
-        'index'
+        strToLower(getModelShortName($modelClass))
+        // 'index'
     ]);;
     
     $names = ['edit', 'new', 'save' ];
@@ -448,7 +470,6 @@ function generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule)
     $genericButtonClassContents = createClassTemplateWithUse($genericButtonClassName);
     $genericButtonClassContents = str_replace('<$use$>' ,'', $genericButtonClassContents);
     
-    output('@TODO: move getBackUrl and getDelete URL out of here?');
     $genericContents = '
     //putting all the button methods in here.  No "right", but the whole
     //button/GenericButton thing seems -- not that great -- to begin with
@@ -491,9 +512,7 @@ function generateButtonClassPrefix($modelClass)
 }
 
 function getAllButtonDataStrings()
-{
-    output('@TODO: getButtonData in delete may need to be ignored for "new" actions?');
-        
+{        
     $singleQuoteForJs = "\\''";
     return [
         'back'=> '[
@@ -551,16 +570,16 @@ function getButtonDataStringForButton($buttonName)
 
 function createButtonClassContents($buttonName)
 {
-    $buttonData = '[
-            \'label\' => __(\'Back\'),
-            \'on_click\' => sprintf("location.href = \'%s\';", $this->getBackUrl()),
-            \'class\' => \'back\',
-            \'sort_order\' => 10    
-        ]';
     $buttonData = getButtonDataStringForButton($buttonName);
+    $extra = '';
+    if($buttonName === 'delete')
+    {
+        $extra = 'if(!$this->getObjectId()) { return []; }';
+    }
     $contents = '     
     public function getButtonData()
     {
+        '.$extra.'
         return '. $buttonData .';
     }' . "\n";
     return $contents;
@@ -704,9 +723,7 @@ function pestle_cli($argv)
 {
     $module_info      = getModuleInformation($argv['module']);
     output("In Progress, see @todo");
-    output('@TODO: Do something about /index/ in URLs, handles');
-    output('@TODO: <item name="source" xsi:type="string">page</item>? Needed?');
-    
+    output('@TODO: Rest Button is not working');
     createControllerFiles($module_info, $argv['model'], $argv['aclRule']);
     createDataProvider($module_info, $argv['model']);
     createLayoutXmlFiles($module_info, $argv['model']);

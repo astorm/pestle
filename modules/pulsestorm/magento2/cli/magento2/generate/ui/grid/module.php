@@ -215,13 +215,18 @@ function generateDiXml($module_info)
     return $xml;
 }
 
-function generatePageActionClass($moduleInfo, $gridId, $idColumn)
+function generatePageActionClass($moduleInfo, $gridId, $idColumn, $collection)
 {
     $pageActionsClassName = generatePageActionClassNameFromPackageModuleAndGridId(
         $moduleInfo->vendor, $moduleInfo->short_name, $gridId);
         
     // $editUrl              = 'adminhtml/'.$gridId.'/viewlog';        
-    $editUrl              = $gridId . '/index/edit';        
+    
+    
+    // $editUrl              = $gridId . '/index/edit';        
+    $shortName = getShortModelNameFromResourceModelCollection(
+        $collection);    
+    $editUrl = $gridId . '/' . strToLower($shortName) . '/edit';   
     $prepareDataSource    = '
     public function prepareDataSource(array $dataSource)
     {
@@ -279,6 +284,18 @@ function generateDataProviderClass($moduleInfo, $gridId, $collectionFactory)
     return $contents;
 }
 
+function getShortModelNameFromResourceModelCollection($collection)
+{
+    $parts = explode('\\', $collection);
+    if($parts[3] !== 'ResourceModel' || $parts[(count($parts)-1)])
+    {
+        output("Collection model name does not conform to the arbitrary naming convention we chose.  We're bailing.");
+    }
+    $parts = array_slice($parts, 4);
+    array_pop($parts);
+    $shortName =  implode('_', $parts);
+    return $shortName;
+}
 /**
 * Generates a Magento 2.1 ui grid listing and support classes.
 *
@@ -292,6 +309,7 @@ function pestle_cli($argv)
 {
     $module_info      = getModuleInformation($argv['module']);
 
+
     generateUiComponentXmlFile(
         $argv['grid_id'], $argv['db_id_column'], $module_info);                                        
         
@@ -299,7 +317,7 @@ function pestle_cli($argv)
         $module_info, $argv['grid_id'], $argv['collection_resource'] . 'Factory');
         
     generatePageActionClass(
-        $module_info, $argv['grid_id'], $argv['db_id_column']);                    
+        $module_info, $argv['grid_id'], $argv['db_id_column'], $argv['collection_resource']);                    
         
     output("Don't forget to add this to your layout XML with <uiComponent name=\"{$argv['grid_id']}\"/> ");        
 }
