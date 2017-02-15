@@ -2864,7 +2864,8 @@ function pestle_cli($argv)
     $xml_type_commandlist = array_shift($nodes);
     if(!$xml_type_commandlist)
     {
-        throw new Exception("Could not find CommandList node");
+        $xml_type_commandlist          = $xml_di->addChild('type');
+        $xml_type_commandlist['name']  = 'Magento\Framework\Console\CommandList';        
     }
     
     $argument = \Pulsestorm\Xml_Library\simpleXmlAddNodesXpath($xml_type_commandlist, 
@@ -3239,11 +3240,24 @@ function createCollectionClass($module_info, $model_name)
     \Pulsestorm\Pestle\Library\writeStringToFile($path, $class_contents);
 }
 
+function createDbTableNameFromModuleInfoAndModelShortName($module_info, $model_name)
+{
+    return strToLower($module_info->name . '_' . $model_name);
+}
+
+function createDbIdFromModuleInfoAndModelShortName($module_info, $model_name)
+{
+    return createDbTableNameFromModuleInfoAndModelShortName(
+        $module_info, $model_name) . '_id';
+}
+
 function createResourceModelClass($module_info, $model_name)
 {
     $path = $module_info->folder . "/Model/ResourceModel/$model_name.php";
-    $db_table               = strToLower($module_info->name . '_' . $model_name);
-    $db_id                  = strToLower($db_table) . '_id';
+    // $db_table               = strToLower($module_info->name . '_' . $model_name);
+    $db_table               = createDbTableNameFromModuleInfoAndModelShortName($module_info, $model_name);
+    // $db_id                  = strToLower($db_table) . '_id';
+    $db_id                  = createDbIdFromModuleInfoAndModelShortName($module_info, $model_name);    
     $class_resource         = getResourceModelClassNameFromModuleInfo($module_info, $model_name);
     $template               = \Pulsestorm\Cli\Code_Generation\createClassTemplate($class_resource, BASE_RESOURCE_CLASS);    
     $construct              = templateConstruct($db_table, $db_id);
@@ -3798,7 +3812,11 @@ function getMenuXmlFiles()
     $base = \Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir();
     // $results = `find $base/vendor -name menu.xml`;
     // $results = explode("\n", $results);
-    $results = \Pulsestorm\Phpdotnet\glob_recursive("$base/vendor/menu.xml");            
+    $results = \Pulsestorm\Phpdotnet\glob_recursive("$base/vendor/menu.xml");  
+    if(file_exists("$base/app/code"))
+    {
+        $results = array_merge($results, \Pulsestorm\Phpdotnet\glob_recursive("$base/app/code/menu.xml"));
+    }          
     $results = array_filter($results);    
     return $results;
 }
@@ -5377,6 +5395,8 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 
 
 
+
+
 function selectParentMenu($arguments, $index)
 {
     if(array_key_exists($index, $arguments))
@@ -5385,10 +5405,10 @@ function selectParentMenu($arguments, $index)
     }
         
     $parent     = '';
-    $continue   = input('Is this a new top level menu? (Y/N)','N');
+    $continue   = \Pulsestorm\Pestle\Library\input('Is this a new top level menu? (Y/N)','N');
     if(strToLower($continue) === 'n')
     {
-        $parent = choseMenuFromTop();
+        $parent = \Pulsestorm\Magento2\Cli\Generate\Menu\choseMenuFromTop();
     }
     return $parent;
 }
@@ -5789,6 +5809,737 @@ function pestle_cli($argv)
 
 }
 }
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Ui\Form{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+
+
+
+
+function getModelShortName($modelClass)
+{
+    $parts = explode('\\', $modelClass);
+    $parts = array_slice($parts, 3);
+    return implode('_', $parts);
+}
+
+function getModuleNameFromClassName($modelClass)
+{
+    $parts = explode('\\', $modelClass);
+    $parts = array_slice($parts, 0,2);
+    return implode('_', $parts);
+}
+
+function getPersistKeyFromModelClassName($modelClass)
+{
+    $key = strToLower(getModuleNameFromClassName($modelClass) 
+        . '_' 
+        . getModelShortName($modelClass));
+    
+    return $key;        
+}
+
+function createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule)
+{
+    return '
+    public function execute()
+    {
+        $resultRedirect = $this->resultRedirectFactory->create();
+        $resultRedirect->setPath(\'*/index/index\');
+        return $resultRedirect;
+    }     
+';
+}
+
+function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
+{    
+    $dbID       = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));    
+    return '    
+    public function execute()
+    {
+        // check if we know what should be deleted
+        $id = $this->getRequest()->getParam(\'object_id\');
+        /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
+        $resultRedirect = $this->resultRedirectFactory->create();
+        if ($id) {
+            $title = "";
+            try {
+                // init model and delete
+                $model = $this->_objectManager->create(\''.$modelClass.'\');
+                $model->load($id);
+                $model->delete();
+                // display success message
+                $this->messageManager->addSuccess(__(\'You have deleted the object.\'));
+                // go to grid
+                return $resultRedirect->setPath(\'*/*/\');
+            } catch (\Exception $e) {
+                // display error message
+                $this->messageManager->addError($e->getMessage());
+                // go back to edit form
+                return $resultRedirect->setPath(\'*/*/edit\', [\''.$dbID.'\' => $id]);
+            }
+        }
+        // display error message
+        $this->messageManager->addError(__(\'We can not find an object to delete.\'));
+        // go to grid
+        return $resultRedirect->setPath(\'*/*/\');
+        
+    }    
+    
+    protected function _isAllowed()
+    {
+        return $this->_authorization->isAllowed(\''.$aclRule.'\');
+    }      
+';    
+}
+
+function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
+{
+    $dbID       = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
+    $persistKey = getPersistKeyFromModelClassName($modelClass);
+    return '
+    /**
+     * Authorization level of a basic admin session
+     *
+     * @see _isAllowed()
+     */
+    const ADMIN_RESOURCE = \''.$aclRule.'\';
+
+    /**
+     * @var DataPersistorInterface
+     */
+    protected $dataPersistor;
+
+    /**
+     * @param Action\Context $context
+     * @param DataPersistorInterface $dataPersistor
+     */
+    public function __construct(
+        Action\Context $context,
+        DataPersistorInterface $dataPersistor
+    ) {
+        $this->dataPersistor = $dataPersistor;
+        parent::__construct($context);
+    }
+
+    /**
+     * Save action
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @return \Magento\Framework\Controller\ResultInterface
+     */
+    public function execute()
+    {
+        $data = $this->getRequest()->getPostValue();
+        /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
+        $resultRedirect = $this->resultRedirectFactory->create();
+        if ($data) {
+            if (isset($data[\'is_active\']) && $data[\'is_active\'] === \'true\') {
+                $data[\'is_active\'] = '.$modelClass.'::STATUS_ENABLED;
+            }
+            if (empty($data[\''.$dbID.'\'])) {
+                $data[\''.$dbID.'\'] = null;
+            }
+
+            /** @var '.$modelClass.' $model */
+            $model = $this->_objectManager->create(\''.$modelClass.'\');
+
+            $id = $this->getRequest()->getParam(\''.$dbID.'\');
+            if ($id) {
+                $model->load($id);
+            }
+
+            $model->setData($data);
+
+            try {
+                $model->save();
+                $this->messageManager->addSuccess(__(\'You saved the thing.\'));
+                $this->dataPersistor->clear(\''.$persistKey.'\');
+                if ($this->getRequest()->getParam(\'back\')) {
+                    return $resultRedirect->setPath(\'*/*/edit\', [\''.$dbID.'\' => $model->getId(), \'_current\' => true]);
+                }
+                return $resultRedirect->setPath(\'*/*/\');
+            } catch (LocalizedException $e) {
+                $this->messageManager->addError($e->getMessage());
+            } catch (\Exception $e) {
+                $this->messageManager->addException($e, __(\'Something went wrong while saving the data.\'));
+            }
+
+            $this->dataPersistor->set(\''.$persistKey.'\', $data);
+            return $resultRedirect->setPath(\'*/*/edit\', [\''.$dbID.'\' => $this->getRequest()->getParam(\''.$dbID.'\')]);
+        }
+        return $resultRedirect->setPath(\'*/*/\');
+    }    
+';
+}
+
+function createControllerClassBody($module_info, $aclRule)
+{
+    return '
+    protected $resultPageFactory;
+    public function __construct(
+        \Magento\Backend\App\Action\Context $context,
+        \Magento\Framework\View\Result\PageFactory $resultPageFactory)
+    {
+        $this->resultPageFactory = $resultPageFactory;        
+        return parent::__construct($context);
+    }
+    
+    public function execute()
+    {
+        return $this->resultPageFactory->create();  
+    }    
+    
+    protected function _isAllowed()
+    {
+        return $this->_authorization->isAllowed(\''.$aclRule.'\');
+    }         
+';
+}
+
+function createControllerFiles($module_info, $modelClass, $aclRule)
+{
+    $shortName = getModelShortName($modelClass);
+    // $moduleBasePath = getModuleBasePath();
+    $prefix = $module_info->vendor . '\\' . $module_info->short_name;
+    $classes = [
+        'controllerEditClassname' => $prefix . '\Controller\Adminhtml\\'.$shortName.'\Edit',
+        'controllerNewClassName'  => $prefix . '\Controller\Adminhtml\\'.$shortName.'\NewAction',
+        'controllerSaveClassName' => $prefix . '\Controller\Adminhtml\\'.$shortName.'\Save'
+    ];
+    foreach($classes as $desc=>$className)
+    {        
+        $contents = createClassWithUse($className, '\Magento\Backend\App\Action', '', 
+            createControllerClassBody($module_info, $aclRule));
+        if($desc === 'controllerSaveClassName')
+        {
+            $useString = '
+                use Magento\Backend\App\Action;
+                use '.$prefix.'\Model\Page;
+                use Magento\Framework\App\Request\DataPersistorInterface;
+                use Magento\Framework\Exception\LocalizedException;
+            ';
+            $contents = createClassWithUse($className, '\Magento\Backend\App\Action', $useString,
+                createControllerClassBodyForSave($module_info, $modelClass, $aclRule));   
+        }       
+        \Pulsestorm\Pestle\Library\output("Creating: $className");
+        \Pulsestorm\Magento2\Cli\Library\createClassFile($className,$contents);        
+    }
+    
+    $deleteClassName = $prefix . '\Controller\Adminhtml\\'.$shortName.'\Delete';
+    $useString       = '';
+    $contents = createClassWithUse(
+        $deleteClassName, '\Magento\Backend\App\Action', $useString,
+        createControllerClassBodyForDelete($module_info, $modelClass, $aclRule));
+    \Pulsestorm\Pestle\Library\output("Creating: $deleteClassName");
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($deleteClassName,$contents); 
+        
+    $indexRedirectClassName = $prefix . '\Controller\Adminhtml\\'.$shortName.'\Index';
+    $useString       = '';
+    $contents = createClassWithUse(
+        $indexRedirectClassName, '\Magento\Backend\App\Action', $useString,
+        createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule));
+    \Pulsestorm\Pestle\Library\output("Creating: $deleteClassName");
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($indexRedirectClassName,$contents);             
+
+
+}
+
+function createCollectionClassNameFromModelName($modelClass)
+{
+    $parts = explode('\\', $modelClass);
+    if($parts[2] !== 'Model')
+    {
+        throw new \Exception("Model name that, while valid, doesn't conform to what we expect");
+    }
+    $first      = array_slice($parts, 0, 3);
+    $first[]    = 'ResourceModel';
+    
+    $second     = array_slice($parts, 3);
+    $second[]   = 'CollectionFactory';
+    $new        = array_merge($first, $second);
+    return implode('\\', $new);
+}
+
+function createDataProviderUseString($module_info, $modelClass)
+{
+    $collectionClassName = createCollectionClassNameFromModelName($modelClass);
+        
+    return 'use '.$collectionClassName.';
+use Magento\Framework\App\Request\DataPersistorInterface;';
+}
+
+function createDataProviderClassBodyString($module_info, $modelClass)
+{
+    $persistKey = getPersistKeyFromModelClassName($modelClass);
+    return '
+
+    protected $collection;
+
+    /**
+     * @var DataPersistorInterface
+     */
+    protected $dataPersistor;
+
+    /**
+     * @var array
+     */
+    protected $loadedData;
+
+    /**
+     * @param string $name
+     * @param string $primaryFieldName
+     * @param string $requestFieldName
+     * @param CollectionFactory $collectionFactory
+     * @param DataPersistorInterface $dataPersistor
+     * @param array $meta
+     * @param array $data
+     */
+    public function __construct(
+        $name,
+        $primaryFieldName,
+        $requestFieldName,
+        CollectionFactory $collectionFactory,
+        DataPersistorInterface $dataPersistor,
+        array $meta = [],
+        array $data = []
+    ) {
+        $this->collection = $collectionFactory->create();
+        $this->dataPersistor = $dataPersistor;
+        parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
+        $this->meta = $this->prepareMeta($this->meta);
+    }
+
+    /**
+     * Prepares Meta
+     *
+     * @param array $meta
+     * @return array
+     */
+    public function prepareMeta(array $meta)
+    {
+        return $meta;
+    }
+
+    /**
+     * Get data
+     *
+     * @return array
+     */
+    public function getData()
+    {
+        if (isset($this->loadedData)) {
+            return $this->loadedData;
+        }
+        $items = $this->collection->getItems();
+
+        foreach ($items as $item) {
+            $this->loadedData[$item->getId()] = $item->getData();
+        }
+
+        $data = $this->dataPersistor->get(\''.$persistKey.'\');
+        if (!empty($data)) {
+            $item = $this->collection->getNewEmptyItem();
+            $item->setData($data);
+            $this->loadedData[$item->getId()] = $item->getData();
+            $this->dataPersistor->clear(\''.$persistKey.'\');
+        }
+
+        return $this->loadedData;
+    }
+';        
+}
+
+function createClassWithUse($className, $parentClass, $useString, $bodyString)
+{
+    $contents           = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($className, $parentClass);
+    $contents           = str_replace('<$use$>', $useString, $contents);
+    $contents           = str_replace('<$body$>', $bodyString, $contents);
+    return $contents;
+}
+
+function createDataProviderClassNameFromModelClassName($modelClass)
+{
+    return $modelClass . '\DataProvider';
+}
+
+function createDataProvider($module_info, $modelClass)
+{
+    // $moduleBasePath = getModuleBasePath();
+    $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);
+    $contents           = createClassWithUse(
+        $dataProviderClassName, 
+        '\Magento\Ui\DataProvider\AbstractDataProvider',
+        createDataProviderUseString($module_info, $modelClass),
+        createDataProviderClassBodyString($module_info, $modelClass)        
+    );        
+    \Pulsestorm\Pestle\Library\output("Creating: $dataProviderClassName");
+    $return             = \Pulsestorm\Magento2\Cli\Library\createClassFile($dataProviderClassName,$contents);        
+    
+}
+
+function createShortPluralModelName($modelClass)
+{
+    $parts = [];
+    $flag  = false;
+    foreach(explode('\\', $modelClass) as $part)
+    { 
+        if($part === 'Model')
+        {
+            $flag = true;
+            continue;
+        }
+        if(!$flag) { continue;}
+        $parts[] = $part;
+    }          
+          
+    $parts = array_map('strToLower', $parts);
+    $name  = implode('_', $parts);
+    
+    if(preg_match('%ly$%',$name))
+    {
+        $name = preg_replace('%ly$%', 'lies',$name);
+    }
+    else
+    {
+        $name = $name . 's';
+    }
+    return $name;
+}
+
+function createEmptyXmlTree()
+{
+    $xml = simplexml_load_string(
+        '<page  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"></page>');
+    return $xml;
+}
+
+function addUiComponentToXml($xml, $uiComponentName)
+{
+    $nodes = $xml->xpath("//uiComponent[@name='$uiComponentName']");
+    if(count($nodes) === 0)
+    {
+        $referenceBlock = $xml->addChild('referenceBlock');
+        $referenceBlock->addAttribute('name', 'content');
+        $uiComponent = $referenceBlock->addChild('uiComponent');
+        $uiComponent->addAttribute('name', $uiComponentName);
+    }
+    return $xml;
+}
+
+function createLayoutXmlFiles($module_info, $modelClass)
+{
+    $moduleBasePath     = $module_info->folder;
+    $layoutBasePath     = $moduleBasePath . '/view/adminhtml/layout'; 
+    
+    $uiComponentName    = createUiComponentNameFromModuleInfoAndModelClass(
+        $module_info, $modelClass);
+    
+    $prefixFilename = implode('_', [
+        strToLower($module_info->name),
+        createShortPluralModelName($modelClass),
+        strToLower(getModelShortName($modelClass))
+        // 'index'
+    ]);;
+    
+    $names = ['edit', 'new', 'save' ];
+    
+    foreach($names as $name)
+    {
+        $fileName = $layoutBasePath . '/' . $prefixFilename . '_' . $name . '.xml';
+        
+        $xml = createEmptyXmlTree();
+        if(file_exists($fileName))
+        {
+            $xml = simplexml_load_file($fileName);
+        }
+        $xml = addUiComponentToXml($xml, $uiComponentName);
+        
+        \Pulsestorm\Pestle\Library\output("Creating $fileName");
+        \Pulsestorm\Pestle\Library\writeStringToFile($fileName, \Pulsestorm\Xml_Library\formatXmlString($xml->asXml()));
+    }        
+}
+
+function createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelClass)
+{
+    return implode('_', [
+        strToLower($module_info->name),
+        createShortPluralModelName($modelClass),
+        'form'
+    ]);
+
+}
+
+function generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule)
+{
+
+    $genericButtonClassName     = $prefix . '\\GenericButton';
+    $genericButtonClassContents = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($genericButtonClassName);
+    $genericButtonClassContents = str_replace('<$use$>' ,'', $genericButtonClassContents);
+    
+    $genericContents = '
+    //putting all the button methods in here.  No "right", but the whole
+    //button/GenericButton thing seems -- not that great -- to begin with
+    public function __construct(
+        \Magento\Backend\Block\Widget\Context $context
+    ) {
+        $this->context = $context;    
+    }
+    
+    public function getBackUrl()
+    {
+        return $this->getUrl(\'*/*/\');
+    }    
+    
+    public function getDeleteUrl()
+    {
+        return $this->getUrl(\'*/*/delete\', [\'object_id\' => $this->getObjectId()]);
+    }   
+    
+    public function getUrl($route = \'\', $params = [])
+    {
+        return $this->context->getUrlBuilder()->getUrl($route, $params);
+    }    
+    
+    public function getObjectId()
+    {
+        return $this->context->getRequest()->getParam(\''.$dbID.'\');
+    }     
+';    
+    $genericButtonClassContents = str_replace('<$body$>',$genericContents, $genericButtonClassContents);    
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($genericButtonClassName,$genericButtonClassContents);                   
+    return $genericButtonClassName;
+}
+
+function generateButtonClassPrefix($modelClass)
+{
+    $prefix = str_replace('_','\\',getModuleNameFromClassName($modelClass)) . '\\Block\\Adminhtml\\' .
+        getModelShortName($modelClass) . '\\Edit';
+    return $prefix;
+}
+
+function getAllButtonDataStrings()
+{        
+    $singleQuoteForJs = "\\''";
+    return [
+        'back'=> '[
+            \'label\' => __(\'Back\'),
+            \'on_click\' => sprintf("location.href = \'%s\';", $this->getBackUrl()),
+            \'class\' => \'back\',
+            \'sort_order\' => 10    
+        ]',
+        'delete'=> '[
+                \'label\' => __(\'Delete Object\'),
+                \'class\' => \'delete\',
+                \'on_click\' => \'deleteConfirm( '.$singleQuoteForJs.' . __(
+                    \'Are you sure you want to do this?\'
+                ) . \''.'\\'.'\', ' . $singleQuoteForJs . ' . $this->getDeleteUrl() . \''.'\\'.'\')\',
+                \'sort_order\' => 20,
+            ]',
+        'reset'=> '[
+            \'label\' => __(\'Reset\'),
+            \'class\' => \'reset\',
+            \'on_click\' => \'location.reload();\',
+            \'sort_order\' => 30
+        ]',        
+        'save'=> '[
+            \'label\' => __(\'Save Object\'),
+            \'class\' => \'save primary\',
+            \'data_attribute\' => [
+                \'mage-init\' => [\'button\' => [\'event\' => \'save\']],
+                \'form-role\' => \'save\',
+            ],
+            \'sort_order\' => 90,
+        ]',                
+        'save_and_continue'=> '[
+            \'label\' => __(\'Save and Continue Edit\'),
+            \'class\' => \'save\',
+            \'data_attribute\' => [
+                \'mage-init\' => [
+                    \'button\' => [\'event\' => \'saveAndContinueEdit\'],
+                ],
+            ],
+            \'sort_order\' => 80,
+        ]',                        
+    ];    
+}
+
+function getButtonDataStringForButton($buttonName)
+{
+    $buttons = getAllButtonDataStrings();
+    if(!isset($buttons[$buttonName]))
+    {
+        \Pulsestorm\Pestle\Library\output("Bailing -- I don't know how to create a [$buttonName] button");
+        exit;
+    }
+    return $buttons[$buttonName];
+}
+
+function createButtonClassContents($buttonName)
+{
+    $buttonData = getButtonDataStringForButton($buttonName);
+    $extra = '';
+    if($buttonName === 'delete')
+    {
+        $extra = 'if(!$this->getObjectId()) { return []; }';
+    }
+    $contents = '     
+    public function getButtonData()
+    {
+        '.$extra.'
+        return '. $buttonData .';
+    }' . "\n";
+    return $contents;
+    // return '//implement me for ' . $buttonName;
+}
+function generateButtonClassAndReturnName($modelClass, $buttonName)
+{            
+    $prefix = generateButtonClassPrefix($modelClass);
+    $buttonClassName = $prefix .= '\\' . str_replace(' ', '', 
+        ucWords(str_replace('_', ' ', $buttonName))) . 'Button';        
+    
+    $contents = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($buttonClassName, 'GenericButton', 
+        'ButtonProviderInterface');
+    $contents   = str_replace('<$use$>','use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;',$contents);
+    $contents   = str_replace('<$body$>',createButtonClassContents($buttonName),$contents);
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($buttonClassName,$contents);            
+    
+    return $buttonClassName;
+}
+
+function createButtonXml($module_info, $modelClass, $aclRule)
+{
+    //handle generic button
+    $prefix = generateButtonClassPrefix($modelClass);
+    $dbID   = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));    
+    generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule);    
+    
+    $buttons = [        
+        'back'              => generateButtonClassAndReturnName($modelClass,'back'),
+        'delete'            => generateButtonClassAndReturnName($modelClass,'delete'),
+        'reset'             => generateButtonClassAndReturnName($modelClass,'reset'),
+        'save'              => generateButtonClassAndReturnName($modelClass,'save'),
+        'save_and_continue' => generateButtonClassAndReturnName($modelClass,'save_and_continue')                                        
+//         'back'              => $prefix . '\BackButton',
+//         'delete'            => $prefix . '\DeleteButton',
+//         'reset'             => $prefix . '\ResetButton',
+//         'save'              => $prefix . '\SaveButton',
+//         'save_and_continue' => $prefix . '\SaveAndContinueButton',                                
+    ];
+    $buttonXml = "\n";
+    foreach($buttons as $name=>$class)
+    {
+        $buttonXml .= '<item name="'.$name.'" xsi:type="string">'.$class.'</item>' . "\n";
+    }
+    
+    return $buttonXml;
+}
+
+function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
+{    
+    $moduleBasePath      = $module_info->folder;
+    $uiComponentBasePath = $moduleBasePath . '/view/adminhtml/ui_component';     
+    $uiComponentName     = createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelClass);
+    $uiComponentFilePath = $uiComponentBasePath . '/' . $uiComponentName . '.xml';        
+    $dbID       = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
+    $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);          
+    
+    $buttonXml = createButtonXml($module_info, $modelClass, $aclRule);
+         
+    $xml = simplexml_load_string(
+'<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">'.$uiComponentName.'.'.$uiComponentName.'_data_source</item>
+            <item name="deps" xsi:type="string">'.$uiComponentName.'.'.$uiComponentName.'_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Object Information</item>
+        <item name="config" xsi:type="array">
+            <item name="dataScope" xsi:type="string">data</item>
+            <item name="namespace" xsi:type="string">'.$uiComponentName.'</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+        <item name="buttons" xsi:type="array">
+            '.$buttonXml.'
+        </item>
+    </argument>
+    <dataSource name="'.$uiComponentName.'_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">'.$dataProviderClassName.'</argument>
+            <argument name="name" xsi:type="string">'.$uiComponentName.'_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">'.$dbID.'</argument>
+            <argument name="requestFieldName" xsi:type="string">'.$dbID.'</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="submit_url" xsi:type="url" path="*/*/save"/>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+    <fieldset name="general">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string">Form Data</item>
+                <item name="collapsible" xsi:type="boolean">true</item>                
+            </item>
+        </argument>
+        <field name="'.$dbID.'">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="visible" xsi:type="boolean">false</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">input</item>                    
+                    <item name="dataScope" xsi:type="string">'.$dbID.'</item>
+                </item>
+            </argument>
+        </field>
+        <field name="title">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="label" xsi:type="string" translate="true">Title</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="sortOrder" xsi:type="number">20</item>
+                    <item name="dataScope" xsi:type="string">title</item>
+                    <item name="validation" xsi:type="array">
+                        <item name="required-entry" xsi:type="boolean">true</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+    </fieldset>
+</form>'    
+    );        
+    \Pulsestorm\Pestle\Library\writeStringToFile($uiComponentFilePath, \Pulsestorm\Xml_Library\formatXmlString($xml->asXml()));
+}
+/**
+* One Line Description
+*
+* @command magento2:generate:ui:form
+* @argument module Which Module? [Pulsestorm_Formexample]
+* @argument model Model Class? [Pulsestorm\Formexample\Model\Thing]
+* @argument aclRule ACL Rule for Controllers? [Pulsestorm_Formexample::ruleName]
+*/
+function pestle_cli($argv)
+{
+    $module_info      = \Pulsestorm\Magento2\Cli\Library\getModuleInformation($argv['module']);
+    \Pulsestorm\Pestle\Library\output("In Progress, see @todo");
+    \Pulsestorm\Pestle\Library\output('@TODO: Reset Button is not working');
+    createControllerFiles($module_info, $argv['model'], $argv['aclRule']);
+    createDataProvider($module_info, $argv['model']);
+    createLayoutXmlFiles($module_info, $argv['model']);
+    createUiComponentXmlFile($module_info, $argv['model'], $argv['aclRule']);
+}
+}
 namespace Pulsestorm\Magento2\Cli\Magento2_Generate_Ui_Grid{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -5802,16 +6553,25 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 
 
 
-function generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName)
+function generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName, $collection)
 {
+    $shortName = getShortModelNameFromResourceModelCollection(
+        $collection);    
     $fullIdentifier = $gridId . '.' . $dataSourceName;
     
     $argument   = \Pulsestorm\Magento2\Cli\Library\addArgument($xml, 'data', 'array');
     $js_config  = \Pulsestorm\Magento2\Cli\Library\addItem($argument,'js_config','array');
     $provider   = \Pulsestorm\Magento2\Cli\Library\addItem($js_config, 'provider', 'string', $fullIdentifier);      
     $deps       = \Pulsestorm\Magento2\Cli\Library\addItem($js_config, 'deps', 'string', $fullIdentifier);      
-    $argument   = \Pulsestorm\Magento2\Cli\Library\addItem($argument, 'spinner', 'string', $columnsName);         
-        
+    $spinner    = \Pulsestorm\Magento2\Cli\Library\addItem($argument, 'spinner', 'string', $columnsName);         
+    
+    $buttons    = \Pulsestorm\Magento2\Cli\Library\addItem($argument, 'buttons', 'array');
+    $add        = \Pulsestorm\Magento2\Cli\Library\addItem($buttons, 'add', 'array');
+    \Pulsestorm\Magento2\Cli\Library\addItem($add, 'name', 'string', 'add');
+    \Pulsestorm\Magento2\Cli\Library\addItem($add, 'label', 'string', 'Add New');
+    \Pulsestorm\Magento2\Cli\Library\addItem($add, 'class', 'string', 'primary');
+    \Pulsestorm\Magento2\Cli\Library\addItem($add, 'url', 'string', '*/'.$shortName.'/new');
+
     return $argument;
 }
 
@@ -5938,7 +6698,7 @@ function generateRequestIdName()
     return 'id';
 }
 
-function generateUiComponentXmlFile($gridId, $databaseIdName, $module_info)
+function generateUiComponentXmlFile($gridId, $databaseIdName, $module_info, $collection)
 {
     $pageActionsClassName = generatePageActionClassNameFromPackageModuleAndGridId(
         $module_info->vendor, $module_info->short_name, $gridId);
@@ -5948,7 +6708,7 @@ function generateUiComponentXmlFile($gridId, $databaseIdName, $module_info)
     $columnsName      = generateColumnsNameFromGridId($gridId);
 
     $xml             = simplexml_load_string(\Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml('uigrid'));        
-    $argument        = generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName);        
+    $argument        = generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName, $collection);        
     $dataSource      = generateDatasourceNode($xml, $dataSourceName, $providerClass, $databaseIdName, $requestIdName);    
     $columns         = generateColumnsNode($xml, $columnsName, $databaseIdName, $pageActionsClassName);
     generateListingToolbar($xml);   
@@ -5998,12 +6758,18 @@ function generateDiXml($module_info)
     return $xml;
 }
 
-function generatePageActionClass($moduleInfo, $gridId, $idColumn)
+function generatePageActionClass($moduleInfo, $gridId, $idColumn, $collection)
 {
     $pageActionsClassName = generatePageActionClassNameFromPackageModuleAndGridId(
         $moduleInfo->vendor, $moduleInfo->short_name, $gridId);
         
-    $editUrl              = 'adminhtml/'.$gridId.'/viewlog';        
+    // $editUrl              = 'adminhtml/'.$gridId.'/viewlog';        
+    
+    
+    // $editUrl              = $gridId . '/index/edit';        
+    $shortName = getShortModelNameFromResourceModelCollection(
+        $collection);    
+    $editUrl = $gridId . '/' . strToLower($shortName) . '/edit';   
     $prepareDataSource    = '
     public function prepareDataSource(array $dataSource)
     {
@@ -6017,7 +6783,7 @@ function generatePageActionClass($moduleInfo, $gridId, $idColumn)
                 }
                 $item[$name]["view"] = [
                     "href"=>$this->getContext()->getUrl(
-                        "'.$editUrl.'",["id"=>$id]),
+                        "'.$editUrl.'",["'.$idColumn.'"=>$id]),
                     "label"=>__("Edit")
                 ];
             }
@@ -6061,6 +6827,18 @@ function generateDataProviderClass($moduleInfo, $gridId, $collectionFactory)
     return $contents;
 }
 
+function getShortModelNameFromResourceModelCollection($collection)
+{
+    $parts = explode('\\', $collection);
+    if($parts[3] !== 'ResourceModel' || $parts[(count($parts)-1)])
+    {
+        \Pulsestorm\Pestle\Library\output("Collection model name does not conform to the arbitrary naming convention we chose.  We're bailing.");
+    }
+    $parts = array_slice($parts, 4);
+    array_pop($parts);
+    $shortName =  implode('_', $parts);
+    return $shortName;
+}
 /**
 * Generates a Magento 2.1 ui grid listing and support classes.
 *
@@ -6074,14 +6852,15 @@ function pestle_cli($argv)
 {
     $module_info      = \Pulsestorm\Magento2\Cli\Library\getModuleInformation($argv['module']);
 
+
     generateUiComponentXmlFile(
-        $argv['grid_id'], $argv['db_id_column'], $module_info);                                        
+        $argv['grid_id'], $argv['db_id_column'], $module_info, $argv['collection_resource']);                                        
         
     generateDataProviderClass(
         $module_info, $argv['grid_id'], $argv['collection_resource'] . 'Factory');
         
     generatePageActionClass(
-        $module_info, $argv['grid_id'], $argv['db_id_column']);                    
+        $module_info, $argv['grid_id'], $argv['db_id_column'], $argv['collection_resource']);                    
         
     \Pulsestorm\Pestle\Library\output("Don't forget to add this to your layout XML with <uiComponent name=\"{$argv['grid_id']}\"/> ");        
 }
@@ -7530,11 +8309,26 @@ function randomUiComponentStuff()
 /**
 * Test Command
 * @command testbed
-* @argument folder Which Folder?
+* @Xargument folder Which Folder?
 */
 function pestle_cli($arguments, $options)
 {
-    \Pulsestorm\Pestle\Library\output("Hello World");
+    $files = glob('/Users/alanstorm/Documents/tumblr-backup/2017-02-03/*');
+    foreach($files as $file)
+    {
+        $xml = simplexml_load_file($file);
+        foreach($xml->posts->post as $post)
+        {
+            $title = (string)$post->{'regular-title'};
+            $title = $title ? $title : (string)$post->{'link-text'};
+            // output((string)$post['title'] . "\t" . (string)$post->url);
+            \Pulsestorm\Pestle\Library\output( 
+                $title                  . "\t"  .
+                (string)$post['url']    . "\t"  .
+                (string) $post['unix-timestamp']
+            );
+        }
+    }
 }
 }
 namespace Pulsestorm\Magento2\Cli\Xml_Template{
@@ -7678,7 +8472,7 @@ function pestle_cli($argv)
     echo `mkdir -p output`;
     echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.tex`;
     echo `pandoc output/in-progress-no-frills.tex -s -o output/in-progress-no-frills.pdf `;
-    echo `pandoc /tmp/working.md-s -o output/in-progress-no-frills.html `;
+    echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.html `;
     echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.epub`;
     echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.epub3`;                
     
@@ -7687,6 +8481,18 @@ function pestle_cli($argv)
     $zip = $date . '.zip';
     echo `zip -r $zip output`;
     
+    $result     = `wc -w /tmp/working.md`;
+    $parts      = preg_split('%\s{1,1000}%', trim($result));
+    $word_count = array_pop($parts);
+    
+    $word_count = preg_split('%\s{1,100}%', trim($result));
+        
+    $word_count = array_shift($word_count);
+    
+    $cmd = "echo \"$date $word_count\" >> wordcount.txt";
+    `$cmd`;
+    readfile('wordcount.txt');
+    // echo `cat wordcount.txt`;
 }
 }
 namespace Pulsestorm\Paypal\Csv_To_Iif{
