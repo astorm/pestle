@@ -7,7 +7,7 @@ pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse');
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
-pestle_import('Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName');
+
 function getModelShortName($modelClass)
 {
     $parts = explode('\\', $modelClass);
