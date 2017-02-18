@@ -52,7 +52,7 @@ function pestle_cli($argv)
     validateNoSuchComponent($xml, $argv['ui_component_name']);
     $node   = getContentNode($xml, $argv);
     
-    $xml->addChild('uiComponent')
+    $node->addChild('uiComponent')
         ->addAttribute('name', $argv['ui_component_name']);
     $xmlString    = formatXmlString($xml->asXml());        
     writeStringToFile($argv['path_layout'], $xmlString);        
