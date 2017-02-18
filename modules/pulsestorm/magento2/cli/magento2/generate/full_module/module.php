@@ -30,23 +30,13 @@ pestle.phar generate_view ' . $packageName . '_' . $moduleName . ' adminhtml ' .
 pestle.phar magento2:generate:ui:grid ' . $packageName . '_' . $moduleName . ' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . ' \'' . $packageName . '\\' . $moduleName . '\Model\ResourceModel\\' . $modelName . '\Collection\' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNameLowerCase . '_id
 pestle.phar magento2:generate:ui:form ' . $packageName . '_' . $moduleName . ' \'' . $packageName . '\\' . $moduleName . '\Model\\' . $modelName . '\' ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . '
 
-pestle.phar magento2:generate:ui:add_to_layout app/code/'.$packageName . '_' . $moduleName.'/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_'.$modelNamePluralLowerCase.'_index_index.xml content testComponent
-pestle_dev magento2:generate:acl:change_title app/code/'.$packageName.'/'.$moduleName.'/etc/acl.xml '.$packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase.' "Manage '.$modelNamePluralLowerCase.'"
+pestle.phar magento2:generate:ui:add_to_layout app/code/'.$packageName . '/' . $moduleName.'/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_'.$modelNamePluralLowerCase.'_index_index.xml content testComponent
+pestle.phar magento2:generate:acl:change_title app/code/'.$packageName.'/'.$moduleName.'/etc/acl.xml '.$packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase.' "Manage '.$modelNamePluralLowerCase.'"
+pestle.phar magento2:generate:controller_edit_acl app/code/' . $packageName  . '/'.$moduleName.'/Controller/Adminhtml/Index/Index.php ' . $packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase . '
 
-#change title in app/code/Pulsestorm/Pestleform/etc/acl.xml
-#Add ACL Rule to app/code/Pulsestorm/Pestleform/Controller/Adminhtml/Index/Index.php
-#Add Grid to module layout handle file app/code/Pulsestorm/Pestleform/view/adminhtml/layout/' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index.xml
-#    - <uiComponent name="' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '"/> 
 php bin/magento module:enable Pulsestorm_Pestleform
 php bin/magento setup:upgrade
 
-echo "Don\'t forget to"
-#echo "    change title in "
-#echo "        app/code/' . $packageName  . '/' . $moduleName  . '/etc/acl.xml"
-echo "    Add ACL Rule to"
-echo "        app/code/' . $packageName  . '/'.$moduleName.'/Controller/Adminhtml/Index/Index.php"
-#echo "    Add <uiComponent name=\"' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '\"/> to "
-#echo "        app/code/' . $packageName  . '/'.$moduleName.'/view/adminhtml/layout/' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index.xml"    
 ';    
 
 }

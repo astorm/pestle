@@ -7,6 +7,7 @@ pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse');
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
+pestle_import('Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName');
 
 function getModelShortName($modelClass)
 {
@@ -34,6 +35,7 @@ function getPersistKeyFromModelClassName($modelClass)
 function createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule)
 {
     return '
+    const ADMIN_RESOURCE = \''.$aclRule.'\';  
     public function execute()
     {
         $resultRedirect = $this->resultRedirectFactory->create();
@@ -46,7 +48,9 @@ function createControllerClassBodyForIndexRedirect($module_info, $modelClass, $a
 function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
 {    
     $dbID       = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));    
-    return '    
+    return '  
+    const ADMIN_RESOURCE = \''.$aclRule.'\';   
+          
     public function execute()
     {
         // check if we know what should be deleted
@@ -78,10 +82,6 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
         
     }    
     
-    protected function _isAllowed()
-    {
-        return $this->_authorization->isAllowed(\''.$aclRule.'\');
-    }      
 ';    
 }
 
@@ -168,6 +168,7 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
 function createControllerClassBody($module_info, $aclRule)
 {
     return '
+    const ADMIN_RESOURCE = \''.$aclRule.'\';       
     protected $resultPageFactory;
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
@@ -181,11 +182,6 @@ function createControllerClassBody($module_info, $aclRule)
     {
         return $this->resultPageFactory->create();  
     }    
-    
-    protected function _isAllowed()
-    {
-        return $this->_authorization->isAllowed(\''.$aclRule.'\');
-    }         
 ';
 }
 
@@ -206,10 +202,10 @@ function createControllerFiles($module_info, $modelClass, $aclRule)
         if($desc === 'controllerSaveClassName')
         {
             $useString = '
-                use Magento\Backend\App\Action;
-                use '.$prefix.'\Model\Page;
-                use Magento\Framework\App\Request\DataPersistorInterface;
-                use Magento\Framework\Exception\LocalizedException;
+use Magento\Backend\App\Action;
+use '.$prefix.'\Model\Page;
+use Magento\Framework\App\Request\DataPersistorInterface;
+use Magento\Framework\Exception\LocalizedException;
             ';
             $contents = createClassWithUse($className, '\Magento\Backend\App\Action', $useString,
                 createControllerClassBodyForSave($module_info, $modelClass, $aclRule));   
