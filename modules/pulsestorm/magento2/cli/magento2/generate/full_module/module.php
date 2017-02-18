@@ -34,7 +34,7 @@ pestle.phar magento2:generate:ui:add_to_layout app/code/'.$packageName . '/' . $
 pestle.phar magento2:generate:acl:change_title app/code/'.$packageName.'/'.$moduleName.'/etc/acl.xml '.$packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase.' "Manage '.$modelNamePluralLowerCase.'"
 pestle.phar magento2:generate:controller_edit_acl app/code/' . $packageName  . '/'.$moduleName.'/Controller/Adminhtml/Index/Index.php ' . $packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase . '
 
-php bin/magento module:enable Pulsestorm_Pestleform
+php bin/magento module:enable '.$packageName . '_' . $moduleName.'
 php bin/magento setup:upgrade
 
 ';    
