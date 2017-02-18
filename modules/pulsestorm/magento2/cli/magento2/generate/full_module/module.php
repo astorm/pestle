@@ -31,7 +31,7 @@ pestle.phar magento2:generate:ui:grid ' . $packageName . '_' . $moduleName . ' '
 pestle.phar magento2:generate:ui:form ' . $packageName . '_' . $moduleName . ' \'' . $packageName . '\\' . $moduleName . '\Model\\' . $modelName . '\' ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . '
 
 pestle.phar magento2:generate:ui:add_to_layout app/code/'.$packageName . '_' . $moduleName.'/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_'.$modelNamePluralLowerCase.'_index_index.xml content testComponent
-
+pestle_dev magento2:generate:acl:change_title app/code/'.$packageName.'/'.$moduleName.'/etc/acl.xml '.$packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase.' "Manage '.$modelNamePluralLowerCase.'"
 
 #change title in app/code/Pulsestorm/Pestleform/etc/acl.xml
 #Add ACL Rule to app/code/Pulsestorm/Pestleform/Controller/Adminhtml/Index/Index.php

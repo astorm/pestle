@@ -3,6 +3,7 @@ namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Ui\Add_To_Layout;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
+pestle_import('Pulsestorm\Xml_Library\getNamedXmlBlockWithNodeNames');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 
 function exitWithErrorMessage($message)
@@ -25,16 +26,6 @@ function getContentBlockOrContainerOrReference($xml, $name)
 {
     return getNamedXmlBlockWithNodeNames($xml, $name, 
         ['container', 'block', 'referenceContainer','referenceBlock']);
-}
-
-function getNamedXmlBlockWithNodeNames($xml, $name, $names)
-{
-    $search = '//*[@name="' . $name . '"]';
-    $nodes = $xml->xpath($search);
-    $nodes = array_filter($nodes, function($node) use ($names){
-        return in_array($node->getName(), $names);
-    });
-    return $nodes;
 }
 
 function getContentNode($xml,$argv)

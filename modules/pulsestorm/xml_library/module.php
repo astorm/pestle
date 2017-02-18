@@ -98,6 +98,21 @@ function simpleXmlAddNodesXpathWorker($xml, $path)
     ];
 }
 
+function getByAttributeXmlBlockWithNodeNames($attributeName, $xml, $name, $names)
+{
+    $search = '//*[@'.$attributeName.'="' . $name . '"]';
+    $nodes = $xml->xpath($search);
+    $nodes = array_filter($nodes, function($node) use ($names){
+        return in_array($node->getName(), $names);
+    });
+    return $nodes;
+}
+
+function getNamedXmlBlockWithNodeNames($xml, $name, $names)
+{
+    return getByAttributeXmlBlockWithNodeNames('name', $xml, $name, $names);
+}
+
 function formatXmlString($string)
 {
     $dom = new DomDocument;

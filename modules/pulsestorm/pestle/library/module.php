@@ -3,6 +3,12 @@ namespace Pulsestorm\Pestle\Library;
 use ReflectionFunction;
 use ReflectionClass;
 
+function exitWithErrorMessage($message)
+{
+    fwrite(STDERR, $message . "\n");
+    exit(1);
+}
+
 function getShortClassNameFromClass($class)
 {
     $parts = explode('\\', $class);
