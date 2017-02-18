@@ -41,8 +41,8 @@ php bin/magento module:enable Pulsestorm_Pestleform
 php bin/magento setup:upgrade
 
 echo "Don\'t forget to"
-echo "    change title in "
-echo "        app/code/' . $packageName  . '/' . $moduleName  . '/etc/acl.xml"
+#echo "    change title in "
+#echo "        app/code/' . $packageName  . '/' . $moduleName  . '/etc/acl.xml"
 echo "    Add ACL Rule to"
 echo "        app/code/' . $packageName  . '/'.$moduleName.'/Controller/Adminhtml/Index/Index.php"
 #echo "    Add <uiComponent name=\"' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '\"/> to "
