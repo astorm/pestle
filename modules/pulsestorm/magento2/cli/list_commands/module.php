@@ -48,6 +48,8 @@ function pestle_cli($argv)
     }
     output('');
     
+//     var_dump($commands);
+//     exit;
     if(count($commands) > 1)
     {
         outputTitle();
@@ -132,27 +134,59 @@ function outputAvaiableCommands($commands)
 {
     $toHide = getCommandsToHide();
     output('Available commands:');
+    $commandSections = [
+        'Uncategorized'=>$commands
+    ];
+    $commandSections = [];
     foreach($commands as $command)
     {
-        if(in_array(trim($command['command']), ['library']))
+        $section = 'Uncategorized';
+        if(strpos($command['command'], ':') !== false)
         {
-            continue;
+            $parts = explode(':', $command['command']);
+            $section = ucWords(array_shift($parts));
         }
         
-        if(in_array($command['command'], $toHide))
+        $commandSections[$section][] = $command;
+    }
+
+//     $commandSections = [
+//         'Uncategorized'=>$commands
+//     ];
+    
+    foreach($commandSections as $section=>$commandsSorted)
+    {
+        output('');
+        output("\033[33m " . $section . "\033[0m");
+        foreach($commandsSorted as $command)
         {
-            continue;
+            if(in_array(trim($command['command']), ['library']))
+            {
+                continue;
+            }
+        
+            if(in_array($command['command'], $toHide))
+            {
+                continue;
+            }
+    //         output("Name");
+
+            $lines = preg_split('%[\r\n]%',$command['help']);
+            $firstLine = array_shift($lines);
+
+            // echo '\033[31m ' . $command['command'] . '\033[0m';
+            output('  ', "\033[32m " . $command['command'] . "\033[0m",
+                getWhitespaceForCommandList($commands, $command['command']), 
+                // substr(
+                    preg_replace('%[\r\n]%',' ',$firstLine)
+                // ,0, 60)
+            );
+    //         output('');
+    //         output("Description");
+    //         output(preg_replace('%^%m','    $0',wordwrap($command['help'],70)));
+    //         output('');
+    //         output('');
         }
-//         output("Name");
-        output('  ', $command['command'],
-            getWhitespaceForCommandList($commands, $command['command']), 
-            substr(preg_replace('%[\r\n]%',' ',$command['help']),0, 30)
-        );
-//         output('');
-//         output("Description");
-//         output(preg_replace('%^%m','    $0',wordwrap($command['help'],70)));
-//         output('');
-//         output('');
     }
 }
 
