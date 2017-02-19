@@ -29,13 +29,15 @@ function parseClass($contents)
 }
 
 /**
-* 
+* BETA: Scans a Magento 2 module for misnamed PHP classes
 * @command check_class_and_namespace
+* @argument folder Which Folder? 
 */
 function pestle_cli($argv)
 {    
-    $path = inputOrIndex('Which folder?','/path/to/magento/app/code/Pulsestorm',
-    $argv, 0);
+    // $path = inputOrIndex('Which folder?','/path/to/magento/app/code/Pulsestorm',$argv, 0);
+    $path = $argv['folder'];
+    
     $files = glob_recursive($path . '/*');
     
     foreach($files as $file)

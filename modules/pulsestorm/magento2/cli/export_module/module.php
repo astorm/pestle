@@ -221,7 +221,7 @@ function getFilesFromArguments($arguments)
 }
 
 /**
-* This is a test
+* ALPHA: Seems to be a start at exporting a pestle module as functions. 
 * @command export_module
 * @argument module_file Which file?
 */

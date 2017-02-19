@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 /**
-* This is a test
+* BETA: Used to move old pestle files to module.php -- still needed?
 * @command dev_namespace
 */
 function pestle_cli($argv)

@@ -72,7 +72,7 @@ function cacheCommandList($lookup)
 }
 
 /**
-* Converts a markdown files to an aiff
+* Builds the command list
 * @command build_command_list
 */
 function pestle_cli($argv)

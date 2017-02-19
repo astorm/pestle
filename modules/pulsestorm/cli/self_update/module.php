@@ -52,6 +52,7 @@ function backupCurrent($path)
 }
 
 /**
+* Updates the pestle.phar file to the latest version
 * @command selfupdate
 */
 function pestle_cli()

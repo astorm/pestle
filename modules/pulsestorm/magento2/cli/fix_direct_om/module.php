@@ -385,7 +385,7 @@ function getBaseConstructor($file, $tokens)
 }
 
 /**
-* Test Command
+* ALPHA: Fixes direct use of PHP Object Manager
 * argument foobar @callback exampleOfACallback
 * @command fix_direct_om
 * @argument folder Folder to scan
