@@ -39,7 +39,7 @@ function getContentNode($xml,$argv)
 }
 
 /**
-* One Line Description
+* Adds a <uiComponent/> node to a named node in a layout update XML file
 *
 * @command magento2:generate:ui:add_to_layout
 * @argument path_layout Layout XML File?

@@ -1,7 +1,7 @@
 <?php
 namespace Pulsestorm\Pestle\Runfile\Run_File;
 /**
-* One Line Description
+* ALPHA: Stub for running a single PHP file in a pestle context
 *
 * @command pestle_run_file
 * @argument file Run which file?

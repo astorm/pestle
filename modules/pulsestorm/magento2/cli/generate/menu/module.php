@@ -159,7 +159,9 @@ function addAttributesToXml($argv, $xml)
     return $xml;
 }
 /**
-* One Line Description
+* Generates Magento 2 menu.xml
+*
+* Wrapped by magento:foo:baz ... version of command
 *
 * @command generate_menu
 * @argument module_name Module Name? [Pulsestorm_HelloGenerate]

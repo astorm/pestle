@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Importer\getCacheDir');
 /**
-* One Line Description
+* BETA: Clears the pestle cache
 *
 * @command pestle_clear_cache
 */

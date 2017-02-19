@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 
 /**
-* One Line Description
+* ALPHA: What is this?
 *
 * @command baz_bar
 */

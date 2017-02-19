@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* One Line Description
+* ALPHA: Another Hello World we can probably discard
 *
 * @command foo_bar
 */

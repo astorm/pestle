@@ -708,7 +708,7 @@ function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
     writeStringToFile($uiComponentFilePath, formatXmlString($xml->asXml()));
 }
 /**
-* One Line Description
+* Generates a Magento 2 UI Component form configuration and PHP boilerplate
 *
 * @command magento2:generate:ui:form
 * @argument module Which Module? [Pulsestorm_Formexample]

@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* One Line Description
+* ALPHA: Is this needed/working anymore?
 * This command will generate the layout handle XML 
 * files needed to add a block to Magento's page 
 * layout

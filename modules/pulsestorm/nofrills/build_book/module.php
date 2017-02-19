@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* One Line Description
+* BETA: Command for building No Frills Magento 2 Layout
 *
 * @command build_book
 */

@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Generate\Install\exported_pestle_cli');
 
 /**
-* One Line Description
+* BETA: Generates commands to install Magento via composer
 *
 * @command magento2:generate:install
 * @argument id_key Identity Key? [magento_2_new]

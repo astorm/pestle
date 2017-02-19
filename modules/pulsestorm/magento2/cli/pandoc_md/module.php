@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* One Line Description
+* BETA: Uses pandoc to converts a markdown file to pdf, epub, epub3, html, txt 
 *
 * @command pandoc_md
 * @argument file Markdown file to convert?

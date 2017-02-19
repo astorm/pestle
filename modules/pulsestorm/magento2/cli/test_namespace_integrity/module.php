@@ -99,7 +99,7 @@ function extractPestleImports($namespace, $command, $file)
 }
 
 /**
-* One Line Description
+* ALPHA: Tests the "namepace integrity?  Not sure what this is anymore. 
 *
 * @command test_namespace_integrity
 */

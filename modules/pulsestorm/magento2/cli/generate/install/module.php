@@ -4,7 +4,9 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* One Line Description
+* Generates Magento 2 install
+*
+* Wrapped by magento:doo:baz version of command
 *
 * @command generate_install
 * @argument id_key Identity Key? [magento_2_new]

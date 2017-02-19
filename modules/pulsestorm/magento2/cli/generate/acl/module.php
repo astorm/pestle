@@ -9,7 +9,9 @@ pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
 
 /**
-* One Line Description
+* Generates Magento 2 acl.xml
+*
+* Wrapped by magento2:foo:baz version of command
 *
 * @command generate_acl
 * @argument module_name Which Module? [Pulsestorm_HelloWorld]

@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Generate\Crud\Model\exported_pestle_cli');
 
 /**
-* One Line Description
+* Generates a Magento 2 CRUD/AbstractModel class and support files
 *
 * @command magento2:generate:crud_model
 * @argument module_name Which module? [Pulsestorm_HelloGenerate]

@@ -5,7 +5,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* One Line Description
+* A Hello World command.  Hello World!
 *
 * @command hello_world
 * @option service Which branch of the service

@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Generate\Acl\exported_pestle_cli');
 
 /**
-* One Line Description
+* Generates a Magento 2 acl.xml file. 
 *
 * @command magento2:generate:acl
 * @argument module_name Which Module? [Pulsestorm_HelloWorld]

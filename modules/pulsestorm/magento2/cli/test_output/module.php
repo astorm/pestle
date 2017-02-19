@@ -3,7 +3,7 @@ namespace Pulsestorm\Magento2\Cli\Test_Output;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
 /**
-* One Line Description
+* A test command for the output function that should probably be pruned
 *
 * @command test_output
 */

@@ -76,7 +76,9 @@ function createViewXmlFile($base_folder, $package, $theme, $area)
     writeStringToFile($path, formatXmlString($xml->asXml()));    
 }
 /**
-* One Line Description
+* Generates Magento 2 theme configuration
+*
+* Wrapped by magento:foo:baz ... version of command
 *
 * @command generate_theme
 * @argument package Theme Package Name? [Pulsestorm]

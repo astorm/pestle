@@ -101,7 +101,7 @@ ENDTRNS';
 }
 
 /**
-* One Line Description
+* BETA: Converts a CSV file to .iif
 *
 * @command csv_to_iif
 * @argument path_to_file CSV File

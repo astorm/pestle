@@ -60,7 +60,7 @@ function parseDescription($string)
 }
 	
 /**
-* One Line Description
+* BETA: Parses Citicard's CSV files into yaml
 *
 * @command parse_citicard
 * @argument file File to Parse?

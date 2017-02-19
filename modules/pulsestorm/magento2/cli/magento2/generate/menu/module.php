@@ -23,7 +23,7 @@ function selectParentMenu($arguments, $index)
 }
 
 /**
-* One Line Description
+* Generates configuration for Magento Adminhtml menu.xml files
 *
 * @command magento2:generate:menu
 * @argument module_name Module Name? [Pulsestorm_HelloGenerate]

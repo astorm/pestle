@@ -72,7 +72,9 @@ function createBlockClass($module_info, $block_name, $area='frontname')
 }
 
 /**
-* One Line Description
+* Generates a Magento 2 view
+*
+* Wrapped by magento:... version of command
 *
 * @command generate_view
 * @argument module_name Which Module? [Pulsestorm_HelloGenerate]

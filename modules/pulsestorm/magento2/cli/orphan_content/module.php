@@ -210,7 +210,7 @@ function removeIrrelevantDataFromUrls($urls)
 }
 
 /**
-* One Line Description
+* BETA: Used to scan my old pre-Wordpress archives for missing pages. 
 *
 * @command orphan_content
 */

@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* One Line Description
+* BETA: Magento command, reads the rest schema on a Magento system
 *
 * @command read_rest_schema
 * @argument url Base Url? [http://magento-2-with-keys.dev/]
