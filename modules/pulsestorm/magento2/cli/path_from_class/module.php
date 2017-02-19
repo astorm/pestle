@@ -12,7 +12,7 @@ function getPathFromClass($class)
 }
 
 /**
-* Short Description
+* Turns a PHP class into a Magento 2 path
 * Long
 * Description
 * @command path_from_class

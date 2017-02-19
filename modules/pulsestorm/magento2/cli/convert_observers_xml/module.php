@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\convertObserverTreeScoped');
 
 /**
-* Short Description
+* ALPHA: Partiall converts Magento 1 config.xml to Magento 2
 * Long
 * Description
 * @command convert_observers_xml

@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* Short Description
+* ALPHA: Partially Converts Magento 1 system.xml into Magento 2 system.xml
 * Long
 * Description
 * @command convert_system_xml

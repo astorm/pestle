@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Cli\Code_Generation\templateRegistrationPhp');
 /**
-* Short Description
+* Scans Magento 2 directories for missing registration.php files
 * Long
 * Description
 * @command check_registration

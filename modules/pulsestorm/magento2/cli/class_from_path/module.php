@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Pestle\Library\output');
 
 /**
-* Short Description
+* Turns a Magento file path into a PHP class
 * Long
 * Description
 * @command class_from_path

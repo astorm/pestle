@@ -9,7 +9,7 @@ pestle_import('\Pulsestorm\Magento2\Cli\Library\convertMageOneClassIntoNamespace
 pestle_import('\Pulsestorm\Magento2\Cli\Library\getDiLinesFromMage2ClassName');
 
 /**
-* Short Description
+* ALPHA: Partially converts Magento 1 class to Magento 2
 * Long
 * Description
 * @command convert_class
