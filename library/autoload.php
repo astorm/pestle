@@ -29,7 +29,7 @@ global $argv;
 if(isset($argv[0]))
 {    
     $parts = explode('/', $argv[0]);
-    $last = array_pop($parts);
+    $last = strToLower(array_pop($parts));
     if(in_array($last, ['pestle', 'pestle_dev', 'pestle.phar']))
     {
         return;
