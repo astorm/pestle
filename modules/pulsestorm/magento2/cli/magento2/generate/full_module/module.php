@@ -52,7 +52,7 @@ function replaceTemplateVars($template, $argv)
 * @command magento2:generate:full_module
 * @argument package_name Package Name? [Pulsestorm]
 * @argument module_name Module Name? [Helloworld]
-* @argument model_name Module Name? [Thing]
+* @argument model_name One Word Model Name? [Thing]
 */
 function pestle_cli($argv)
 {
