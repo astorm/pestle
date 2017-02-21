@@ -102,7 +102,7 @@ function getUsedAclRuleIdsFromControllerFiles($dir)
 /**
 * Scans modules for ACL rule ids, makes sure they'll all used/defined
 *
-* @command check_acl
+* @command magento2:scan:acl_used
 * @argument dir Which Directory?
 */
 function pestle_cli($argv)

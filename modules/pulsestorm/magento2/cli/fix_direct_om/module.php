@@ -387,7 +387,7 @@ function getBaseConstructor($file, $tokens)
 /**
 * ALPHA: Fixes direct use of PHP Object Manager
 * argument foobar @callback exampleOfACallback
-* @command fix_direct_om
+* @command magento2:fix_direct_om
 * @argument folder Folder to scan
 * @argument extensions File extensions? [php, phtml]
 */

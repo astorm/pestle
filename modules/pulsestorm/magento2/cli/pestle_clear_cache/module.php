@@ -14,3 +14,8 @@ function pestle_cli($argv)
     rename($cache_dir, $cache_dir . '.' . time());
     getCacheDir();
 }
+
+function pestle_cli_exported($argv, $options=[])
+{
+    return pestle_cli($argv, $options);
+}    

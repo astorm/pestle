@@ -73,7 +73,7 @@ function cacheCommandList($lookup)
 
 /**
 * Builds the command list
-* @command build_command_list
+* @command pestle:build_command_list
 */
 function pestle_cli($argv)
 {

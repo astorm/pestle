@@ -56,7 +56,7 @@ class Session
 
 /**
 * ALPHA: Extracts data from a saved PHP session file
-* @command extract_session
+* @command php:extract_session
 */
 function pestle_cli($argv)
 {

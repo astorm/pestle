@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 /**
 * BETA: Command for building No Frills Magento 2 Layout
 *
-* @command build_book
+* @command pulsestorm:build_book
 */
 function pestle_cli($argv)
 {

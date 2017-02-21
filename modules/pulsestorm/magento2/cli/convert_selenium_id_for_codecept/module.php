@@ -149,7 +149,7 @@ function convertInfoArray($info)
 * @todo waitfortext is selectOption, has incorrect arguments, reversed
 * @todo name= is not a thinge either
 * @todo label= is not a thing
-* @command convert_selenium_id_for_codecept
+* @command codecept:convert_selenium_id_for_codecept
 */
 function pestle_cli($argv)
 {

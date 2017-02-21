@@ -5,10 +5,9 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
 
 /**
-* "Fixes" permissions for development boxes
-* running mod_php by setting things to 777.
-* I am a traitor 
-* @command fix_permissions_modphp
+* ALPHA: "Fixes" permissions for development boxes
+* running mod_php by setting things to 777. 
+* @command magento2:fix_permissions_modphp
 */
 function pestle_cli($argv)
 {

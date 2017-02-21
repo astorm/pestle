@@ -28,7 +28,7 @@ function tokenIsSemiColonAndNextTokenIsNotTCloseTag($tokens, $key)
 /**
 * ALPHA: Experiments with a PHP formatter.
 *
-* @command format_php
+* @command php:format_php
 * @argument file Which file?
 */
 function pestle_cli($argv)

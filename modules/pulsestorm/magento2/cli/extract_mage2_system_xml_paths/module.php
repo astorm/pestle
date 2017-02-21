@@ -11,7 +11,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\getSimpleTreeFromSystemXmlFile');
 * system.xml file, and then generates a config.xml file
 * for the creation of default values
 *
-* @command extract_mage2_system_xml_paths
+* @command magento2:extract_mage2_system_xml_paths
 */
 function pestle_cli($argv)
 {

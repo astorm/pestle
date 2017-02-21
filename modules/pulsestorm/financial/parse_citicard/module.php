@@ -62,7 +62,7 @@ function parseDescription($string)
 /**
 * BETA: Parses Citicard's CSV files into yaml
 *
-* @command parse_citicard
+* @command parsing:citicard
 * @argument file File to Parse?
 * @argument count Starting Count?
 */

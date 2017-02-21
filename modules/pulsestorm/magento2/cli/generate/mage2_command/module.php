@@ -53,3 +53,8 @@ function pestle_cli($argv)
     output("sublime $path_full");
     output("vi $path_full");    
 }
+
+function pestle_cli_exported($argv, $options=[])
+{
+    return pestle_cli($argv, $options);
+}    

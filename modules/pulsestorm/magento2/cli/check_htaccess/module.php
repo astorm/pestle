@@ -5,10 +5,8 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 
 
 /**
-* Checks for missing Magento 2 HTACCESS files from a hard coded list
-* Long
-* Description
-* @command check_htaccess
+* ALPHA: Checks for missing Magento 2 HTACCESS files from a hard coded list
+* @command magento2:scan:htaccess
 */
 function pestle_cli($argv)
 {

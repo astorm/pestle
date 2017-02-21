@@ -103,7 +103,7 @@ ENDTRNS';
 /**
 * BETA: Converts a CSV file to .iif
 *
-* @command csv_to_iif
+* @command parsing:csv_to_iif
 * @argument path_to_file CSV File
 */
 function pestle_cli($argv)

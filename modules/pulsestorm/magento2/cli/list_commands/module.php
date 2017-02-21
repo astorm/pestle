@@ -21,7 +21,8 @@ function pestle_cli($argv)
     $executes = array_filter($user, function($function){
         $parts = explode('\\', $function);
         $function = array_pop($parts);
-        return strpos($function, 'pestle_cli') === 0;
+        return strpos($function, 'pestle_cli') === 0 &&
+               strpos($function, 'pestle_cli_export') === false;
     });
     
         
@@ -32,12 +33,9 @@ function pestle_cli($argv)
             'command'=>$command,
             'help'=>getDocCommentAsString($r->getName()),
         ];
-        // $function = str_replace('execute_', '', $function);
-        // $parts = explode('\\', $function);
-        // return array_pop($parts);
-        // return $function;
     }, $executes);
 
+    // var_dump($commands);
     $command_to_check = array_shift($argv);        
 
     if($command_to_check)
@@ -48,8 +46,6 @@ function pestle_cli($argv)
     }
     output('');
     
-//     var_dump($commands);
-//     exit;
     if(count($commands) > 1)
     {
         outputTitle();
@@ -127,67 +123,113 @@ function getCommandsToHide()
         'generate_route',
         'generate_theme',
         'generate_view',     
+        'wp_export_xml',         
+        'wp_urls',
+        'generate_pestle_command',
+        'pestle_clear_cache',
     ];
 }
 
-function outputAvaiableCommands($commands)
+function sortCommandsIntoSection($commands)
 {
     $toHide = getCommandsToHide();
-    output('Available commands:');
-    $commandSections = [
-        'Uncategorized'=>$commands
-    ];
-    $commandSections = [];
+    $commandSections = [];    
     foreach($commands as $command)
-    {
+    {                
+        if(in_array($command['command'], $toHide))
+        {
+            continue;
+        }    
         $section = 'Uncategorized';
         if(strpos($command['command'], ':') !== false)
         {
             $parts = explode(':', $command['command']);
             $section = ucWords(array_shift($parts));
-        }
-        
+            if(count($parts) > 1)
+            {
+                $section .= ' ' . ucWords(array_shift($parts));
+            }
+        }        
         $commandSections[$section][] = $command;
     }
+    ksort($commandSections);
+    return $commandSections;
+}
 
-//     $commandSections = [
-//         'Uncategorized'=>$commands
-//     ];
+function outputWithShellColor($toOutput, $colorCode=33)
+{
+    output(
+        getStringWrappedWithShellColor($toOutput, $colorCode)
+    );
+}
+
+function getStringWrappedWithShellColor($string, $colorCode)
+{
+    return "\033[{$colorCode}m" . $string . "\033[0m";
+}
+
+function outputSectionHeader($section)
+{
+    output('');
+    outputWithShellColor($section, 33);
+}
+
+function outputCommandListing($command, $commands)
+{
+    $lines = preg_split('%[\r\n]%',$command['help']);
+    $firstLine = array_shift($lines);
+    if(!$firstLine)
+    {
+        $firstLine = 'NULL Command?  Fix this pls.';
+    }    
+    output( '  ', 
+            getStringWrappedWithShellColor($command['command'], 32),
+            getWhitespaceForCommandList($commands, $command['command']), 
+            $firstLine);
+}
+
+function shouldSkipShowingCommand($command)
+{
+    $toHide = getCommandsToHide();
+    if(in_array(trim($command['command']), ['library']))
+    {
+        return true;
+    }
+
+    if(in_array($command['command'], $toHide))
+    {
+        return true;
+    }    
     
+    return false;
+}
+
+function outputAvaiableCommandsBySection($commandSections, $commands)
+{
+   
     foreach($commandSections as $section=>$commandsSorted)
     {
-        output('');
-        output("\033[33m " . $section . "\033[0m");
+        $commandsSorted = $commandSections[$section];
+        outputSectionHeader($section);
         foreach($commandsSorted as $command)
         {
-            if(in_array(trim($command['command']), ['library']))
+            if(shouldSkipShowingCommand($command))
             {
                 continue;
-            }
-        
-            if(in_array($command['command'], $toHide))
-            {
-                continue;
-            }
-    //         output("Name");
-
-            $lines = preg_split('%[\r\n]%',$command['help']);
-            $firstLine = array_shift($lines);
-
-            // echo '\033[31m ' . $command['command'] . '\033[0m';
-            output('  ', "\033[32m " . $command['command'] . "\033[0m",
-                getWhitespaceForCommandList($commands, $command['command']), 
-                // substr(
-                    preg_replace('%[\r\n]%',' ',$firstLine)
-                // ,0, 60)
-            );
-    //         output('');
-    //         output("Description");
-    //         output(preg_replace('%^%m','    $0',wordwrap($command['help'],70)));
-    //         output('');
-    //         output('');
+            }        
+            outputCommandListing($command, $commands);
         }
     }
+}
+
+function outputAvaiableCommands($commands)
+{    
+    output('Available commands:');
+    $commandSections = [
+        'Uncategorized'=>$commands
+    ];
+    $commandSections = sortCommandsIntoSection($commands);
+    outputAvaiableCommandsBySection($commandSections, $commands);
 }
 
 function outputUsage()
