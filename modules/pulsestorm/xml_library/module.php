@@ -98,11 +98,12 @@ function simpleXmlAddNodesXpathWorker($xml, $path)
     ];
 }
 
-function getByAttributeXmlBlockWithNodeNames($attributeName, $xml, $name, $names)
+function getByAttributeXmlBlockWithNodeNames($attributeName, $xml, $value, $names=null)
 {
-    $search = '//*[@'.$attributeName.'="' . $name . '"]';
+    $search = '//*[@'.$attributeName.'="' . $value . '"]';
     $nodes = $xml->xpath($search);
     $nodes = array_filter($nodes, function($node) use ($names){
+        if(!$names) { return true; }
         return in_array($node->getName(), $names);
     });
     return $nodes;
