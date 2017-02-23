@@ -198,6 +198,10 @@ function applyCommandNameAlias($command_name)
     {
         case 'list':
             return 'list_commands';
+        case '--version':
+            return 'version';
+        case '-v':
+            return 'version';            
         default:
             return $command_name;
     }
@@ -210,6 +214,7 @@ function getCommandNameFromParsedArgv($parsed_argv)
     $command_name   = $parsed_argv['command'];
     $command_name   = $command_name ? $command_name : 'help'; 
     $command_name   = applyCommandNameAlias($command_name);
+
     return $command_name;
 }
 
