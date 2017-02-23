@@ -53,7 +53,7 @@ function pestle_cli($argv)
         $namespace = parseNamespace($contents);
         if(!$namespace)
         {
-            output("No Namspace: Skipping $file");
+            output("No Namespace: Skipping $file");
             continue;            
         }
         $class     = parseClass($contents);
