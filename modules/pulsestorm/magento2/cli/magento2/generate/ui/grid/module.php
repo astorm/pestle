@@ -169,10 +169,10 @@ function generateUiComponentXmlFile($gridId, $databaseIdName, $module_info, $col
 
     $xml             = simplexml_load_string(getBlankXml('uigrid'));        
     $argument        = generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName, $collection);        
-    $dataSource      = generateDatasourceNode($xml, $dataSourceName, $providerClass, $databaseIdName, $requestIdName);    
+    $dataSource      = generateDatasourceNode($xml, $dataSourceName, $providerClass, $databaseIdName, $requestIdName);
+    generateListingToolbar($xml);
     $columns         = generateColumnsNode($xml, $columnsName, $databaseIdName, $pageActionsClassName);
-    generateListingToolbar($xml);   
-    
+     
     $path = $module_info->folder . 
         '/view/adminhtml/ui_component/' . $gridId . '.xml';        
     output("Creating New $path");
