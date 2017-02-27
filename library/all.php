@@ -1354,7 +1354,7 @@ function pestle_cli($argv)
         $namespace = parseNamespace($contents);
         if(!$namespace)
         {
-            \Pulsestorm\Pestle\Library\output("No Namspace: Skipping $file");
+            \Pulsestorm\Pestle\Library\output("No Namespace: Skipping $file");
             continue;            
         }
         $class     = parseClass($contents);
@@ -1597,7 +1597,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 
 
 /**
-* ALPHA: Partiall converts Magento 1 config.xml to Magento 2
+* ALPHA: Partially converts Magento 1 config.xml to Magento 2
 * Long
 * Description
 * @command magento2:convert_observers_xml
@@ -5702,7 +5702,8 @@ function getShellScript($argv)
     $moduleNameLowerCase      = strToLower($moduleName);
     $modelNameLowerCase       = strToLower($modelName);
     $modelNamePluralLowerCase = strToLower($modelNamePlural);
-        
+
+    $pathModule = 'app/code/'.$packageName . '/' . $moduleName;        
     return '
 #!/bin/bash
 pestle.phar magento2:generate:module ' . $packageName . ' ' . $moduleName . ' 0.0.1
@@ -5715,9 +5716,11 @@ pestle.phar generate_view ' . $packageName . '_' . $moduleName . ' adminhtml ' .
 pestle.phar magento2:generate:ui:grid ' . $packageName . '_' . $moduleName . ' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . ' \'' . $packageName . '\\' . $moduleName . '\Model\ResourceModel\\' . $modelName . '\Collection\' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNameLowerCase . '_id
 pestle.phar magento2:generate:ui:form ' . $packageName . '_' . $moduleName . ' \'' . $packageName . '\\' . $moduleName . '\Model\\' . $modelName . '\' ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . '
 
-pestle.phar magento2:generate:ui:add_to_layout app/code/'.$packageName . '/' . $moduleName.'/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_'.$modelNamePluralLowerCase.'_index_index.xml content ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '
-pestle.phar magento2:generate:acl:change_title app/code/'.$packageName.'/'.$moduleName.'/etc/acl.xml '.$packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase.' "Manage '.$modelNamePluralLowerCase.'"
-pestle.phar magento2:generate:controller_edit_acl app/code/' . $packageName  . '/'.$moduleName.'/Controller/Adminhtml/Index/Index.php ' . $packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase . '
+pestle.phar magento2:generate:ui:add_to_layout '    . $pathModule.'/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_'.$modelNamePluralLowerCase.'_index_index.xml content ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '
+pestle.phar magento2:generate:acl:change_title '    . $pathModule.'/etc/acl.xml '.$packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase.' "Manage '.$modelNamePluralLowerCase.'"
+pestle.phar magento2:generate:controller_edit_acl ' . $pathModule.'/Controller/Adminhtml/Index/Index.php ' . $packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase . '
+
+pestle.phar magento2:generate:remove-named-node '   . $pathModule . '/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index.xml block '.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_block_main
 
 php bin/magento module:enable '.$packageName . '_' . $moduleName.'
 php bin/magento setup:upgrade
@@ -5737,7 +5740,7 @@ function replaceTemplateVars($template, $argv)
 * @command magento2:generate:full_module
 * @argument package_name Package Name? [Pulsestorm]
 * @argument module_name Module Name? [Helloworld]
-* @argument model_name Module Name? [Thing]
+* @argument model_name One Word Model Name? [Thing]
 */
 function pestle_cli($argv)
 {
@@ -6981,6 +6984,7 @@ function pestle_cli($argv)
 namespace Pulsestorm\Magento2\Cli\Magento2_Generate_Ui_Grid{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
+
     
 
 
@@ -7147,10 +7151,10 @@ function generateUiComponentXmlFile($gridId, $databaseIdName, $module_info, $col
 
     $xml             = simplexml_load_string(\Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml('uigrid'));        
     $argument        = generateArgumentNode($xml, $gridId, $dataSourceName, $columnsName, $collection);        
-    $dataSource      = generateDatasourceNode($xml, $dataSourceName, $providerClass, $databaseIdName, $requestIdName);    
+    $dataSource      = generateDatasourceNode($xml, $dataSourceName, $providerClass, $databaseIdName, $requestIdName);
+    generateListingToolbar($xml);
     $columns         = generateColumnsNode($xml, $columnsName, $databaseIdName, $pageActionsClassName);
-    generateListingToolbar($xml);   
-    
+     
     $path = $module_info->folder . 
         '/view/adminhtml/ui_component/' . $gridId . '.xml';        
     \Pulsestorm\Pestle\Library\output("Creating New $path");
@@ -7268,9 +7272,9 @@ function generateDataProviderClass($moduleInfo, $gridId, $collectionFactory)
 function getShortModelNameFromResourceModelCollection($collection)
 {
     $parts = explode('\\', $collection);
-    if($parts[3] !== 'ResourceModel' || $parts[(count($parts)-1)])
+    if($parts[3] !== 'ResourceModel' || $parts[(count($parts)-1)] !== 'Collection')
     {
-        \Pulsestorm\Pestle\Library\output("Collection model name does not conform to the arbitrary naming convention we chose.  We're bailing.");
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("Collection model name does not conform to the arbitrary naming convention we chose.  We're bailing.");
     }
     $parts = array_slice($parts, 4);
     array_pop($parts);
@@ -7814,7 +7818,7 @@ function extractPestleImports($namespace, $command, $file)
 }
 
 /**
-* ALPHA: Tests the "namepace integrity?  Not sure what this is anymore. 
+* ALPHA: Tests the "namespace integrity?  Not sure what this is anymore. 
 *
 * @command php:test_namespace_integrity
 */
@@ -8862,6 +8866,524 @@ function getBlankXmlLayout_handle()
 function pestle_cli($argv)
 {
 }    }
+namespace Pulsestorm\Magento2\Generate\Remove_Named_Node{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+
+
+
+/**
+* Removes a named node from a generic XML configuration file
+*
+* @command magento2:generate:remove-named-node
+* @argument path_xml The XML file? []
+* @argument node_name The <node_name/>? [block]
+* @argument name The {node_name}="" value? []
+*/
+function pestle_cli($argv)
+{
+    $xml = simplexml_load_file($argv['path_xml']);
+    $nodes = \Pulsestorm\Xml_Library\getByAttributeXmlBlockWithNodeNames(
+        'name', $xml, $argv['name'], [$argv['node_name']]);    
+
+    if(count($nodes) === 0)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("Bailing: No such node.");
+    }
+
+    if(count($nodes) > 1)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("Bailing: Found more than one node.");
+    }
+            
+    $node = $nodes[0];            
+    
+    if(count($node->children()) > 0)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("Bailing: Contains child nodes");
+    }
+
+    unset($node[0]); //http://stackoverflow.com/questions/262351/remove-a-child-with-a-specific-attribute-in-simplexml-for-php/16062633#16062633
+        
+    \Pulsestorm\Pestle\Library\writeStringToFile(
+        $argv['path_xml'],\Pulsestorm\Xml_Library\formatXmlString($xml->asXml())
+    );
+    \Pulsestorm\Pestle\Library\output("Node Removed");
+}
+}
+namespace Pulsestorm\Magento2\Generate\SchemaUpgrade{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+
+
+
+
+
+function getUpgradeSchemaPathFromModuleInfo($moduleInfo)
+{
+    return $moduleInfo->folder . '/Setup/UpgradeSchema.php';
+}
+
+function getUpgradeDataPathFromModuleInfo($moduleInfo)
+{
+    return $moduleInfo->folder . '/Setup/UpgradeData.php';
+}
+
+function classFileIsOurDataUpgrade($path)
+{
+    $contents = file_get_contents($path);
+    return strpos($contents, 'Setup\Scripts') !== -1 &&
+        strpos($contents, 'this->scriptHelper->run') !== -1;
+}
+
+function classFileIsOurSchemaUpgrade($path)
+{
+    $contents = file_get_contents($path);
+    return strpos($contents, 'Setup\Scripts') !== -1 &&
+        strpos($contents, 'this->scriptHelper->run') !== -1;
+}
+
+function moduleHasOrNeedsOurUpgradeData($moduleInfo)
+{
+    $path = getUpgradeDataPathFromModuleInfo($moduleInfo);
+    if(!file_exists($path))
+    {        
+        return true;
+    }    
+    
+    if(classFileIsOurDataUpgrade($path))
+    {
+        return true;
+    }
+    
+    return;
+}
+
+function moduleHasOrNeedsOurUpgradeSchema($moduleInfo)
+{
+    $path = getUpgradeSchemaPathFromModuleInfo($moduleInfo);
+    if(!file_exists($path))
+    {
+        return true;
+    }    
+    
+    if(classFileIsOurSchemaUpgrade($path))
+    {
+        return true;
+    }
+    
+    return;
+}
+
+function checkForUpgradeData($moduleInfo)
+{
+    if(!moduleHasOrNeedsOurUpgradeData($moduleInfo))
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("Bailing: Upgrade Data already exists and it not pestle's");
+    }
+}
+
+function checkForUpgradeSchema($moduleInfo)
+{
+    if(!moduleHasOrNeedsOurUpgradeSchema($moduleInfo))
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("Bailing: Upgrade Schema already exists and is not pestle's");
+    }
+}
+
+function checkForSchemaInstall($moduleInfo)
+{
+    if(!file_exists($moduleInfo->folder . '/Setup/InstallSchema.php'))
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("Bailing: Module needs an InstallSchema first.");
+    }
+}
+
+function getSetupScriptPathFromModuleInfo($moduleInfo, $type='schema')
+{
+    return $moduleInfo->folder . '/upgrade_scripts/' . $type;
+}
+
+function checkForExistingUpgradeScript($moduleInfo, $upgradeVersion)
+{
+    $types = ['schema', 'data'];
+    foreach($types as $type)
+    {
+        $baseScriptPath = getSetupScriptPathFromModuleInfo($moduleInfo, $type);
+        if(file_exists($baseScriptPath . '/' . $upgradeVersion . '.php'))
+        {
+            \Pulsestorm\Pestle\Library\exitWithErrorMessage("A $upgradeVersion.php $type script already exists");
+        }
+    }  
+}
+
+function getModuleXmlPathFromModuleInfo($moduleInfo)
+{
+    return $moduleInfo->folder . '/etc/module.xml';
+}
+
+function checkModuleXmlForVersion($moduleInfo, $upgradeVersion)
+{
+    $xml = simplexml_load_file(getModuleXmlPathFromModuleInfo($moduleInfo));
+    $oldVersion = $xml->module['setup_version'];
+    if(version_compare($oldVersion, $upgradeVersion) !== -1)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("New module version ({$upgradeVersion}) " .
+            "is older or equal to old module version ({$oldVersion}).");
+    }
+    return $xml;
+}
+
+function checkUpgradeVersionValidity($moduleInfo, $upgradeVersion)
+{
+    $parts = explode('.',$upgradeVersion);
+    $parts = array_filter($parts, 'is_numeric');    
+    if(count($parts) !== 3)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("Version does not appear to be in numeric X.X.X format.");
+    }        
+    checkForExistingUpgradeScript($moduleInfo, $upgradeVersion);      
+    checkModuleXmlForVersion($moduleInfo, $upgradeVersion);      
+}
+
+function getSchemaClassNameFromModuleInfo($moduleInfo)
+{
+    return $moduleInfo->vendor . '\\' . $moduleInfo->short_name . 
+        '\Setup\UpgradeSchema';
+}
+
+function getDataClassNameFromModuleInfo($moduleInfo)
+{
+    return $moduleInfo->vendor . '\\' . $moduleInfo->short_name . 
+        '\Setup\UpgradeData';
+}
+
+function getDataUseStatements()
+{
+    return 'use Magento\Framework\Setup\UpgradeDataInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\ModuleDataSetupInterface;    
+';    
+}
+
+function getDataClassBody($moduleInfo)
+{
+    $setupScriptClassName = getSetupScriptClassNameFromModuleInfo($moduleInfo);
+    return '
+    protected $scriptHelper;
+    public function __construct(
+        '.$setupScriptClassName.' $scriptHelper
+    )
+    {
+        $this->scriptHelper = $scriptHelper;
+    }
+    /**
+     * {@inheritdoc}
+     */
+    public function upgrade(
+        ModuleDataSetupInterface $setup, 
+        ModuleContextInterface $context
+    )
+    {
+        $setup->startSetup();        
+        $this->scriptHelper->run($setup, $context, \'data\');
+        $setup->endSetup();
+    }        
+';    
+}
+
+function getSchemaUseStatements()
+{
+    return 'use Magento\Framework\Setup\UpgradeSchemaInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\SchemaSetupInterface;';
+}
+
+function getSetupScriptClassNameFromModuleInfo($moduleInfo)
+{
+    return '\\' . $moduleInfo->vendor . '\\' . $moduleInfo->short_name . '\Setup\Scripts';
+}
+
+function getSchemaClassBody($moduleInfo)
+{
+    $setupScriptClassName = getSetupScriptClassNameFromModuleInfo($moduleInfo);
+    return '
+    protected $scriptHelper;
+    public function __construct(
+        '.$setupScriptClassName.' $scriptHelper
+    )
+    {
+        $this->scriptHelper = $scriptHelper;
+    }
+    /**
+     * {@inheritdoc}
+     */
+    public function upgrade(
+        SchemaSetupInterface $setup, 
+        ModuleContextInterface $context
+    )
+    {
+        $setup->startSetup();        
+        $this->scriptHelper->run($setup, $context, \'schema\');
+        $setup->endSetup();
+    }      
+';    
+}
+
+function generateUpgradeSchemaClass($moduleInfo)
+{
+    $path = getUpgradeSchemaPathFromModuleInfo($moduleInfo);
+    $className = getSchemaClassNameFromModuleInfo($moduleInfo);
+
+    $contents = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($className, false, 'UpgradeSchemaInterface');
+    $contents = str_replace('<$use$>', getSchemaUseStatements(), $contents);
+    $contents = str_replace('<$body$>', getSchemaClassBody($moduleInfo), $contents);
+    \Pulsestorm\Pestle\Library\output("Creating $className");
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($className, $contents);        
+}
+
+function generateUpgradeDataClass($moduleInfo)
+{
+    $path = getUpgradeDataPathFromModuleInfo($moduleInfo);
+    $className = getDataClassNameFromModuleInfo($moduleInfo);
+
+    $contents = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($className, false, 'UpgradeDataInterface');
+    $contents = str_replace('<$use$>', getDataUseStatements(), $contents);
+    $contents = str_replace('<$body$>', getDataClassBody($moduleInfo), $contents);
+    \Pulsestorm\Pestle\Library\output("Creating $className");
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($className, $contents); 
+}
+
+function getScriptsClassBody($moduleInfo)
+{
+    return '
+    protected $dirReader;
+    protected $currentModuleVersionFromDisk=false;
+    public function __construct(
+        \Magento\Framework\Module\Dir\Reader $dirReader
+    )
+    {
+        $this->dirReader = $dirReader;
+    }
+
+    public function run($setup, $context, $type)
+    {
+        foreach($this->getSetupScripts($type) as $version=>$script)
+        {
+            $this->runUpgradeScriptIfNeeded($version, $script, $context, $setup);
+        }            
+    }
+    
+    protected function runUpgradeScriptIfNeeded($version, $script, $context, $setup)
+    {        
+        if(!version_compare($context->getVersion(), $version, \'<\'))
+        {
+            return;
+        }
+
+        if(version_compare($this->getCurrentModuleVersionFromDisk(), $version) === -1)
+        {
+            return;
+        }
+        include $script;                
+    }  
+        
+    protected function getSetupScripts($type)
+    {
+        $files = glob($this->getBaseModuleDirectory() . \'/upgrade_scripts/\' .
+            $type . \'/*.*.*.php\');
+
+        usort($files, function($a, $b){
+            $a = pathinfo($a)[\'filename\'];
+            $b = pathinfo($b)[\'filename\'];
+            return version_compare($a, $b);
+        });
+                    
+        $withVersionKeys = [];
+        foreach($files as $file)
+        {
+            $withVersionKeys[pathinfo($file)[\'filename\']] = $file;
+        }
+        
+        return $withVersionKeys;
+    }
+    
+    protected function getModuleNameFromStaticClassName()
+    {
+        $parts = explode("\\\\", static::class);
+        return $parts[0] . \'_\' . $parts[1];
+    }
+    
+    protected function getBaseModuleDirectory()
+    {
+        return $this->dirReader->getModuleDir(\'\',$this->getModuleNameFromStaticClassName());        
+    }
+
+    /**
+     * We don\'t trust any of the standard class mechanisms to stay stable version
+     * to version, and that seems important in an upgrade class that shouldn\'t
+     * ever change.
+     */    
+    protected function getCurrentModuleVersionFromDisk()
+    {
+        if(!$this->currentModuleVersionFromDisk)
+        {
+            $xml = $this->loadXmlFile($this->getBaseModuleDirectory() . \'/etc/module.xml\');
+            $this->currentModuleVersionFromDisk = $xml->module[\'setup_version\'];
+        }
+        return $this->currentModuleVersionFromDisk;
+    }
+    
+    protected function loadXmlFile($path)
+    {
+        return simplexml_load_file($path);
+    }      
+';    
+}
+
+function generateScriptHelperClass($moduleInfo)
+{
+    $setupScriptClassName = getSetupScriptClassNameFromModuleInfo($moduleInfo);    
+    $contents = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($setupScriptClassName, false);
+    $contents = str_replace('<$use$>', '', $contents);
+    $contents = str_replace('<$body$>', getScriptsClassBody($moduleInfo), $contents);
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($setupScriptClassName, $contents);         
+}
+
+function getSchemaUpgradeScriptBody()
+{
+    return '<?php ' . "\n" .
+'/**
+ * This script `included` via class method, inherits this variable from that context
+ * @var $setup \Magento\Framework\Setup\SchemaSetupInterface
+ */
+ $setup;
+
+/**
+ * This script `included` via class method, inherits this variable from that context
+ * @var $setup \Magento\Framework\Setup\ModuleContextInterface
+ */
+ $context;
+ 
+//create a table
+//         $table = $setup->getConnection()
+//             ->newTable($setup->getTable(Gallery::GALLERY_VALUE_TO_ENTITY_TABLE))
+//             ->addColumn(
+//                 \'value_id\',
+//                 \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+//                 null,
+//                 [\'unsigned\' => true, \'nullable\' => false],
+//                 \'Value media Entry ID\'
+//             )
+//         $setup->getConnection()->createTable($table);
+
+//update a table
+// $installer = $setup;
+// $tableAdmins = $setup->getTable(\'admin_user\');
+// 
+// $setup->getConnection()->addColumn(
+//     $tableAdmins,
+//     \'failures_num\',
+//     [
+//         \'type\' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+//         \'nullable\' => true,
+//         \'default\' => 0,
+//         \'comment\' => \'Failure Number\'
+//     ]
+// );
+ ';
+}
+
+function getDataUpgradeScriptBody()
+{
+    return '<?php ' . "\n" .
+'/**
+ * This script `included` via class method, inherits this variable from that context
+ * @var $setup \Magento\Framework\Setup\ModuleDataSetupInterface
+ */
+ $setup;
+
+/**
+ * This script `included` via class method, inherits this variable from that context
+ * @var $setup \Magento\Framework\Setup\ModuleContextInterface
+ */
+ $context;
+
+//insert data  
+//             $connection = $setup->getConnection();      
+//             $select = $connection->select()
+//                 ->from(
+//                     $this->relationProcessor->getTable(\'catalog_product_link\'),
+//                     [\'product_id\', \'linked_product_id\']
+//                 )
+//                 ->where(\'link_type_id = ?\', Link::LINK_TYPE_GROUPED);
+// 
+//             $connection->query(
+//                 $connection->insertFromSelect(
+//                     $select, $this->relationProcessor->getMainTable(),
+//                     [\'parent_id\', \'child_id\'],
+//                     AdapterInterface::INSERT_IGNORE
+//                 )
+//             ); 
+
+//update data
+// $connection = $setup->getConnection(\'sales\');
+// $select = $connection->select()
+//     ->from($setup->getTable(\'sales_order_payment\'), \'entity_id\')
+//     ->columns([\'additional_information\'])
+//     ->where(\'additional_information LIKE ?\', \'%token_metadata%\');
+//     ...
+//     $connection->update(
+//         $setup->getTable(\'sales_order_payment\'),
+//         [\'additional_information\' => serialize($additionalInfo)],
+//         [\'entity_id = ?\' => $item[\'entity_id\']]
+//     );
+// }      
+ ';
+}
+
+function incrementModuleXml($moduleInfo, $upgradeVersion)
+{
+    $path = getModuleXmlPathFromModuleInfo($moduleInfo);
+    $xml = simplexml_load_file($path);
+    $xml->module['setup_version'] = $upgradeVersion;    
+    \Pulsestorm\Pestle\Library\writeStringToFile($path, \Pulsestorm\Xml_Library\formatXmlString($xml->asXml()));
+}
+
+function generateUpgradeScripts($moduleInfo, $upgradeVersion)
+{
+    \Pulsestorm\Pestle\Library\writeStringToFile(getSetupScriptPathFromModuleInfo($moduleInfo, 'schema') . 
+    '/' . $upgradeVersion . '.php', getSchemaUpgradeScriptBody());
+    
+    \Pulsestorm\Pestle\Library\writeStringToFile(getSetupScriptPathFromModuleInfo($moduleInfo, 'data') . 
+    '/' . $upgradeVersion . '.php', getDataUpgradeScriptBody());
+}        
+
+/**
+* BETA: Generates a migration-based UpgradeSchema and UpgradeData classes
+*
+* @command magento2:generate:schema-upgrade
+* @argument module_name Module Name? [Pulsestorm_Helloworld]
+* @argument upgrade_version New Module Version? [0.0.2]
+*/
+function pestle_cli($argv)
+{
+    $moduleInfo = \Pulsestorm\Magento2\Cli\Library\getModuleInformation($argv['module_name']);
+    checkForSchemaInstall($moduleInfo);
+    checkForUpgradeSchema($moduleInfo);
+    checkForUpgradeData($moduleInfo);
+    checkUpgradeVersionValidity($moduleInfo, $argv['upgrade_version']);
+    
+    generateUpgradeSchemaClass($moduleInfo);
+    generateUpgradeDataClass($moduleInfo);
+    generateScriptHelperClass($moduleInfo);
+    generateUpgradeScripts($moduleInfo, $argv['upgrade_version']);
+    incrementModuleXml($moduleInfo, $argv['upgrade_version']);
+}}
 namespace Pulsestorm\Nofrills\Build_Book{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -8884,6 +9406,7 @@ function pestle_cli($argv)
         'src/todo.md',
         'src/toc.md',
         'src/chapter0.md',
+        'src/chapter1b.md',                
         'src/chapter1.md',
         'src/chapter2.md',            
         'src/chapter3.md',         
@@ -9442,6 +9965,20 @@ function pestle_cli($argv)
     require_once($argv['file']);
 }
 }
+namespace Pulsestorm\Pestle\Version{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+define('PULSESTORM_PESTLE_VERSION', '1.1.2');
+/**
+* One Line Description
+*
+* @command version
+*/
+function pestle_cli($argv)
+{
+    \Pulsestorm\Pestle\Library\output('pestle Ver ' . PULSESTORM_PESTLE_VERSION);
+}
+}
 namespace Pulsestorm\Phpdotnet{
 /**
 * Function found on php.net.  
@@ -9575,11 +10112,12 @@ function simpleXmlAddNodesXpathWorker($xml, $path)
     ];
 }
 
-function getByAttributeXmlBlockWithNodeNames($attributeName, $xml, $name, $names)
+function getByAttributeXmlBlockWithNodeNames($attributeName, $xml, $value, $names=null)
 {
-    $search = '//*[@'.$attributeName.'="' . $name . '"]';
+    $search = '//*[@'.$attributeName.'="' . $value . '"]';
     $nodes = $xml->xpath($search);
     $nodes = array_filter($nodes, function($node) use ($names){
+        if(!$names) { return true; }
         return in_array($node->getName(), $names);
     });
     return $nodes;
