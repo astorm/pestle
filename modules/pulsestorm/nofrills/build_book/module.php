@@ -21,6 +21,7 @@ function pestle_cli($argv)
         'src/todo.md',
         'src/toc.md',
         'src/chapter0.md',
+        'src/chapter1b.md',                
         'src/chapter1.md',
         'src/chapter2.md',            
         'src/chapter3.md',         

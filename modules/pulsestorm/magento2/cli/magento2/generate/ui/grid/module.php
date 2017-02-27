@@ -2,6 +2,7 @@
 namespace Pulsestorm\Magento2\Cli\Magento2_Generate_Ui_Grid;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
 pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');    
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
 pestle_import('Pulsestorm\Xml_Library\getXmlNamespaceFromPrefix');
@@ -289,9 +290,9 @@ function generateDataProviderClass($moduleInfo, $gridId, $collectionFactory)
 function getShortModelNameFromResourceModelCollection($collection)
 {
     $parts = explode('\\', $collection);
-    if($parts[3] !== 'ResourceModel' || $parts[(count($parts)-1)])
+    if($parts[3] !== 'ResourceModel' || $parts[(count($parts)-1)] !== 'Collection')
     {
-        output("Collection model name does not conform to the arbitrary naming convention we chose.  We're bailing.");
+        exitWithErrorMessage("Collection model name does not conform to the arbitrary naming convention we chose.  We're bailing.");
     }
     $parts = array_slice($parts, 4);
     array_pop($parts);
