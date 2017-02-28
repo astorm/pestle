@@ -9,6 +9,56 @@ pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
 
+/**
+ * One Line Description
+ */
+function getMitLicenseTextAsComment()
+{
+    return '/**
+ * The MIT License (MIT)
+ * Copyright (c) 2015 - '.date('Y').' Pulse Storm LLC, Alan Storm
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining 
+ * a copy of this software and associated documentation files (the 
+ * "Software"), to deal in the Software without restriction, including 
+ * without limitation the rights to use, copy, modify, merge, publish, 
+ * distribute, sublicense, and/or sell copies of the Software, and to 
+ * permit persons to whom the Software is furnished to do so, subject to 
+ * the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT 
+ * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR 
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */';
+    
+}
+
+function prefacePhpStringWithMitLicense($string)
+{
+    $lines = preg_split('{[\r\n]}', $string);
+    $found = false;
+    $new = [];
+    foreach($lines as $line)
+    {
+        $new[] = $line;
+        if($found) {continue;}
+        if(preg_match('{^namespace.+?;}', $line))
+        {
+            $new[] = getMitLicenseTextAsComment();
+            $found = true;
+        }
+    }
+    
+    return implode("\n", $new);
+}
+
 function getUpgradeSchemaPathFromModuleInfo($moduleInfo)
 {
     return $moduleInfo->folder . '/Setup/UpgradeSchema.php';
@@ -228,6 +278,8 @@ function generateUpgradeSchemaClass($moduleInfo)
     $contents = createClassTemplateWithUse($className, false, 'UpgradeSchemaInterface');
     $contents = str_replace('<$use$>', getSchemaUseStatements(), $contents);
     $contents = str_replace('<$body$>', getSchemaClassBody($moduleInfo), $contents);
+    $contents = prefacePhpStringWithMitLicense($contents);
+        
     output("Creating $className");
     createClassFile($className, $contents);        
 }
@@ -240,7 +292,8 @@ function generateUpgradeDataClass($moduleInfo)
     $contents = createClassTemplateWithUse($className, false, 'UpgradeDataInterface');
     $contents = str_replace('<$use$>', getDataUseStatements(), $contents);
     $contents = str_replace('<$body$>', getDataClassBody($moduleInfo), $contents);
-    output("Creating $className");
+    $contents = prefacePhpStringWithMitLicense($contents);    
+    output("Creating $className");    
     createClassFile($className, $contents); 
 }
 
@@ -337,6 +390,7 @@ function generateScriptHelperClass($moduleInfo)
     $contents = createClassTemplateWithUse($setupScriptClassName, false);
     $contents = str_replace('<$use$>', '', $contents);
     $contents = str_replace('<$body$>', getScriptsClassBody($moduleInfo), $contents);
+    $contents = prefacePhpStringWithMitLicense($contents);    
     createClassFile($setupScriptClassName, $contents);         
 }
 
@@ -434,6 +488,7 @@ function getDataUpgradeScriptBody()
 
 function incrementModuleXml($moduleInfo, $upgradeVersion)
 {
+    output("Incrementing module.xml to {$upgradeVersion}");
     $path = getModuleXmlPathFromModuleInfo($moduleInfo);
     $xml = simplexml_load_file($path);
     $xml->module['setup_version'] = $upgradeVersion;    
@@ -441,12 +496,16 @@ function incrementModuleXml($moduleInfo, $upgradeVersion)
 }
 
 function generateUpgradeScripts($moduleInfo, $upgradeVersion)
-{
-    writeStringToFile(getSetupScriptPathFromModuleInfo($moduleInfo, 'schema') . 
-    '/' . $upgradeVersion . '.php', getSchemaUpgradeScriptBody());
-    
-    writeStringToFile(getSetupScriptPathFromModuleInfo($moduleInfo, 'data') . 
-    '/' . $upgradeVersion . '.php', getDataUpgradeScriptBody());
+{    
+    $setupPath = getSetupScriptPathFromModuleInfo($moduleInfo, 'schema');
+    output("Creating {$upgradeVersion} Upgrade Scripts in {$setupPath}");    
+    writeStringToFile($setupPath . '/' . $upgradeVersion . '.php', 
+        getSchemaUpgradeScriptBody());    
+            
+    $setupPath = getSetupScriptPathFromModuleInfo($moduleInfo, 'data');        
+    output("Creating {$upgradeVersion} Upgrade Scripts in {$setupPath}");    
+    writeStringToFile($setupPath . '/' . $upgradeVersion . '.php', 
+        getDataUpgradeScriptBody());
 }        
 
 /**
