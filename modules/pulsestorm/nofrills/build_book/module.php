@@ -23,6 +23,7 @@ function pestle_cli($argv)
         'src/chapter0.md',
         'src/chapter1b.md',                
         'src/chapter1.md',
+        'src/chapter-layouthandles.md',        
         'src/chapter2.md',            
         'src/chapter3.md',         
         'src/chapter4.md',         
