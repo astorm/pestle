@@ -114,7 +114,13 @@ function includeLibraryForCommand($command, $try_again=true)
         buildCommandList();
         return includeLibraryForCommand($command, false);
     }    
-    
+
+    //old underscore commands
+    if(!array_key_exists($command, $command_list))
+    {
+        $command = str_replace('-','_', $command);
+    }    
+        
     if(!array_key_exists($command, $command_list))
     {    
         output("Can't find [$command] in " . __FUNCTION__);
@@ -182,6 +188,12 @@ function getReflectedCommand($command_name)
 {
     $reflected_commands = getListOfDefinedCliFunctions();        
 
+    //old underscore commands
+    if(!array_key_exists($command_name, $reflected_commands))
+    {
+        $command_name = str_replace('-','_', $command_name);
+    }    
+    
     if(!array_key_exists($command_name, $reflected_commands))
     {
         output("No such command $command_name");
@@ -209,10 +221,17 @@ function applyCommandNameAlias($command_name)
     throw new Exception('How did you get here?');
 }
 
+function normalizeCommandUnderscoresAndDashes($command_name)
+{
+    $command_name = str_replace('_','-',$command_name);
+    return $command_name;
+}
+
 function getCommandNameFromParsedArgv($parsed_argv)
 {
     $command_name   = $parsed_argv['command'];
     $command_name   = $command_name ? $command_name : 'help'; 
+    $command_name   = normalizeCommandUnderscoresAndDashes($command_name);
     $command_name   = applyCommandNameAlias($command_name);
 
     return $command_name;
