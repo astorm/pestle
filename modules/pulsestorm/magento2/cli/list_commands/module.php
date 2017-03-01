@@ -41,7 +41,8 @@ function pestle_cli($argv)
     if($command_to_check)
     {
         $commands = array_filter($commands, function($s) use ($command_to_check){
-            return $s['command'] === $command_to_check;
+            return $s['command'] === $command_to_check || 
+                $s['command'] === str_replace('_','-',$command_to_check);
         });
     }
     output('');
