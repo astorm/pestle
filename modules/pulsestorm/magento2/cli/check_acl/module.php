@@ -100,7 +100,7 @@ function getUsedAclRuleIdsFromControllerFiles($dir)
 }
 
 /**
-* Scans modules for ACL rule ids, makes sure they'll all used/defined
+* Scans modules for ACL rule ids, makes sure they're all used/defined
 *
 * @command magento2:scan:acl-used
 * @argument dir Which Directory?
