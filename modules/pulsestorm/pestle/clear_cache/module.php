@@ -7,7 +7,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Pestle_Clear_Cache\pestle_cli_exported');
 /**
 * BETA: Clears the pestle cache
 *
-* @command pestle:clear_cache
+* @command pestle:clear-cache
 */
 function pestle_cli($argv, $options)
 {

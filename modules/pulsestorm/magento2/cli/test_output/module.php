@@ -5,7 +5,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 /**
 * A test command for the output function that should probably be pruned
 *
-* @command test_output
+* @command test-output
 */
 function pestle_cli($argv)
 {

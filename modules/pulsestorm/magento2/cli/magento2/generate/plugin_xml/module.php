@@ -13,7 +13,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Plugin_Xml\exported_pestle_cli')
 * @argument module_name Create in which module? [Pulsestorm_Helloworld]
 * @argument class Which class are you plugging into? [Magento\Framework\Logger\Monolog]
 * @argument class_plugin What's your plugin class name? [<$module_name$>\Plugin\<$class$>]
-* @command magento2:generate:plugin_xml
+* @command magento2:generate:plugin-xml
 */
 function pestle_cli($argv)
 {

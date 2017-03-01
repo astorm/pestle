@@ -13,7 +13,7 @@ pestle_import('Pulsestorm\Xml_Library\simpleXmlAddNodesXpath');
 *
 * Wrapped by magento2:foo:baz version of command
 *
-* @command generate_acl
+* @command generate-acl
 * @argument module_name Which Module? [Pulsestorm_HelloWorld]
 * @argument rule_ids Rule IDs? [<$module_name$>::top,<$module_name$>::config,]
 */

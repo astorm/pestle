@@ -79,7 +79,7 @@ function createControllerClassForRoute($module, $area, $acl)
 /**
 * Creates a Route XML
 * generate_route module area id 
-* @command generate_route
+* @command generate-route
 * @argument module_name Which Module? [Pulsestorm_HelloWorld]
 * @argument area Which Area (frontend, adminhtml)? [frontend]
 * @argument frontname Frontname/Route ID? [pulsestorm_helloworld]

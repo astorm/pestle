@@ -101,7 +101,7 @@ function extractPestleImports($namespace, $command, $file)
 /**
 * ALPHA: Tests the "namespace integrity?  Not sure what this is anymore. 
 *
-* @command php:test_namespace_integrity
+* @command php:test-namespace-integrity
 */
 function pestle_cli($argv)
 {

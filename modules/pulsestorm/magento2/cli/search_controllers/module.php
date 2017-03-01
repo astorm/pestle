@@ -56,7 +56,7 @@ function getExecuteMethods($controllers)
 
 /**
 * Searches controllers
-* @command magento2:search:search_controllers
+* @command magento2:search:search-controllers
 */
 function pestle_cli($argv)
 {

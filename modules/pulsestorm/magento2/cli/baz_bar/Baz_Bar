@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\output');
 /**
 * ALPHA: What is this?
 *
-* @command baz_bar
+* @command baz-bar
 */
 function pestle_cli($argv)
 {

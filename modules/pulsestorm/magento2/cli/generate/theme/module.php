@@ -80,7 +80,7 @@ function createViewXmlFile($base_folder, $package, $theme, $area)
 *
 * Wrapped by magento:foo:baz ... version of command
 *
-* @command generate_theme
+* @command generate-theme
 * @argument package Theme Package Name? [Pulsestorm]
 * @argument theme Theme Name? [blank]
 * @argument area Area? (frontend, adminhtml) [frontend]

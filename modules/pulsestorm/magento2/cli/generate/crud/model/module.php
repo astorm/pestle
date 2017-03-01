@@ -432,7 +432,7 @@ function createDataClass($module_info, $model_name)
 *
 * Wrapped by magento:foo:baz ... version of command
 *
-* @command generate_crud_model
+* @command generate-crud-model
 * @argument module_name Which module? [Pulsestorm_HelloGenerate]
 * @argument model_name  What model name? [Thing]
 */

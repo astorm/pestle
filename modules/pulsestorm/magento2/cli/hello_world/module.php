@@ -7,7 +7,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 /**
 * A Hello World command.  Hello World!
 *
-* @command hello_world
+* @command hello-world
 * @option service Which branch of the service
 */
 function pestle_cli($argv, $options)

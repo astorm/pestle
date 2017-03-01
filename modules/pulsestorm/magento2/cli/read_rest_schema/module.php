@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 /**
 * BETA: Magento command, reads the rest schema on a Magento system
 *
-* @command magento2:read_rest_schema
+* @command magento2:read-rest-schema
 * @argument url Base Url? [http://magento-2-with-keys.dev/]
 */
 function pestle_cli($argv)

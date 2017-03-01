@@ -131,7 +131,7 @@ function runSimulation($argv, $results, $keepDoor, $times)
 * techniques on the contestants.  Also assumes the producers had no access
 * to the contestant to tell them which doors to pick or to not pick.  
 *
-* @command pulsestorm:monty_hall_problem
+* @command pulsestorm:monty-hall-problem
 * @argument strategy Which Strategy (keep_door|change_door)? [keep_door]
 * @argument times Run Game N Times [10000]
 */

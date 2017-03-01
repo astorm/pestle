@@ -4,7 +4,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 /**
 * Another Hello World we can probably discard
-* @command pestle:dev_import
+* @command pestle:dev-import
 */
 function pestle_cli($argv)
 {

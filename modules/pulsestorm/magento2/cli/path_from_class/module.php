@@ -15,7 +15,7 @@ function getPathFromClass($class)
 * Turns a PHP class into a Magento 2 path
 * Long
 * Description
-* @command magento2:path_from_class
+* @command magento2:path-from-class
 */
 function pestle_cli($argv)
 {

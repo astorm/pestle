@@ -48,7 +48,7 @@ function createDiIfNeeded($module_dir)
 * app/code/Pulsestorm/Generate/Command/Example.php
 * app/code/Pulsestorm/Generate/etc/di.xml
 *
-* @command generate_command
+* @command generate-command
 * @argument module_name In which module? [Pulsestorm_Helloworld]
 * @argument command_name Command Name? [Testbed]
 */

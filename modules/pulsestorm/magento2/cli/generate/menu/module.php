@@ -163,7 +163,7 @@ function addAttributesToXml($argv, $xml)
 *
 * Wrapped by magento:foo:baz ... version of command
 *
-* @command generate_menu
+* @command generate-menu
 * @argument module_name Module Name? [Pulsestorm_HelloGenerate]
 * @argument parent @callback selectParentMenu
 * @argument id Menu Link ID [<$module_name$>::unique_identifier]

@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 /**
 * A demo of pestle argument and option configuration/parsing
 *
-* @command pestle:hello_argument
+* @command pestle:hello-argument
 * @argument greeting Please Enter the Greeting [Hello]
 * @option explain Should I display the explain text?
 * @argument entity Please Enter the Entity [World]

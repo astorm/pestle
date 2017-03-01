@@ -19,7 +19,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
 * @argument namespace Vendor Namespace? [Pulsestorm]
 * @argument name Module Name? [Testbed]
 * @argument version Version? [0.0.1]
-* @command generate_module
+* @command generate-module
 */
 function pestle_cli($argv)
 {

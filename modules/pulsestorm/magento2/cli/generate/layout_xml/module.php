@@ -11,7 +11,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 * files needed to add a block to Magento's page 
 * layout
 *
-* @command generate_layout_xml
+* @command generate-layout-xml
 * @todo implement me please
 */
 function pestle_cli($argv)

@@ -76,7 +76,7 @@ function createBlockClass($module_info, $block_name, $area='frontname')
 *
 * Wrapped by magento:... version of command
 *
-* @command generate_view
+* @command generate-view
 * @argument module_name Which Module? [Pulsestorm_HelloGenerate]
 * @argument area Which Area? [frontend]
 * @argument handle Which Handle? [<$module_name$>_index_index]

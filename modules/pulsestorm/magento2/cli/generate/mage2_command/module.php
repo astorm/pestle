@@ -14,7 +14,7 @@ pestle_import('Pulsestorm\Cli\Code_Generation\createNamespaceFromNamespaceAndCom
 *
 *     pestle.phar generate_pestle_command command_name
 *
-* @command generate_pestle_command
+* @command generate-pestle-command
 * @argument command_name New Command Name? [foo_bar]
 * @argument namespace_module Create in PHP Namespace? [Pulsestorm\Magento2\Cli]
 */

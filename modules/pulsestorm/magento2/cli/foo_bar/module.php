@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 /**
 * ALPHA: Another Hello World we can probably discard
 *
-* @command pestle:foo_bar
+* @command pestle:foo-bar
 */
 function pestle_cli($argv)
 {

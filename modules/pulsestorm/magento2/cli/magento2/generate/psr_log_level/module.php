@@ -10,7 +10,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Psr_Log_Level\exported_pestle_cl
 * This command generates a list of Magento 1 log levels, 
 * and their PSR log level equivalents.
 *
-* @command magento2:generate:psr_log_level
+* @command magento2:generate:psr-log-level
 */
 function pestle_cli($argv)
 {

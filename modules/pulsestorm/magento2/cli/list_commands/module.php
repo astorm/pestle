@@ -11,7 +11,7 @@ pestle_import('Pulsestorm\Cli\Build_Command_List\includeAllModuleFiles');
 * Read the doc blocks for all commands, and then
 * outputs a list of commands along with thier doc
 * blocks.  
-* @command list_commands
+* @command list-commands
 */
 function pestle_cli($argv)
 {

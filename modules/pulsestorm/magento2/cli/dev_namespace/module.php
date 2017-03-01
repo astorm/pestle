@@ -5,7 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 /**
 * BETA: Used to move old pestle files to module.php -- still needed?
-* @command pestle:dev_namespace
+* @command pestle:dev-namespace
 */
 function pestle_cli($argv)
 {

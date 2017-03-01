@@ -8,7 +8,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 *
 * Wrapped by magento:doo:baz version of command
 *
-* @command generate_install
+* @command generate-install
 * @argument id_key Identity Key? [magento_2_new]
 * @argument umask Default Umask? [000]
 * @argument repo Composer Repo [https://repo.magento.com/]

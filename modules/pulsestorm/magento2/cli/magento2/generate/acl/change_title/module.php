@@ -9,7 +9,7 @@ pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 /**
 * Changes the title of a specific ACL rule in a Magento 2 acl.xml file
 *
-* @command magento2:generate:acl:change_title
+* @command magento2:generate:acl:change-title
 * @argument path_acl Path to ACL file? 
 * @argument acl_rule_id ACL Rule ID? 
 * @argument title New Title? 

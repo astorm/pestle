@@ -6,7 +6,7 @@ pestle_import('Pulsestorm\Pestle\Importer\getCacheDir');
 /**
 * BETA: Clears the pestle cache
 *
-* @command pestle_clear_cache
+* @command pestle-clear-cache
 */
 function pestle_cli($argv)
 {

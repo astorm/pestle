@@ -146,7 +146,7 @@ class EditConstantTokenParser extends TokenParser
 /**
 * Edits the const ADMIN_RESOURCE value of an admin controller
 *
-* @command magento2:generate:controller_edit_acl
+* @command magento2:generate:controller-edit-acl
 * @argument path_controller Path to Admin Controller
 * @argument acl_rule Path to Admin Controller
 */

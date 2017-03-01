@@ -212,7 +212,7 @@ function removeIrrelevantDataFromUrls($urls)
 /**
 * BETA: Used to scan my old pre-Wordpress archives for missing pages. 
 *
-* @command pulsestorm:orphan_content
+* @command pulsestorm:orphan-content
 */
 function pestle_cli($argv)
 {

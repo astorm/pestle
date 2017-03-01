@@ -44,7 +44,7 @@ function underscoreClass($class)
 * @argument module_name Create in which module? [Pulsestorm_Helloworld]
 * @argument class Which class are you plugging into? [Magento\Framework\Logger\Monolog]
 * @argument class_plugin What's your plugin class name? [<$module_name$>\Plugin\<$class$>]
-* @command generate_plugin_xml
+* @command generate-plugin-xml
 */
 function pestle_cli($argv)
 {

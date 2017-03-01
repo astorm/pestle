@@ -19,7 +19,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\inputModuleName');
 *             __DIR__
 *         );
 * 
-* @command generate_registration
+* @command generate-registration
 * @argument module_name Which Module? [Vendor_Module] 
 */
 function pestle_cli($argv)

@@ -30,7 +30,7 @@ function parseClass($contents)
 
 /**
 * BETA: Scans a Magento 2 module for misnamed PHP classes
-* @command magento2:scan:class_and_namespace
+* @command magento2:scan:class-and-namespace
 * @argument folder Which Folder? 
 */
 function pestle_cli($argv)

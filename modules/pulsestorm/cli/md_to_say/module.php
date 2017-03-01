@@ -12,7 +12,7 @@ function swapExtension($filename, $from, $to)
 
 /**
 * Converts a markdown files to an aiff
-* @command pulsestorm:md_to_say
+* @command pulsestorm:md-to-say
 */
 function pestle_cli($argv)
 {

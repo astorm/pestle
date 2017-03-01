@@ -9,7 +9,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\convertObserverTreeScoped');
 * ALPHA: Partially converts Magento 1 config.xml to Magento 2
 * Long
 * Description
-* @command magento2:convert_observers_xml
+* @command magento2:convert-observers-xml
 */
 function pestle_cli($argv)
 {

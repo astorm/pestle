@@ -10,7 +10,7 @@ pestle_import('Pulsestorm\Cli\Code_Generation\getZendPsrLogLevelMap');
 * This command generates a list of Magento 1 log levels, 
 * and their PSR log level equivalents.
 *
-* @command generate_psr_log_level
+* @command generate-psr-log-level
 */
 function pestle_cli($argv)
 {   

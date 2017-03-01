@@ -10,7 +10,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\askForModuleAndReturnFolder');
 * Checks for incorrectly named template folder
 * Long
 * Description
-* @command magento2:check_templates
+* @command magento2:check-templates
 */
 function pestle_cli($argv)
 {

@@ -227,7 +227,7 @@ function injectDependencyArgumentIntoFile($class, $file, $propName=false)
 *
 *    pestle.phar generate_di app/code/Pulsestorm/Generate/Command/Example.php 'Magento\Catalog\Model\ProductFactory' 
 *
-* @command generate_di
+* @command generate-di
 * @argument file Which PHP class file are we injecting into?
 * @argument class Which class to inject? [Magento\Catalog\Model\ProductFactory]
 *

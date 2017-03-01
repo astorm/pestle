@@ -12,7 +12,7 @@ pestle_import('\Pulsestorm\Magento2\Cli\Library\getDiLinesFromMage2ClassName');
 * ALPHA: Partially converts Magento 1 class to Magento 2
 * Long
 * Description
-* @command magento2:convert_class
+* @command magento2:convert-class
 */
 function pestle_cli($argv)
 {

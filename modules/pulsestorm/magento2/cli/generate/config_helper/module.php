@@ -11,7 +11,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 * This command will generate the necessary files and configuration 
 * needed for reading Magento 2's configuration values.
 * 
-* @command generate_config_helper
+* @command generate-config-helper
 * @todo needs to be implemented
 */
 function pestle_cli($argv)
