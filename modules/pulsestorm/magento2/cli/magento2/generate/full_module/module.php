@@ -19,7 +19,7 @@ function getShellScript($argv, $options)
     $modelNamePluralLowerCase = strToLower($modelNamePlural);
 
     $pharName = 'pestle.phar';
-    if(array_key_exists('use-phar-name', $options))
+    if(array_key_exists('use-phar-name', $options) && $options['use-phar-name'])
     {
         $pharName = 'pestle_dev';
     }
@@ -62,6 +62,7 @@ function replaceTemplateVars($template, $argv)
 * @argument package_name Package Name? [Pulsestorm]
 * @argument module_name Module Name? [Helloworld]
 * @argument model_name One Word Model Name? [Thing]
+* @option use-phar-name Change pestle.phar to something like pestle_dev
 */
 function pestle_cli($argv, $options)
 {

@@ -72,15 +72,15 @@ function getUpgradeDataPathFromModuleInfo($moduleInfo)
 function classFileIsOurDataUpgrade($path)
 {
     $contents = file_get_contents($path);
-    return strpos($contents, 'Setup\Scripts') !== -1 &&
-        strpos($contents, 'this->scriptHelper->run') !== -1;
+    return strpos($contents, 'Setup\Scripts') !== false &&
+        strpos($contents, 'this->scriptHelper->run') !== false;
 }
 
 function classFileIsOurSchemaUpgrade($path)
 {
     $contents = file_get_contents($path);
-    return strpos($contents, 'Setup\Scripts') !== -1 &&
-        strpos($contents, 'this->scriptHelper->run') !== -1;
+    return strpos($contents, 'Setup\Scripts') !== false &&
+        strpos($contents, 'this->scriptHelper->run') !== false;
 }
 
 function moduleHasOrNeedsOurUpgradeData($moduleInfo)
@@ -515,7 +515,7 @@ function generateUpgradeScripts($moduleInfo, $upgradeVersion)
 * @argument module_name Module Name? [Pulsestorm_Helloworld]
 * @argument upgrade_version New Module Version? [0.0.2]
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options)
 {
     $moduleInfo = getModuleInformation($argv['module_name']);
     checkForSchemaInstall($moduleInfo);
@@ -528,4 +528,9 @@ function pestle_cli($argv)
     generateScriptHelperClass($moduleInfo);
     generateUpgradeScripts($moduleInfo, $argv['upgrade_version']);
     incrementModuleXml($moduleInfo, $argv['upgrade_version']);
+}
+
+function exportedSchemaUpgrade($argv, $options)
+{
+    return pestle_cli($argv, $options);
 }

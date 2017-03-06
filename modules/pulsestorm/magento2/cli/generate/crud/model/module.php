@@ -10,6 +10,13 @@ pestle_import('Pulsestorm\Cli\Code_Generation\templateInterface');
 pestle_import('Pulsestorm\Magento2\Cli\Path_From_Class\getPathFromClass');
 pestle_import('Pulsestorm\Cli\Code_Generation\generateInstallSchemaTable');
 
+pestle_import('Pulsestorm\Magento2\Generate\SchemaUpgrade\classFileIsOurSchemaUpgrade');
+pestle_import('Pulsestorm\Magento2\Generate\SchemaUpgrade\classFileIsOurDataUpgrade');
+pestle_import('Pulsestorm\Magento2\Generate\SchemaUpgrade\getModuleXmlPathFromModuleInfo');
+pestle_import('Pulsestorm\Magento2\Generate\SchemaUpgrade\exportedSchemaUpgrade');
+
+pestle_import('Pulsestorm\Magento2\Generate\SchemaUpgrade\getSetupScriptPathFromModuleInfo');
+
 define('BASE_COLLECTION_CLASS'  , '\Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection');
 define('BASE_RESOURCE_CLASS'    , '\Magento\Framework\Model\ResourceModel\Db\AbstractDb');
 define('BASE_MODEL_CLASS'       , '\Magento\Framework\Model\AbstractModel');
@@ -477,6 +484,13 @@ function createSchemaClass($moduleInfo, $modelName, $options)
     writeStringToFile($path, $contents);
 }
 
+function generateUpgradeDataClassName($moduleInfo)
+{
+    $className  = str_replace('_', '\\', $moduleInfo->name) . 
+        '\Setup\UpgradeData';
+    return $className;
+}
+
 function generateClassNameAndInterfaceNameForDataFromModuleInfoAndOptions($moduleInfo, $options)
 {
     $className  = str_replace('_', '\\', $moduleInfo->name) . 
@@ -485,8 +499,8 @@ function generateClassNameAndInterfaceNameForDataFromModuleInfoAndOptions($modul
     
     if(isUseUpgradeSchema($options))
     {
-        $className  = str_replace('_', '\\', $moduleInfo->name) . 
-            '\Setup\UpgradeData';
+        $className = generateUpgradeDataClassName($moduleInfo);
+
         $interfaceName = '\Magento\Framework\Setup\UpgradeDataInterface';        
     }
         
@@ -557,19 +571,63 @@ function checkForInstallSchemaClass($moduleInfo, $modelName)
     $path      = getPathFromClass($className);
     
     if(file_exists($path))
+    {  
+        $message = 
+"\nIt looks like this module already has an InstallSchema class.  This means 
+ee can't proceed.  If you're trying to add a second model to a module, 
+try using --use-upgrade-schema or --use-upgrade-schema-with-scripts\n";                   
+
+        exitWithErrorMessage($message);    
+    }  
+
+}
+
+function checkForNoInstallSchemaAndOurUpgrade($moduleInfo, $modelName)
+{
+    $className = generateInstallSchemaClassName($moduleInfo);
+    $path      = getPathFromClass($className);
+    
+    if(!file_exists($path))
     {    
         $message = 
-"\nERROR: The module {$moduleInfo->name} already has a 
-defined {$className}.  
-We can't proceed.
+"The --use-upgrade-schema-with-scripts options requires an InstallSchema
+class to already be present.  
 
-Try the following two options to use an UpgradeSchema instead.
-    
-    --use-upgrade-schema
-    --use-upgrade-schema-with-scripts
+Try creating your first crud model without any options, and use the 
+--use-upgrade-schema-with-scripts options for your 2nd, 3rd, ..., nth 
+crud models. ";        
+        exitWithErrorMessage($message);
+    }
+
+    $path = getPathFromClass(
+        generateUpgradeSchemaClassName($moduleInfo));
+
+    if(file_exists($path) && !classFileIsOurSchemaUpgrade($path))
+    {
+        $message =
+"The module contains an UpgradeSchema class that is not compatible with
+UpgradeSchema classes created via magento2:generate:schema-upgrade.
+
+The --use-upgrade-schema-with-scripts relies on an UpgradeSchema class
+that is compatible with magento2:generate:schema-upgrade.
 ";        
         exitWithErrorMessage($message);
     }
+
+    $path = getPathFromClass(
+        generateUpgradeDataClassName($moduleInfo));        
+    if(file_exists($path) && !classFileIsOurDataUpgrade($path))
+    {
+        $message =
+"The module contains an UpgradeData class that is not compatible with
+UpgradeSchema classes created via magento2:generate:schema-upgrade.
+
+The --use-upgrade-schema-with-scripts relies on an UpgradeSchema class
+that is compatible with magento2:generate:schema-upgrade.
+";      
+        exitWithErrorMessage($message);
+    }
+    
 }
 
 function checkForSchemaOptions($keys)
@@ -588,10 +646,66 @@ function checkForSchemaClasses($moduleInfo, $modelName, $options)
     {
         checkForUpgradeSchemaClass($moduleInfo, $modelName);
     }
+    else if(array_key_exists('use-upgrade-schema-with-scripts', $options))    
+    {
+        checkForNoInstallSchemaAndOurUpgrade($moduleInfo, $modelName);
+    }    
     else if(!array_key_exists('use-upgrade-schema-with-scripts', $options))
     {
         checkForInstallSchemaClass($moduleInfo, $modelName);
     }
+}
+
+function isUseUpgradeSchemaWithScripts($options)
+{
+    return array_key_exists('use-upgrade-schema-with-scripts', $options);
+}
+
+function bumpDottedVersionNumber($version)
+{
+    $parts = explode('.', $version);
+    $last = array_pop($parts);
+    if(!is_numeric($last))
+    {
+        exitWithErrorMessage("I don't know what to do with a version number that looks like $version");
+    }
+    $last++;
+    $parts[] = $last;
+    return implode('.', $parts);
+}
+
+function invokeGenerateSchemaUpgrade($moduleInfo, $modelName, $options)
+{
+    $xml = simplexml_load_file(getModuleXmlPathFromModuleInfo($moduleInfo));
+    $oldVersion = $xml->module['setup_version'];
+    $version = bumpDottedVersionNumber($oldVersion);
+
+    exportedSchemaUpgrade([
+        'module_name'       => $moduleInfo->name,
+        'upgrade_version'   => $version
+    ],[]);
+    
+    $setupPath = getSetupScriptPathFromModuleInfo($moduleInfo, 'schema') . 
+                    "/{$version}.php";
+    
+    $table_name = createTableNameFromModuleInfoAndModelName(
+        $moduleInfo, $modelName);
+    
+    $contents = file_get_contents($setupPath);
+    $contents .= "\n" . '$installer = $setup;' . "\n" . generateInstallSchemaTable($table_name);
+    
+    writeStringToFile($setupPath, $contents);                
+}
+
+function createSchemaAndDataClasses($moduleInfo, $modelName, $options)
+{
+    if(isUseUpgradeSchemaWithScripts($options))
+    {                   
+        invokeGenerateSchemaUpgrade($moduleInfo, $modelName, $options);
+        return;
+    }
+    createSchemaClass($moduleInfo, $modelName, $options);
+    createDataClass($moduleInfo, $modelName, $options);
 }
 
 /**
@@ -625,12 +739,8 @@ function pestle_cli($argv, $options)
     createModelInterface($moduleInfo, $modelName);
     createCollectionClass($moduleInfo, $modelName);
     createResourceModelClass($moduleInfo, $modelName);
-    createModelClass($moduleInfo, $modelName); 
-                   
-    createSchemaClass($moduleInfo, $modelName, $options);
-    createDataClass($moduleInfo, $modelName, $options);
-
-
+    createModelClass($moduleInfo, $modelName);                    
+    createSchemaAndDataClasses($moduleInfo, $modelName, $options);
 }
 
 function exported_pestle_cli($argv, $options)
