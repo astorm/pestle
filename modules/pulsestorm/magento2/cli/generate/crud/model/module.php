@@ -2,6 +2,7 @@
 namespace Pulsestorm\Magento2\Cli\Generate\Crud\Model;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
@@ -427,6 +428,34 @@ function createDataClass($module_info, $model_name)
     }        
 }
 
+function generateInstallSchemaClassName($module_info)
+{
+    $className  = str_replace('_', '\\', $module_info->name) . 
+        '\Setup\InstallSchema';
+    return $className;
+}
+
+function checkForInstallSchemaClass($module_info, $model_name)
+{
+    $className = generateInstallSchemaClassName($module_info);
+    $path      = getPathFromClass($className);
+    
+    if(file_exists($path))
+    {    
+        $message = 
+"\nERROR: The module {$module_info->name} already has a 
+defined {$className}.  
+We can't proceed.
+
+Try the following two options to use an UpgradeSchema instead.
+    
+    --use-upgrade-schema
+    --use-upgrade-schema-with-scripts
+";        
+        exitWithErrorMessage($message);
+    }
+}
+
 /**
 * Generates Magento 2 CRUD model
 *
@@ -442,14 +471,13 @@ function pestle_cli($argv)
     $module_info = getModuleInformation($argv['module_name']);    
     $model_name  = $argv['model_name'];
 
+    checkForInstallSchemaClass($module_info, $model_name);
     createRepositoryInterface($module_info, $model_name);    
     createRepository($module_info, $model_name);
     createModelInterface($module_info, $model_name);
     createCollectionClass($module_info, $model_name);
     createResourceModelClass($module_info, $model_name);
-    createModelClass($module_info, $model_name);
-    
-    
+    createModelClass($module_info, $model_name);        
     createSchemaClass($module_info, $model_name);
     createDataClass($module_info, $model_name);
 
