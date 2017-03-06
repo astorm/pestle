@@ -14,22 +14,31 @@ define('BASE_COLLECTION_CLASS'  , '\Magento\Framework\Model\ResourceModel\Db\Col
 define('BASE_RESOURCE_CLASS'    , '\Magento\Framework\Model\ResourceModel\Db\AbstractDb');
 define('BASE_MODEL_CLASS'       , '\Magento\Framework\Model\AbstractModel');
 
-function getCollectionClassNameFromModuleInfo($module_info, $model_name)
+function getCollectionClassNameFromModuleInfo($moduleInfo, $modelName)
 {
-    return $module_info->vendor . '\\' . $module_info->short_name . 
-        '\Model\ResourceModel\\' . $model_name . '\Collection';
+    return $moduleInfo->vendor . '\\' . $moduleInfo->short_name . 
+        '\Model\ResourceModel\\' . $modelName . '\Collection';
 }
 
-function getResourceModelClassNameFromModuleInfo($module_info, $model_name)
+function getResourceModelClassNameFromModuleInfo($moduleInfo, $modelName)
 {
-    return $module_info->vendor . '\\' . $module_info->short_name . 
-        '\Model\ResourceModel\\' . $model_name;
+    return $moduleInfo->vendor . '\\' . $moduleInfo->short_name . 
+        '\Model\ResourceModel\\' . $modelName;
 }
 
-function getModelClassNameFromModuleInfo($module_info, $model_name)
+function getModelClassNameFromModuleInfo($moduleInfo, $modelName)
 {
-    return $module_info->vendor . '\\' . $module_info->short_name . 
-        '\Model\\' . $model_name;
+    return $moduleInfo->vendor . '\\' . $moduleInfo->short_name . 
+        '\Model\\' . $modelName;
+}
+
+function templateUpgradeDataFunction()
+{
+    return "\n" . '    public function upgrade(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
+    {
+        //install data here
+    }' . "\n";
+
 }
 
 function templateInstallDataFunction()
@@ -38,6 +47,19 @@ function templateInstallDataFunction()
     {
         //install data here
     }' . "\n";
+}
+
+function templateUpgradeFunction()
+{
+    return "\n" . '    public function upgrade(\Magento\Framework\Setup\SchemaSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
+    {
+        $installer = $setup;
+        $installer->startSetup();
+        //START: install stuff
+        //END:   install stuff
+        $installer->endSetup();
+    }' . "\n";
+
 }
 
 function templateInstallFunction()
@@ -102,10 +124,10 @@ function templateComplexInterface($useContents, $methodContents, $interfaceConte
     return $interfaceContents;
 }
 
-function createRepositoryInterfaceContents($module_info, $model_name, $interface)
+function createRepositoryInterfaceContents($moduleInfo, $modelName, $interface)
 {
-    $modelInterface             = getModelInterfaceShortName($model_name);
-    $modelInterfaceLongName     = getModelInterfaceName($module_info, $model_name);
+    $modelInterface             = getModelInterfaceShortName($modelName);
+    $modelInterfaceLongName     = getModelInterfaceName($moduleInfo, $modelName);
     
     $contents                   = templateInterface($interface,[]);   
     $contentsAbstractFunctions  = templateRepositoryInterfaceAbstractFunction($modelInterface);
@@ -116,9 +138,9 @@ function createRepositoryInterfaceContents($module_info, $model_name, $interface
     return $contents;
 }
 
-function getModelRepositoryName($model_name)
+function getModelRepositoryName($modelName)
 {
-    return $model_name . 'Repository';    
+    return $modelName . 'Repository';    
 }
 
 function templateUseFunctions($repositoryInterface, $thingInterface, $classModel, $collectionModel)
@@ -235,17 +257,17 @@ function templateRepositoryFunctions($modelName)
     }';    
 }
 
-function createRepository($module_info, $model_name)
+function createRepository($moduleInfo, $modelName)
 {
-    $classCollection    = getCollectionClassNameFromModuleInfo($module_info, $model_name);
-    $classModel         = getModelClassNameFromModuleInfo($module_info, $model_name);
-    $modelInterface     = getModelInterfaceName($module_info, $model_name);
-    $repositoryName     = getModelRepositoryName($model_name);
-    $repositoryFullName = getModelClassNameFromModuleInfo($module_info, $repositoryName);
-    $interface          = getModuleInterfaceName($module_info, $repositoryName, 'Api');    
+    $classCollection    = getCollectionClassNameFromModuleInfo($moduleInfo, $modelName);
+    $classModel         = getModelClassNameFromModuleInfo($moduleInfo, $modelName);
+    $modelInterface     = getModelInterfaceName($moduleInfo, $modelName);
+    $repositoryName     = getModelRepositoryName($modelName);
+    $repositoryFullName = getModelClassNameFromModuleInfo($moduleInfo, $repositoryName);
+    $interface          = getModuleInterfaceName($moduleInfo, $repositoryName, 'Api');    
     $template           = createClassTemplate($repositoryFullName, false, '\\' . $interface, true);
     
-    $body               = templateRepositoryFunctions($model_name);
+    $body               = templateRepositoryFunctions($modelName);
     $use                = templateUseFunctions($interface, $modelInterface, $classModel, $classCollection);
     $contents           = $template;
     $contents           = str_replace('<$body$>', $body, $contents);
@@ -257,22 +279,22 @@ function createRepository($module_info, $model_name)
     writeStringToFile($path, $contents);    
 }
 
-function createRepositoryInterface($module_info, $model_name)
+function createRepositoryInterface($moduleInfo, $modelName)
 {    
-    $repositoryName = getModelRepositoryName($model_name);
-    $interface      = getModuleInterfaceName($module_info, $repositoryName, 'Api');
+    $repositoryName = getModelRepositoryName($modelName);
+    $interface      = getModuleInterfaceName($moduleInfo, $repositoryName, 'Api');
     $path           = getPathFromClass($interface);    
-    $contents       = createRepositoryInterfaceContents($module_info, $model_name, $interface);
+    $contents       = createRepositoryInterfaceContents($moduleInfo, $modelName, $interface);
     output("Creating: " . $path);
     writeStringToFile($path, $contents);
 }
 
-function createCollectionClass($module_info, $model_name)
+function createCollectionClass($moduleInfo, $modelName)
 {
-    $path                   = $module_info->folder . "/Model/ResourceModel/$model_name/Collection.php";
-    $class_collection       = getCollectionClassNameFromModuleInfo($module_info, $model_name);
-    $class_model            = getModelClassNameFromModuleInfo($module_info, $model_name);
-    $class_resource         = getResourceModelClassNameFromModuleInfo($module_info, $model_name);
+    $path                   = $moduleInfo->folder . "/Model/ResourceModel/$modelName/Collection.php";
+    $class_collection       = getCollectionClassNameFromModuleInfo($moduleInfo, $modelName);
+    $class_model            = getModelClassNameFromModuleInfo($moduleInfo, $modelName);
+    $class_resource         = getResourceModelClassNameFromModuleInfo($moduleInfo, $modelName);
             
     $template               = createClassTemplate($class_collection, BASE_COLLECTION_CLASS);
     $construct              = templateConstruct($class_model, $class_resource);
@@ -282,25 +304,25 @@ function createCollectionClass($module_info, $model_name)
     writeStringToFile($path, $class_contents);
 }
 
-function createDbTableNameFromModuleInfoAndModelShortName($module_info, $model_name)
+function createDbTableNameFromModuleInfoAndModelShortName($moduleInfo, $modelName)
 {
-    return strToLower($module_info->name . '_' . $model_name);
+    return strToLower($moduleInfo->name . '_' . $modelName);
 }
 
-function createDbIdFromModuleInfoAndModelShortName($module_info, $model_name)
+function createDbIdFromModuleInfoAndModelShortName($moduleInfo, $modelName)
 {
     return createDbTableNameFromModuleInfoAndModelShortName(
-        $module_info, $model_name) . '_id';
+        $moduleInfo, $modelName) . '_id';
 }
 
-function createResourceModelClass($module_info, $model_name)
+function createResourceModelClass($moduleInfo, $modelName)
 {
-    $path = $module_info->folder . "/Model/ResourceModel/$model_name.php";
-    // $db_table               = strToLower($module_info->name . '_' . $model_name);
-    $db_table               = createDbTableNameFromModuleInfoAndModelShortName($module_info, $model_name);
+    $path = $moduleInfo->folder . "/Model/ResourceModel/$modelName.php";
+    // $db_table               = strToLower($moduleInfo->name . '_' . $modelName);
+    $db_table               = createDbTableNameFromModuleInfoAndModelShortName($moduleInfo, $modelName);
     // $db_id                  = strToLower($db_table) . '_id';
-    $db_id                  = createDbIdFromModuleInfoAndModelShortName($module_info, $model_name);    
-    $class_resource         = getResourceModelClassNameFromModuleInfo($module_info, $model_name);
+    $db_id                  = createDbIdFromModuleInfoAndModelShortName($moduleInfo, $modelName);    
+    $class_resource         = getResourceModelClassNameFromModuleInfo($moduleInfo, $modelName);
     $template               = createClassTemplate($class_resource, BASE_RESOURCE_CLASS);    
     $construct              = templateConstruct($db_table, $db_id);
     $class_contents         = str_replace('<$body$>', $construct, $template);    
@@ -321,18 +343,18 @@ function templateCacheTag($tag_name)
     return "\n    const CACHE_TAG = '$tag_name';\n";
 }
 
-function getModelInterfaceShortName($model_name)
+function getModelInterfaceShortName($modelName)
 {
-    return $model_name . 'Interface';
+    return $modelName . 'Interface';
 }
 
-function createModelClass($module_info, $model_name)
+function createModelClass($moduleInfo, $modelName)
 {
-    $path = $module_info->folder . "/Model/$model_name.php";
-    $cache_tag           = strToLower($module_info->name . '_' . $model_name);
-    $class_model         = getModelClassNameFromModuleInfo($module_info, $model_name);
-    $class_resource      = getResourceModelClassNameFromModuleInfo($module_info, $model_name);
-    $implements          = getModelInterfaceShortName($model_name) . ', \Magento\Framework\DataObject\IdentityInterface';
+    $path = $moduleInfo->folder . "/Model/$modelName.php";
+    $cache_tag           = strToLower($moduleInfo->name . '_' . $modelName);
+    $class_model         = getModelClassNameFromModuleInfo($moduleInfo, $modelName);
+    $class_resource      = getResourceModelClassNameFromModuleInfo($moduleInfo, $modelName);
+    $implements          = getModelInterfaceShortName($modelName) . ', \Magento\Framework\DataObject\IdentityInterface';
     $template            = createClassTemplate($class_model, BASE_MODEL_CLASS, $implements);    
     $construct           = templateConstruct($class_resource);
 
@@ -346,43 +368,70 @@ function createModelClass($module_info, $model_name)
     writeStringToFile($path, $class_contents);    
 }
 
-function getModuleInterfaceName($module_info, $model_name, $type)
+function getModuleInterfaceName($moduleInfo, $modelName, $type)
 {
-    return $module_info->vendor . '\\' . $module_info->short_name . 
-        '\\' . $type .'\\' . getModelInterfaceShortName($model_name);
+    return $moduleInfo->vendor . '\\' . $moduleInfo->short_name . 
+        '\\' . $type .'\\' . getModelInterfaceShortName($modelName);
 
 }
 
-function getModelInterfaceName($module_info, $model_name)
+function getModelInterfaceName($moduleInfo, $modelName)
 {
-    return getModuleInterfaceName($module_info, $model_name, 'Model');
-//     return $module_info->vendor . '\\' . $module_info->short_name . 
-//         '\Model\\' . getModelInterfaceShortName($model_name);
+    return getModuleInterfaceName($moduleInfo, $modelName, 'Model');
+//     return $moduleInfo->vendor . '\\' . $moduleInfo->short_name . 
+//         '\Model\\' . getModelInterfaceShortName($modelName);
 }
 
-function createModelInterface($module_info, $model_name)
+function createModelInterface($moduleInfo, $modelName)
 {
-    $interface = getModelInterfaceName($module_info, $model_name);
+    $interface = getModelInterfaceName($moduleInfo, $modelName);
     $path      = getPathFromClass($interface);
     $contents  = templateInterface($interface,[]);    
     writeStringToFile($path, $contents);
     output("Creating: " . $path);
 }
 
-function createTableNameFromModuleInfoAndModelName($module_info, $model_name)
+function createTableNameFromModuleInfoAndModelName($moduleInfo, $modelName)
 {
-    return strToLower($module_info->name . '_' . $model_name);
+    return strToLower($moduleInfo->name . '_' . $modelName);
 }
 
-function createSchemaClass($module_info, $model_name)
+function generateClassNameAndInterfaceNameForSchemaFromModuleInfoAndOptions(
+    $moduleInfo, $options)
 {
-    $className  = str_replace('_', '\\', $module_info->name) . 
-        '\Setup\InstallSchema';
-    $path       = getPathFromClass($className);
+    //InstallSchema
+    $className      = generateInstallSchemaClassName($moduleInfo);
+    $interfaceName  = '\Magento\Framework\Setup\InstallSchemaInterface';
 
-    $template   = createClassTemplate($className, false, 
-        '\Magento\Framework\Setup\InstallSchemaInterface');        
-    $contents   = str_replace('<$body$>', templateInstallFunction(), $template);    
+    //UpgradeSchema
+    if(isUseUpgradeSchema($options))
+    {
+        $className      = generateUpgradeSchemaClassName($moduleInfo);        
+        $interfaceName  = '\Magento\Framework\Setup\UpgradeSchemaInterface';    
+    }
+    
+    
+    return [
+        $className, $interfaceName];
+}    
+
+function isUseUpgradeSchema($options)
+{
+    return array_key_exists('use-upgrade-schema', $options);
+}
+
+function generateSchemaBodyFromModuleInfoAndOptions($moduleInfo, $options)
+{
+    $body = templateInstallFunction();
+    if(isUseUpgradeSchema($options))
+    {
+        $body = templateUpgradeFunction();
+    }
+    return $body;    
+}
+
+function conditionalWriteStringToFile($path, $contents)
+{
     if(!file_exists($path))
     {
         output("Creating: " . $path);        
@@ -392,10 +441,12 @@ function createSchemaClass($module_info, $model_name)
     {
         output("File Already Exists: " . $path);
     }
-    
+}
+
+function prependInstallerCodeBeforeEndSetup($moduleInfo, $modelName, $contents, $path)
+{
     $table_name = createTableNameFromModuleInfoAndModelName(
-        $module_info, $model_name);
-    
+        $moduleInfo, $modelName);
     $install_code = generateInstallSchemaTable($table_name);
     $contents     = file_get_contents($path);
     $end_setup    = '$installer->endSetup();';
@@ -404,46 +455,111 @@ function createSchemaClass($module_info, $model_name)
         $install_code .
         "\n//END   table setup\n" .
         $end_setup, $contents);
+    return $contents;
+}
+
+function createSchemaClass($moduleInfo, $modelName, $options)
+{
+    list($className, $interfaceName) = 
+        generateClassNameAndInterfaceNameForSchemaFromModuleInfoAndOptions(
+            $moduleInfo, $options);
+            
+    $path       = getPathFromClass($className);
+    $template   = createClassTemplate($className, false, $interfaceName);        
         
+    $classBody = generateSchemaBodyFromModuleInfoAndOptions($moduleInfo, $options);        
+    $contents   = str_replace('<$body$>', $classBody, $template); 
+    conditionalWriteStringToFile($path, $contents);   
+    
+    $contents = prependInstallerCodeBeforeEndSetup(
+        $moduleInfo, $modelName, $contents, $path);
+            
     writeStringToFile($path, $contents);
 }
 
-function createDataClass($module_info, $model_name)
+function generateClassNameAndInterfaceNameForDataFromModuleInfoAndOptions($moduleInfo, $options)
 {
-    $className  = str_replace('_', '\\', $module_info->name) . 
+    $className  = str_replace('_', '\\', $moduleInfo->name) . 
         '\Setup\InstallData';
-    $path       = getPathFromClass($className);
-    $template   = createClassTemplate($className, false, 
-        '\Magento\Framework\Setup\InstallDataInterface');        
-    $contents   = str_replace('<$body$>', templateInstallDataFunction(), $template);        
-
-    if(!file_exists($path))
+    $interfaceName = '\Magento\Framework\Setup\InstallDataInterface';    
+    
+    if(isUseUpgradeSchema($options))
     {
-        output("Creating: " . $path);        
-        writeStringToFile($path, $contents);
+        $className  = str_replace('_', '\\', $moduleInfo->name) . 
+            '\Setup\UpgradeData';
+        $interfaceName = '\Magento\Framework\Setup\UpgradeDataInterface';        
     }
-    else
-    {
-        output("Data Installer Already Exists: " . $path);
-    }        
+        
+    return [$className, $interfaceName];
 }
 
-function generateInstallSchemaClassName($module_info)
+function generateDataBodyFromOptions($options)
 {
-    $className  = str_replace('_', '\\', $module_info->name) . 
+    $body = templateInstallDataFunction();
+    if(isUseUpgradeSchema($options))
+    {
+        $body = templateUpgradeDataFunction();        
+    }
+    
+    return $body;
+}
+
+function createDataClass($moduleInfo, $modelName, $options)
+{
+    list($className, $interfaceName) = 
+        generateClassNameAndInterfaceNameForDataFromModuleInfoAndOptions(
+            $moduleInfo, $options);
+
+    $path       = getPathFromClass($className);
+    $template   = createClassTemplate($className, false, $interfaceName);        
+    $classBody  = generateDataBodyFromOptions($options);
+    $contents   = str_replace('<$body$>', $classBody, $template);        
+
+    conditionalWriteStringToFile($path, $contents);       
+}
+
+function generateUpgradeSchemaClassName($moduleInfo)
+{
+    $className  = str_replace('_', '\\', $moduleInfo->name) . 
+        '\Setup\UpgradeSchema';
+    return $className;
+}
+
+function generateInstallSchemaClassName($moduleInfo)
+{
+    $className  = str_replace('_', '\\', $moduleInfo->name) . 
         '\Setup\InstallSchema';
     return $className;
 }
 
-function checkForInstallSchemaClass($module_info, $model_name)
+function checkForUpgradeSchemaClass($moduleInfo, $modelName)
 {
-    $className = generateInstallSchemaClassName($module_info);
+    $className = generateUpgradeSchemaClassName($moduleInfo);
     $path      = getPathFromClass($className);
     
     if(file_exists($path))
     {    
         $message = 
-"\nERROR: The module {$module_info->name} already has a 
+"\nERROR: The module {$moduleInfo->name} already has a 
+defined {$className}.  
+
+We can't proceed. If you're using upgrade scripts, try
+the --use-upgrade-schema-with-scripts option.
+";        
+        exitWithErrorMessage($message);
+    }
+
+}
+
+function checkForInstallSchemaClass($moduleInfo, $modelName)
+{
+    $className = generateInstallSchemaClassName($moduleInfo);
+    $path      = getPathFromClass($className);
+    
+    if(file_exists($path))
+    {    
+        $message = 
+"\nERROR: The module {$moduleInfo->name} already has a 
 defined {$className}.  
 We can't proceed.
 
@@ -456,35 +572,68 @@ Try the following two options to use an UpgradeSchema instead.
     }
 }
 
+function checkForSchemaOptions($keys)
+{
+    if( in_array('use-upgrade-schema',$keys) && 
+        in_array('use-upgrade-schema-with-scripts',$keys))
+    {
+        $message = 'Can\'t use --use-upgrade-schema and --use-upgrade-schema-with-scripts together.';
+        exitWithErrorMessage($message);
+    }
+}
+
+function checkForSchemaClasses($moduleInfo, $modelName, $options)
+{
+    if(array_key_exists('use-upgrade-schema', $options))
+    {
+        checkForUpgradeSchemaClass($moduleInfo, $modelName);
+    }
+    else if(!array_key_exists('use-upgrade-schema-with-scripts', $options))
+    {
+        checkForInstallSchemaClass($moduleInfo, $modelName);
+    }
+}
+
 /**
 * Generates Magento 2 CRUD model
 *
 * Wrapped by magento:foo:baz ... version of command
 *
+* 
 * @command generate-crud-model
 * @argument module_name Which module? [Pulsestorm_HelloGenerate]
 * @argument model_name  What model name? [Thing]
+* @option use-upgrade-schema Create UpgradeSchema and UpgradeData classes instead of InstallSchema
+* @option use-upgrade-schema-with-scripts Same as use-upgrade-schema, but uses schema script helpers
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options)
 {
-    $module_name = $argv['module_name'];
-    $module_info = getModuleInformation($argv['module_name']);    
-    $model_name  = $argv['model_name'];
+    $options = array_filter($options, function($item){
+        return !is_null($item);
+    });
 
-    checkForInstallSchemaClass($module_info, $model_name);
-    createRepositoryInterface($module_info, $model_name);    
-    createRepository($module_info, $model_name);
-    createModelInterface($module_info, $model_name);
-    createCollectionClass($module_info, $model_name);
-    createResourceModelClass($module_info, $model_name);
-    createModelClass($module_info, $model_name);        
-    createSchemaClass($module_info, $model_name);
-    createDataClass($module_info, $model_name);
+    $module_name = $argv['module_name'];
+    $moduleInfo = getModuleInformation($argv['module_name']);    
+    $modelName  = $argv['model_name'];
+
+    
+    checkForSchemaOptions(array_keys($options));
+    checkForSchemaClasses($moduleInfo, $modelName, $options);
+    
+    createRepositoryInterface($moduleInfo, $modelName);    
+    createRepository($moduleInfo, $modelName);
+    createModelInterface($moduleInfo, $modelName);
+    createCollectionClass($moduleInfo, $modelName);
+    createResourceModelClass($moduleInfo, $modelName);
+    createModelClass($moduleInfo, $modelName); 
+                   
+    createSchemaClass($moduleInfo, $modelName, $options);
+    createDataClass($moduleInfo, $modelName, $options);
 
 
 }
 
-function exported_pestle_cli($argv)
+function exported_pestle_cli($argv, $options)
 {
-    return pestle_cli($argv);
+    return pestle_cli($argv, $options);
 }
