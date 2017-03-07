@@ -138,14 +138,15 @@ function getListOfDefinedCliFunctions()
     $current_namespace = strToLower(__NAMESPACE__);
     foreach($namespaces as $namespace)
     {            
-        if(in_array($namespace, ['',$current_namespace,'composer\autoload']))        
+        if(in_array($namespace, ['',$current_namespace,
+            'composer\autoload','guzzlehttp\promise','guzzlehttp\psr7','guzzlehttp']))        
         {
             //skip self
             continue;
         }
         $main = $namespace . '\\pestle_cli'; 
         if(!function_exists($main)) { 
-            output("Skippng $main -- no such function");
+            output("Skipping $main -- no such function");
             continue;
         }
         $r = new ReflectionFunction($main);
