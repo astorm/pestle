@@ -27,6 +27,9 @@ function pestle_cli($argv)
         'namespace ' . $namespace . ';'  . "\n" .
         'use function Pulsestorm\Pestle\Importer\pestle_import;'       . "\n" .
         'pestle_import(\'Pulsestorm\Pestle\Library\output\');' . "\n\n" .
+        'pestle_import(\'Pulsestorm\Pestle\Library\exitWithErrorMessage\');' . "\n\n" .
+        
+
         '/**' . "\n" .
         '* One Line Description' . "\n" .
         '*' . "\n" .
