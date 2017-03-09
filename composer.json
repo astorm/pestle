@@ -4,7 +4,8 @@
     "require": {
         "michelf/php-markdown": "1.6.0",
         "ext-xml": "*",
-        "abraham/twitteroauth": "0.7.2"        
+        "abraham/twitteroauth": "0.7.2",
+        "nexmo/client":"@beta"
     },
     
     "require-dev": {
