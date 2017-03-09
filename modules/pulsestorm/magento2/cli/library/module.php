@@ -6,6 +6,7 @@ use DomDocument;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\isAboveRoot');
 pestle_import('Pulsestorm\Pestle\Library\output');
+pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Pestle\Library\input');
@@ -33,7 +34,9 @@ function getBaseModuleDir($module_name)
     $path = getModuleInformation($module_name)->folder;
     if(!file_exists($path))
     {
-        throw new Exception("No such path: $path");
+        exitWithErrorMessage("No such path: $path" . "\n" . 
+            "Please use magento2:generate:module to create module first");
+        // throw new Exception("No such path: $path");
     }
     return $path;
 }
@@ -149,7 +152,7 @@ function createClassFile($model_name, $contents)
     }
     if(!is_dir(dirname($path)))
     {
-        mkdir(dirname($path), 0777, true);
+        mkdir(dirname($path), 0755, true);
     }
     file_put_contents($path, $contents);
 }

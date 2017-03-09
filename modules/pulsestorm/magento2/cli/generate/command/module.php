@@ -18,7 +18,7 @@ function createPhpClass($module_dir, $namespace, $module_name, $command_name)
 
     if(!is_dir($module_dir . '/Command'))
     {
-        mkdir($module_dir . '/Command');
+        mkdir($module_dir . '/Command',0755,true);
     }
     
     writeStringToFile($module_dir . '/Command/'.$command_name.'.php', $class_file_string);
