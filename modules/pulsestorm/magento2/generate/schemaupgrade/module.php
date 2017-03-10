@@ -206,17 +206,23 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 ';    
 }
 
-function getDataClassBody($moduleInfo)
+function getDataClassBody($moduleInfo, $useScripts)
 {
+    $constructor          = '';
+    if($useScripts)
+    {
+        $constructor = getConstructorForUpgradeClassesFromModuleInfo($moduleInfo);
+    }
+    
+    $scriptHelperCall    = '';
+    if($useScripts)
+    {
+        $scriptHelperCall = '$this->scriptHelper->run($setup, $context, \'data\');';
+    }
+        
     $setupScriptClassName = getSetupScriptClassNameFromModuleInfo($moduleInfo);
     return '
-    protected $scriptHelper;
-    public function __construct(
-        '.$setupScriptClassName.' $scriptHelper
-    )
-    {
-        $this->scriptHelper = $scriptHelper;
-    }
+    ' . $constructor . '
     /**
      * {@inheritdoc}
      */
@@ -226,7 +232,7 @@ function getDataClassBody($moduleInfo)
     )
     {
         $setup->startSetup();        
-        $this->scriptHelper->run($setup, $context, \'data\');
+        ' . $scriptHelperCall . '
         $setup->endSetup();
     }        
 ';    
@@ -244,17 +250,37 @@ function getSetupScriptClassNameFromModuleInfo($moduleInfo)
     return '\\' . $moduleInfo->vendor . '\\' . $moduleInfo->short_name . '\Setup\Scripts';
 }
 
-function getSchemaClassBody($moduleInfo)
+function getConstructorForUpgradeClassesFromModuleInfo($moduleInfo)
 {
-    $setupScriptClassName = getSetupScriptClassNameFromModuleInfo($moduleInfo);
-    return '
-    protected $scriptHelper;
+    $setupScriptClassName = getSetupScriptClassNameFromModuleInfo($moduleInfo);    
+    $constructor = '
+    protected $scriptHelper;    
     public function __construct(
         '.$setupScriptClassName.' $scriptHelper
     )
     {
         $this->scriptHelper = $scriptHelper;
+    }        
+';        
+    return $constructor;
+}
+function getSchemaClassBody($moduleInfo, $useScripts)
+{
+    
+    $constructor          = '';
+    if($useScripts)
+    {
+        $constructor = getConstructorForUpgradeClassesFromModuleInfo($moduleInfo);
     }
+    
+    $scriptHelperCall    = '';
+    if($useScripts)
+    {
+        $scriptHelperCall = '$this->scriptHelper->run($setup, $context, \'schema\');';
+    }
+        
+    return '
+    ' . $constructor . '
     /**
      * {@inheritdoc}
      */
@@ -264,34 +290,34 @@ function getSchemaClassBody($moduleInfo)
     )
     {
         $setup->startSetup();        
-        $this->scriptHelper->run($setup, $context, \'schema\');
+        ' . $scriptHelperCall . '
         $setup->endSetup();
     }      
 ';    
 }
 
-function generateUpgradeSchemaClass($moduleInfo)
+function generateUpgradeSchemaClass($moduleInfo, $useScripts)
 {
     $path = getUpgradeSchemaPathFromModuleInfo($moduleInfo);
     $className = getSchemaClassNameFromModuleInfo($moduleInfo);
 
     $contents = createClassTemplateWithUse($className, false, 'UpgradeSchemaInterface');
     $contents = str_replace('<$use$>', getSchemaUseStatements(), $contents);
-    $contents = str_replace('<$body$>', getSchemaClassBody($moduleInfo), $contents);
+    $contents = str_replace('<$body$>', getSchemaClassBody($moduleInfo, $useScripts), $contents);
     $contents = prefacePhpStringWithMitLicense($contents);
         
     output("Creating $className");
     createClassFile($className, $contents);        
 }
 
-function generateUpgradeDataClass($moduleInfo)
+function generateUpgradeDataClass($moduleInfo, $useScripts)
 {
     $path = getUpgradeDataPathFromModuleInfo($moduleInfo);
     $className = getDataClassNameFromModuleInfo($moduleInfo);
 
     $contents = createClassTemplateWithUse($className, false, 'UpgradeDataInterface');
     $contents = str_replace('<$use$>', getDataUseStatements(), $contents);
-    $contents = str_replace('<$body$>', getDataClassBody($moduleInfo), $contents);
+    $contents = str_replace('<$body$>', getDataClassBody($moduleInfo, $useScripts), $contents);
     $contents = prefacePhpStringWithMitLicense($contents);    
     output("Creating $className");    
     createClassFile($className, $contents); 
@@ -514,20 +540,30 @@ function generateUpgradeScripts($moduleInfo, $upgradeVersion)
 * @command magento2:generate:schema-upgrade
 * @argument module_name Module Name? [Pulsestorm_Helloworld]
 * @argument upgrade_version New Module Version? [0.0.2]
+* @option use-simple-upgrade Option to skip creating script helpers
 */
 function pestle_cli($argv, $options)
 {
+    $options = array_filter($options, function($item){
+        return !is_null($item);
+    });
+    $useScripts = isset($options['use-simple-upgrade']) ? false : true;
     $moduleInfo = getModuleInformation($argv['module_name']);
+    
     checkForSchemaInstall($moduleInfo);
     checkForUpgradeSchema($moduleInfo);
     checkForUpgradeData($moduleInfo);
     checkUpgradeVersionValidity($moduleInfo, $argv['upgrade_version']);
     
-    generateUpgradeSchemaClass($moduleInfo);
-    generateUpgradeDataClass($moduleInfo);
-    generateScriptHelperClass($moduleInfo);
-    generateUpgradeScripts($moduleInfo, $argv['upgrade_version']);
+    generateUpgradeSchemaClass($moduleInfo, $useScripts);
+    generateUpgradeDataClass($moduleInfo, $useScripts);
     incrementModuleXml($moduleInfo, $argv['upgrade_version']);
+    
+    if($useScripts)
+    {
+        generateScriptHelperClass($moduleInfo);
+        generateUpgradeScripts($moduleInfo, $argv['upgrade_version']);
+    }    
 }
 
 function exportedSchemaUpgrade($argv, $options)
