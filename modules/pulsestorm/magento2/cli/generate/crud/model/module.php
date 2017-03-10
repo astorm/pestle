@@ -361,7 +361,7 @@ function createModelClass($moduleInfo, $modelName)
     $cache_tag           = strToLower($moduleInfo->name . '_' . $modelName);
     $class_model         = getModelClassNameFromModuleInfo($moduleInfo, $modelName);
     $class_resource      = getResourceModelClassNameFromModuleInfo($moduleInfo, $modelName);
-    $implements          = getModelInterfaceShortName($modelName) . ', \Magento\Framework\DataObject\IdentityInterface';
+    $implements          = getImplementsModelInterfaceName($moduleInfo, $modelName) . ', \Magento\Framework\DataObject\IdentityInterface';
     $template            = createClassTemplate($class_model, BASE_MODEL_CLASS, $implements);    
     $construct           = templateConstruct($class_resource);
 
@@ -384,10 +384,16 @@ function getModuleInterfaceName($moduleInfo, $modelName, $type)
 
 function getModelInterfaceName($moduleInfo, $modelName)
 {
-    return getModuleInterfaceName($moduleInfo, $modelName, 'Model');
+    return getModuleInterfaceName($moduleInfo, $modelName, 'Api\\Data');
 //     return $moduleInfo->vendor . '\\' . $moduleInfo->short_name . 
 //         '\Model\\' . getModelInterfaceShortName($modelName);
 }
+
+function getImplementsModelInterfaceName($moduleInfo, $modelName)
+{
+    return '\\' . getModelInterfaceName($moduleInfo, $modelName);
+}
+
 
 function createModelInterface($moduleInfo, $modelName)
 {
