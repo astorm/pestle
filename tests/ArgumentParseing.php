@@ -135,6 +135,53 @@ class ArgumentParsingTest extends PestleBaseTest
         $this->assertResults($results);            
     }
 
+    public function testParse5a()
+    {
+        $args = [
+            'fake-script.php',
+            'command-name',
+            '--use-upgrade-schema',
+            'Pulsestorm_Helloworld',             
+            'Thing',             
+            ];
+        $results = parseArgvIntoCommandAndArgumentsAndOptions($args);            
+        
+        $this->assertEquals(2, count($results['arguments']));
+        // $this->assertResults($results);            
+    }
+
+    public function testParse5b()
+    {
+        $args = [
+            'fake-script.php',
+            'command-name',
+            '--upgrade-schema',
+            'Pulsestorm_Helloworld',             
+            'Thing',             
+            ];
+        $results = parseArgvIntoCommandAndArgumentsAndOptions($args);            
+        
+        // var_dump($results);
+
+        $this->assertEquals(1, count($results['arguments']));
+        $this->assertEquals('Pulsestorm_Helloworld', $results['options']['upgrade-schema']);
+        // $this->assertResults($results);            
+    }
+
+    public function testParse5c()
+    {
+        $args = [
+            'fake-script.php',
+            'command-name',
+            '--upgrade-schema=Hello',
+            'Pulsestorm_Helloworld',             
+            'Thing',             
+            ];
+        $results = parseArgvIntoCommandAndArgumentsAndOptions($args);            
+        
+        $this->assertEquals(2, count($results['arguments']));
+        $this->assertEquals('Hello', $results['options']['upgrade-schema']);
+    }    
     public function testParseArgumentOnly()
     {
         $args = [
@@ -157,7 +204,7 @@ class ArgumentParsingTest extends PestleBaseTest
           
     public function testArguments()
     {
-        $results = $this->runCommand('hello_argument', [
+        $results = $this->runCommand('pestle:hello_argument', [
             '--explain=true', 'Hola', 'World'
         ]);
         $lines = preg_split('%[\r\n]%', $results);

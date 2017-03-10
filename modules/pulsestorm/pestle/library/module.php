@@ -313,6 +313,11 @@ function parseArgvIntoCommandAndArgumentsAndOptions($argv)
             {   
                 list($option, $option_value) = explode('=', $option, 2);
             }
+            //the boolean options
+            else if(preg_match('%^(use|is)-%', $option))
+            {
+                $option_value = '';
+            }
             else
             {
                 $option_value = '';
