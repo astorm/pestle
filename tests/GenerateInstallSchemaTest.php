@@ -16,9 +16,9 @@ class GenerateInstallSchemaTest extends PestleBaseTest
         $result = generateInstallSchemaTable(
             'unit_test', [], 'A testing table'
         );
-        $fixture = '$table = $installer->getConnection()->newTable(
+        $fixture = '        $table = $installer->getConnection()->newTable(
             $installer->getTable(\'unit_test\')
-    )->addColumn(
+        )->addColumn(
             \'unit_test_id\',
             \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
             null,
@@ -51,7 +51,7 @@ class GenerateInstallSchemaTest extends PestleBaseTest
         )->setComment(
              \'A testing table\'
          );
-$installer->getConnection()->createTable($table);';
+        $installer->getConnection()->createTable($table);';
         $this->assertEquals(
             $result, 
             $fixture
