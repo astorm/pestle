@@ -310,7 +310,7 @@ function limitArgumentsIfPresentInDocBlock($arguments, $parsed_doc_block, $refle
             $callback = $reflected_command->getNamespaceName() . '\\' . 
                 array_pop($parts);
             $r = new ReflectionFunction($callback);                
-            $new_arguments[$argument_name] = $r->invokeArgs([$arguments, $c]);
+            $new_arguments[$argument_name] = $r->invokeArgs([$arguments, $c, $new_arguments]);
         }
         else
         {
