@@ -73,7 +73,7 @@ function generateInstallSchemaNewTable($table_name)
 {
     return '$installer->getConnection()->newTable(
             $installer->getTable(\''.$table_name.'\')
-    )';
+        )';
 }
 
 function exportArrayForString($array)
@@ -188,9 +188,10 @@ function generateInstallSchemaGetDefaultColumns($table)
     return [$id, $title, $creation_time, $update_time, $is_active];
 }
 
-function generateInstallSchemaTable($table_name='', $columns=[], $comment='')
+function generateInstallSchemaTable($table_name='', $columns=[], $comment='',$indent=false)
 {
-    $block = '$table = ' . generateInstallSchemaNewTable($table_name);
+    $indent = $indent ? $indent : '        ';
+    $block = $indent . '$table = ' . generateInstallSchemaNewTable($table_name);
     $default_columns = generateInstallSchemaGetDefaultColumns($table_name);
     $columns = array_merge($default_columns, $columns);
     foreach($columns as $column)
@@ -202,7 +203,7 @@ function generateInstallSchemaTable($table_name='', $columns=[], $comment='')
         $block .= generateInstallSchemaAddComment($comment);
     }
     return $block .= ';' . "\n" .
-    '$installer->getConnection()->createTable($table);';
+    $indent . '$installer->getConnection()->createTable($table);';
 }
 
 function templateRegistrationPhp($module_name, $type='MODULE')

@@ -462,11 +462,11 @@ function prependInstallerCodeBeforeEndSetup($moduleInfo, $modelName, $contents, 
         $moduleInfo, $modelName);
     $install_code = generateInstallSchemaTable($table_name);
     $contents     = file_get_contents($path);
-    $end_setup    = '$installer->endSetup();';
+    $end_setup    = '        ' . '$installer->endSetup();';
     $contents     = str_replace($end_setup, 
-        "\n//START table setup\n" .
+        "\n        //START table setup\n" .
         $install_code .
-        "\n//END   table setup\n" .
+        "\n        //END   table setup\n" .
         $end_setup, $contents);
     return $contents;
 }
