@@ -715,6 +715,19 @@ function createSchemaAndDataClasses($moduleInfo, $modelName, $options)
 }
 
 /**
+ * Temp fix until: https://github.com/astorm/pestle/issues/212
+ */
+function validateModelName($modelName)
+{
+    $newModelName = preg_replace('%[^A-Za-z0-9]%','',$modelName);
+    if($newModelName !== $modelName)
+    {
+        exitWithErrorMessage("Invalid (to us) model name -- try again with {$newModelName}?" . "\n" .
+        "If this annoys you -- pull requests welcome at: https://github.com/astorm/pestle/issues/212");
+    }
+}
+
+/**
 * Generates Magento 2 CRUD model
 *
 * Wrapped by magento:foo:baz ... version of command
@@ -734,8 +747,7 @@ function pestle_cli($argv, $options)
 
     $module_name = $argv['module_name'];
     $moduleInfo = getModuleInformation($argv['module_name']);    
-    $modelName  = $argv['model_name'];
-
+    $modelName  = validateModelName($argv['model_name']);
     
     checkForSchemaOptions(array_keys($options));
     checkForSchemaClasses($moduleInfo, $modelName, $options);
