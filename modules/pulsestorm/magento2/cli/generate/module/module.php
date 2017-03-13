@@ -3,6 +3,7 @@ namespace Pulsestorm\Magento2\Cli\Generate\Module;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
+pestle_import('Pulsestorm\Pestle\Library\writeFormattedXmlStringToFile');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
 pestle_import('Pulsestorm\Xml_Library\addSchemaToXmlString');
@@ -47,7 +48,7 @@ function pestle_cli($argv)
     }
     
     mkdir($etc_dir, 0777, $etc_dir);
-    writeStringToFile($etc_dir . '/module.xml', $xml);
+    writeFormattedXmlStringToFile($etc_dir . '/module.xml', $xml);
     output("Created: " . $etc_dir . '/module.xml');
     
     $register = templateRegistrationPhp($full_module_name);    
