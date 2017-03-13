@@ -114,6 +114,13 @@ function writeStringToFile($path, $contents)
     {
         copy($path, $path_backup);
     }
+    if(preg_match('/.xml$/', $path)){
+        $dom = new \DOMDocument("1.0");
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML($contents);
+        $contents = $dom->saveXML();
+    }
     file_put_contents($path, $contents);
     return $path;
 }
