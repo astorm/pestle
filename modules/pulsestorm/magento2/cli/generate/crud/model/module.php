@@ -725,6 +725,7 @@ function validateModelName($modelName)
         exitWithErrorMessage("Invalid (to us) model name -- try again with {$newModelName}?" . "\n" .
         "If this annoys you -- pull requests welcome at: https://github.com/astorm/pestle/issues/212");
     }
+    return $modelName;
 }
 
 /**
