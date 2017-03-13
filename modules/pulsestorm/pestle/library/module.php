@@ -119,7 +119,7 @@ function writeStringToFile($path, $contents)
 }
 
 function writeFormattedXmlStringToFile($path, $contents){
-    writeStringToFile($path, formatXmlString($contents));
+    return writeStringToFile($path, formatXmlString($contents));
 }
 
 function bail($message)
