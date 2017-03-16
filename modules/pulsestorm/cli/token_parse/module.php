@@ -1,6 +1,8 @@
 <?php
 namespace Pulsestorm\Cli\Token_Parse;
 use function token_get_all as php_token_get_all;
+use function Pulsestorm\Pestle\Importer\pestle_import;
+pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
 
 define('STATE_PARSING',                             0);
 define('STATE_FOUND_FUNCTION',                      1);
@@ -18,6 +20,95 @@ function pestle_cli()
 function getFunctionFromClass($string, $function_name)
 {
     return getFunctionFromCode($string, $function_name);
+}
+
+function removeWhitespaceAndReIndex(&$tokens)
+{
+    $array = array_filter($tokens, function($token){
+        return $token->token_name !== 'T_WHITESPACE';
+    });    
+    return array_values($array);
+    
+}
+
+function addPhpTagIfNeeded($string)
+{
+    $string = trim($string);
+    if($string[0] !== '<' && $string[1] !== '?')
+    {
+        $string = '<' . '?php ' . $string;
+    }
+    return $string;
+}
+
+function extractUntilSemiColon(&$tokens, $i, $toSkipValues)
+{
+    $tokenCount = count($tokens);
+    $imports = [];
+    for($i;$i<$tokenCount;$i++)
+    {
+        $token = $tokens[$i];
+        //if we've hit a semi-colon, that's the end
+        if($token->token_value === ';'){ break; }    
+
+        //skip the stuff we don't need
+        if(in_array($token->token_value, $toSkipValues))
+        {
+            continue;
+        }
+        
+        $imports[] = $token;        
+    }
+    if(count($imports) > 1)
+    {
+        var_dump($imports);
+        exitWithErrorMessage("Not sure what to do about dynamic pestle_import");
+    }
+    
+    $includeString = $imports[0]->token_value;
+    $includeString = preg_replace('%[\'"]%', '', $includeString);
+    return $includeString;
+}
+
+function getPestleImportsFromCode($string)
+{
+    $string = addPhpTagIfNeeded($string);
+    $tokens = pestle_token_get_all($string);
+    $tokens = removeWhitespaceAndReIndex($tokens);  
+    $importNames = [];
+    $tokenCount = count($tokens);
+    for($i=0;$i<$tokenCount;$i++)
+    {
+        $token = $tokens[$i];
+        if($token->token_value == 'pestle_import' && $tokens[$i-1]->token_name !== 'T_NS_SEPARATOR')
+        {
+            $importNames[] = extractUntilSemiColon($tokens, $i, ['pestle_import','(',')']);            
+        }
+    }        
+    return $importNames;
+}
+
+function getFunctionNamesFromCode($string)
+{
+    $string = trim($string);
+    if($string[0] !== '<' && $string[1] !== '?')
+    {
+        $string = '<' . '?php ' . $string;
+    }
+
+    $tokens = pestle_token_get_all($string);
+    $tokens = removeWhitespaceAndReIndex($tokens);    
+    $tokenCount = count($tokens);
+    $functionNames = [];
+    for($i=0;$i<$tokenCount;$i++)
+    {
+        $token = $tokens[$i];
+        if($token->token_name == 'T_FUNCTION' && $tokens[$i-1]->token_name !== 'T_USE')
+        {
+            $functionNames[] = $tokens[$i+1];
+        }
+    }
+    return $functionNames;
 }
 
 function getFunctionFromCode($string, $function)
