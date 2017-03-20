@@ -70,7 +70,7 @@ function getPestleImportsFunctionBodiesFromContents($contents)
 }
 
 /**
-* One Line Description
+* Exports a Pestle Module as a Symfony Console Command
 *
 * @command pestle:export-as-symfony
 * @argument command_to_export Export Which Pestle Command? [hello-world]
