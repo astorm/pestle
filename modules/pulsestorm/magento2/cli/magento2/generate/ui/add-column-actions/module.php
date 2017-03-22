@@ -38,9 +38,7 @@ function generatePageActionsClassFromListingXmlFileAndXml($file, $xml)
         ucwords(preg_replace('%[^a-zA-Z0-9]%', '', $gridId)) . '\\' .
         'PageActions';
         
-    var_dump($pageActionsClassName);        
-    exit;
-    return $actionsClass = 'Foo\Baz\Bar\Actions';
+    return $pageActionsClassName;        
 }
 
 /**
