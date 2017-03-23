@@ -885,12 +885,7 @@ function randomUiComponentStuff()
     //reportDataProviderToListingXmlFileMap($xmls);    
 }
 
-/**
-* Test Command
-* @command testbed
-* @Xargument folder Which Folder?
-*/
-function pestle_cli($arguments, $options)
+function tumblrBackupExtract()
 {
     $files = glob('/Users/alanstorm/Documents/tumblr-backup/2017-02-03/*');
     foreach($files as $file)
@@ -908,4 +903,47 @@ function pestle_cli($arguments, $options)
             );
         }
     }
+
+}
+/**
+* Test Command
+* @command testbed
+* @Xargument folder Which Folder?
+*/
+function pestle_cli($arguments, $options)
+{
+    $cmd    = 'find vendor/magento -wholename \'*ui_component/*.xml\'';
+    $files  = explode("\n", `$cmd`);    
+    $files  = array_filter($files);
+    $files  = array_map(function($file){
+        $xml = simplexml_load_file($file);
+        return $xml;
+    }, $files);
+    
+    $files = array_filter($files, function($xml){
+        return $xml->getName() === 'listing';
+        return true;
+    });
+    
+    $allColumns = [];
+    foreach($files as $xml)
+    {
+        $columns = $xml->xpath('//column');
+        $allColumns = array_merge($allColumns, $columns);
+    }    
+    
+    foreach($allColumns as $column)
+    {        
+        #output($column->children()->count());        
+        output($column->asXml());
+        
+        
+        foreach($column->argument->item as $item)
+        {
+            
+        }
+        exit;
+    }
+//     var_dump($allColumns);
+//     exit;
 }
