@@ -182,7 +182,6 @@ function sortCommandsIntoSection($commands)
             }
             return ($a['command'] < $b['command']) ? -1 : 1;        
         });
-        // sort($commands);
         $commandSections[$section] = $commands;
     }
     return $commandSections;
