@@ -44,7 +44,8 @@ function generatePageActionsClassFromListingXmlFileAndXml($file, $xml)
 /**
 * Generates a Magento 2.1 ui grid listing and support classes.
 *
-* @command magento2:generate:ui:add-column-actions
+* magento2:generate:ui:add-column-actions
+* @command library
 * @argument listing_file Which Listing File? []
 * @argument index_field Index Field/Primary Key? [entity_id]
 */
