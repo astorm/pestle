@@ -66,7 +66,7 @@ function pestle_cli()
     //super gross -- thanks PHP
     $permissions = substr(sprintf('%o', fileperms($localPharPath)),-4);
     
-    output("Reaplced $localPharPath");
+    output("Replaced $localPharPath");
     rename($tmpFile, $localPharPath);
     
     chmod($localPharPath, octdec($permissions));
