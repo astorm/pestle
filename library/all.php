@@ -826,7 +826,7 @@ function pestle_cli()
     //super gross -- thanks PHP
     $permissions = substr(sprintf('%o', fileperms($localPharPath)),-4);
     
-    \Pulsestorm\Pestle\Library\output("Reaplced $localPharPath");
+    \Pulsestorm\Pestle\Library\output("Replaced $localPharPath");
     rename($tmpFile, $localPharPath);
     
     chmod($localPharPath, octdec($permissions));
