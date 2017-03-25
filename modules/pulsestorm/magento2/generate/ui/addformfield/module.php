@@ -27,6 +27,22 @@ function validateXml($xml, $argv)
     }
 }
 
+function getNextSortOrderFromXml($xml)
+{
+    $nodes = $xml->xpath('//item[@name="sortOrder"]');
+    $max   = array_reduce($nodes, function($carry, $item){
+        $item = (int) $item;
+        if($carry > $item)
+        {
+            return $carry;
+        }
+        return $item;
+    }, 0);
+    
+    return $max + 10;
+}
+
+
 /**
 * One Line Description
 *
@@ -56,7 +72,7 @@ function pestle_cli($argv, $options)
     $itemDataType       = addSpecificChild('item', $itemConfig, 'dataType', 'string', $dataType);
     $itemLabel          = addSpecificChild('item', $itemConfig, 'label', 'string', $argv['label']);        
     $itemFormElement    = addSpecificChild('item', $itemConfig, 'formElement', 'string', $formElement);
-    $itemSortOrder      = addSpecificChild('item', $itemConfig, 'sortOrder', 'string', $sortOrder);
+    $itemSortOrder      = addSpecificChild('item', $itemConfig, 'sortOrder', 'string', getNextSortOrderFromXml($fieldset));
     $itemDataScope      = addSpecificChild('item', $itemConfig, 'dataScope', 'string', $argv['field']);    
         
     $itemValidation     = addSpecificChild('item', $itemConfig, 'validation', 'array');    
