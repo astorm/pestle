@@ -70,11 +70,12 @@ function generateDatasourceNode($xml, $dataSourceName, $providerClass, $database
     return $dataSource;
 }
 
-function addBaseColumnItemNodes($config, $width, $indexField)
+function addBaseColumnItemNodes($config, $width, $indexField, $sortOrder=10)
 {
     addItem($config, 'resizeEnabled', 'boolean', 'false');
     addItem($config, 'resizeDefaultWidth', 'string', $width);
     addItem($config, 'indexField', 'string', $indexField);
+    addItem($config, 'sortOrder', 'number', $sortOrder);
 }
 
 function addIdColumnToColumns($columns, $data, $idColumn)
@@ -99,7 +100,7 @@ function addActionsColumnToColumns($columns, $pageActionsClassName, $idColumn)
     $actionsColumn->addAttribute('class',$pageActionsClassName);
     $data = addArgument($actionsColumn, 'data','array');
     $config = addItem($data, 'config', 'array');
-    addBaseColumnItemNodes($config, '107', $idColumn);        
+    addBaseColumnItemNodes($config, '107', $idColumn, 200);        
     return $actionsColumn;
 }
 
@@ -111,7 +112,7 @@ function generateColumnsNode($xml, $columnsName, $pulsestorm_commercebug_log_id,
     $data = addArgument($sectionColumns, 'data', 'array');
     $config = addItem($data, 'config', 'array');
         
-    addBaseColumnItemNodes($config, '55', $pulsestorm_commercebug_log_id);            
+    addBaseColumnItemNodes($config, '55', $pulsestorm_commercebug_log_id, 10);            
     addIdColumnToColumns($columns, $data, $pulsestorm_commercebug_log_id);
     addActionsColumnToColumns($columns, $pageActionsClassName, $pulsestorm_commercebug_log_id);
                 
