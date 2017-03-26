@@ -32,7 +32,7 @@ function getShellScript($argv, $options)
     }
 
     $pathModule = 'app/code/'.$packageName . '/' . $moduleName;        
-    return '
+    $script = '
 #!/bin/bash
 ' . pharString('magento2:generate:module',$pharName)              . $packageName . ' ' . $moduleName . ' 0.0.1
 ' . pharString('generate_crud_model',$pharName)                   . $fullModuleName . ' ' . $modelName . '
@@ -50,9 +50,15 @@ function getShellScript($argv, $options)
 ' . pharString('magento2:generate:remove-named-node',$pharName)   . $pathModule . '/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index.xml block '.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_block_main
 
 php bin/magento module:enable '.$fullModuleName.'
-php bin/magento setup:upgrade
+';
 
+    if(!is_null($options['with-setup-upgrade']))
+    {
+        $script .= '
+php bin/magento setup:upgrade
 ';    
+    }
+    return $script;
 
 }
 
@@ -69,6 +75,7 @@ function replaceTemplateVars($template, $argv)
 * @argument module_name Module Name? [Helloworld]
 * @argument model_name One Word Model Name? [Thing]
 * @option with-phar-name Change pestle.phar to something like pestle_dev
+* @option with-setup-upgrade Add Setup Upgrade Call?
 */
 function pestle_cli($argv, $options)
 {

@@ -17,7 +17,7 @@ function validateXml($xml, $argv)
     $fieldsets = $xml->xpath('/form/fieldset[@name="'.$argv['fieldset'].'"]');
     if(count($fieldsets) !== 1)
     {
-        exitWithErrorMessage('ERROR: XML file should have exactly one name="general" fieldset.');
+        exitWithErrorMessage('ERROR: XML file should have exactly one name="'.$argv['fieldset'].'" fieldset.');
     }
 
     $fields = $xml->xpath('/form/fieldset/field[@name="'.$argv['field'].'"]');
@@ -48,13 +48,13 @@ function getNextSortOrderFromXml($xml)
 *
 * @command magento2:generate:ui:add-form-field
 * @argument path_xml Path to Form XML File? 
-* @argument field Field Name? (title)
-* @argument label Label? (Title)
-* @argument fieldset Fieldset Name? (general)
+* @argument field Field Name? [title]
+* @argument label Label? [Title]
+* @argument fieldset Fieldset Name? [general]
 * @option is-required Is field required?
 */
 function pestle_cli($argv, $options)
-{
+{    
     $xml = simplexml_load_file($argv['path_xml']);
     validateXml($xml, $argv);
     $fieldsets  = $xml->xpath('/form/fieldset[@name="'.$argv['fieldset'].'"]');        

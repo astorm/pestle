@@ -89,12 +89,12 @@ function getLengthFromType($type)
         'smallint'=>'null',        
         'varchar'=>'255',
         'varbinary'=>'255',                     
-        'text'=>'64K',
-        'blob'=>'64K',                
-        'mediumtext'=>'2M',
-        'mediumblob'=>'2M',        
-        'longtext'=>'4G',
-        'longblob'=>'4G',   
+        'text'=>'"64K"',
+        'blob'=>'"64K"',                
+        'mediumtext'=>'"2M"',
+        'mediumblob'=>'"2M"',        
+        'longtext'=>'"4G"',
+        'longblob'=>'"4G"',   
     ]; 
     return $legend[$type];   
 }
@@ -130,13 +130,14 @@ function getColumnProps($type)
         'typeConstant'   => getClassConstantFromType($type),    //'\Magento\Framework\DB\Ddl\Table::TYPE_TEXT',
         'length'         => getLengthFromType($type),           //'255',
         'propertyArray'  => getPropertyArrayFromType($type),    //"['nullable' => false]",
-        'comment'        => "''",
+        'comment'        => '',
     ];
 }
 
 function generateAddColumn($name, $type)
 {
     $props = getColumnProps($type);
+    $props['comment'] = '"' . $name . ' field"';
     extract($props);
     $string = "
 ->addColumn('$name',
@@ -297,10 +298,10 @@ function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
 * and if found, scanning to the ; and inserting the addColumn         
 *
 * @command magento2:generate:ui:add-schema-column
+* @argument php_file PHP file with newTable call? [skip]
 * @argument table Database Table? (packagename_modulename_modelnames)
 * @argument column Columns Name? (new_column)
 * @argument column_type @callback selectColumnType
-* @argument php_file PHP file with newTable call? [skip]
 */
 function pestle_cli($argv)
 {
