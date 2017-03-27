@@ -12,6 +12,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Crud\Model\exported_pestle_cli')
 * @argument model_name  What model name? [Thing]
 * @option use-upgrade-schema Create UpgradeSchema and UpgradeData classes instead of InstallSchema
 * @option use-upgrade-schema-with-scripts Same as use-upgrade-schema, but uses schema script helpers
+* @option use-install-schema-for-new-model Allows you to add another model definition to InstallSchema
 */
 function pestle_cli($argv, $options)
 {
