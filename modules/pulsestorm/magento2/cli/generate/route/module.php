@@ -15,14 +15,14 @@ pestle_import('Pulsestorm\Cli\Code_Generation\createControllerClassTemplate');
 pestle_import('Pulsestorm\Cli\Code_Generation\createControllerClass');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 
-function createControllerClassName($module,$area='frontend')
+function createControllerClassName($module, $area='frontend', $controller ='Index', $action='Index')
 {
     $class = str_replace('_','\\',$module) . '\Controller';
     if($area === 'adminhtml')
     {
         $class .= '\Adminhtml';
     }
-    $class .= '\Index\Index';
+    $class .= '\\' . $controller . '\\' . $action;
     return $class;
 }
 
@@ -63,12 +63,14 @@ function createRoutesXmlFile($module_info, $area, $frontname, $router_id, $route
     return $xml;
 }
 
-function createControllerClassForRoute($module, $area, $acl)
+function createControllerClassForRoute($module, $area, $controller, $action, $acl)
 {
-    $class = createControllerClassName($module, $area, $acl);
+    $class = createControllerClassName($module, $area, $controller, $action, $acl);
     $controllerClass = createControllerClass(
         $class, 
-        $area
+        $area,
+        $controller,
+        $action
     );    
     $path_controller = getPathFromClass($class);    
     writeStringToFile($path_controller, $controllerClass);
@@ -83,12 +85,16 @@ function createControllerClassForRoute($module, $area, $acl)
 * @argument module_name Which Module? [Pulsestorm_HelloWorld]
 * @argument area Which Area (frontend, adminhtml)? [frontend]
 * @argument frontname Frontname/Route ID? [pulsestorm_helloworld]
+* @argument controller Controller name? [Index]
+* @argument action action? [Index]
 */
 function pestle_cli($argv)
 {    
     $module      = $argv['module_name'];
     $area        = $argv['area'];    
-    $frontname   = $argv['frontname'];    
+    $frontname   = $argv['frontname'];
+    $controller  = $argv['controller'];
+    $action      = $argv['action'];    
     
     $module_info = getModuleInformation($module);        
     $router_id   = getRouterIdFromArea($area);
@@ -99,7 +105,7 @@ function pestle_cli($argv)
     );        
     
     $acl = $module . '::' . $frontname . '_menu';
-    createControllerClassForRoute($module, $area, $acl);
+    createControllerClassForRoute($module, $area, $controller, $action, $acl);
     
     if($area === 'adminhtml')
     {
