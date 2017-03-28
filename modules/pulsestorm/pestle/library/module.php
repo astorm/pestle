@@ -173,7 +173,9 @@ function inputRawPhp()
 function inputReadline($prompt=null)
 {
     if(is_null($prompt))
+    {
         return readline();
+    }
 
     return readline($prompt);
 }
