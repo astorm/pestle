@@ -26,12 +26,18 @@ function pestle_cli($argv)
         'src/chapter-layouthandles.md',        
         'src/chapter2.md',            
         'src/chapter3.md',         
+        'src/chapter-page-layout.md',
         'src/chapter4.md',         
         'src/chapter5.md',         
         'src/chapter6.md',         
         'src/chapter7.md',         
         'src/chapter8.md',         
-        'src/chapter9.md',                                                         
+        'src/chapter9.md',  
+        'src/appendix-components.md',
+        'src/appendix-view-source.md',
+        'src/appendix-magento-modes.md',
+        'src/appendix-areas.md',
+        'src/appendix-di.md',                
     ];
     
     $raw = [];

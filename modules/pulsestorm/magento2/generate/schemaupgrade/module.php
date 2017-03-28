@@ -10,7 +10,7 @@ pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
 
 /**
- * One Line Description
+ * returns MIT license for complex generated files
  */
 function getMitLicenseTextAsComment()
 {

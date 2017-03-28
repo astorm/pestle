@@ -48,7 +48,7 @@ function writeToCredentialFile($data)
 }
 
 /**
-* One Line Description
+* Stores Nexmo API in temp file
 *
 * @command nexmo:store-credentials
 * @argument key Key? []

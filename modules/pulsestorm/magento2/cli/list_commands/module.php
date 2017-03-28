@@ -174,6 +174,16 @@ function sortCommandsIntoSection($commands)
         $commandSections[$section][] = $command;
     }
     ksort($commandSections);
+    foreach($commandSections as $section=>$commands)
+    {
+        usort($commands, function($a, $b){
+            if ($a['command'] == $b['command']) {
+                return 0;
+            }
+            return ($a['command'] < $b['command']) ? -1 : 1;        
+        });
+        $commandSections[$section] = $commands;
+    }
     return $commandSections;
 }
 

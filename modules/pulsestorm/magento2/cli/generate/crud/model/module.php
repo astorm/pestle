@@ -462,13 +462,26 @@ function prependInstallerCodeBeforeEndSetup($moduleInfo, $modelName, $contents, 
         $moduleInfo, $modelName);
     $install_code = generateInstallSchemaTable($table_name);
     $contents     = file_get_contents($path);
-    $end_setup    = '        ' . '$installer->endSetup();';
+    $end_setup    = '$installer->endSetup();';
     $contents     = str_replace($end_setup, 
         "\n        //START table setup\n" .
         $install_code .
         "\n        //END   table setup\n" .
         $end_setup, $contents);
     return $contents;
+}
+
+function appendInstallSchemaClass($moduleInfo, $modelName, $options)
+{
+    list($className, $interfaceName) = 
+        generateClassNameAndInterfaceNameForSchemaFromModuleInfoAndOptions(
+            $moduleInfo, $options);
+    $path       = getPathFromClass($className);         
+    $contents = prependInstallerCodeBeforeEndSetup(
+        $moduleInfo, $modelName, '', $path); 
+
+    output("Adding model to InstallSchema");        
+    writeStringToFile($path, $contents);                              
 }
 
 function createSchemaClass($moduleInfo, $modelName, $options)
@@ -571,6 +584,23 @@ the --use-upgrade-schema-with-scripts option.
 
 }
 
+function checkThatInstallSchemaClassExists($moduleInfo, $modelName)
+{
+    $className = generateInstallSchemaClassName($moduleInfo);
+    $path      = getPathFromClass($className);
+    
+    if(!file_exists($path))
+    {  
+        $message = 
+"\nIt looks like this module does not has an InstallSchema class.  This means 
+ee can't proceed.  The --use-install-schema-for-new-model options requires this
+class.  Try running the command with no -- options for initial generation.
+";                   
+
+        exitWithErrorMessage($message);    
+    }  
+}
+
 function checkForInstallSchemaClass($moduleInfo, $modelName)
 {
     $className = generateInstallSchemaClassName($moduleInfo);
@@ -580,8 +610,10 @@ function checkForInstallSchemaClass($moduleInfo, $modelName)
     {  
         $message = 
 "\nIt looks like this module already has an InstallSchema class.  This means 
-ee can't proceed.  If you're trying to add a second model to a module, 
-try using --use-upgrade-schema or --use-upgrade-schema-with-scripts\n";                   
+we can't proceed.  If you're trying to add a second model to a module, 
+try using --use-upgrade-schema, --use-upgrade-schema-with-scripts or
+--use-install-schema-for-new-model.
+";                   
 
         exitWithErrorMessage($message);    
     }  
@@ -656,6 +688,10 @@ function checkForSchemaClasses($moduleInfo, $modelName, $options)
     {
         checkForNoInstallSchemaAndOurUpgrade($moduleInfo, $modelName);
     }    
+    else if(array_key_exists('use-install-schema-for-new-model', $options))
+    {
+        checkThatInstallSchemaClassExists($moduleInfo, $modelName);
+    }    
     else if(!array_key_exists('use-upgrade-schema-with-scripts', $options))
     {
         checkForInstallSchemaClass($moduleInfo, $modelName);
@@ -710,6 +746,12 @@ function createSchemaAndDataClasses($moduleInfo, $modelName, $options)
         invokeGenerateSchemaUpgrade($moduleInfo, $modelName, $options);
         return;
     }
+    
+    if(array_key_exists('use-install-schema-for-new-model', $options))
+    {
+        appendInstallSchemaClass($moduleInfo, $modelName, $options);
+        return;
+    }
     createSchemaClass($moduleInfo, $modelName, $options);
     createDataClass($moduleInfo, $modelName, $options);
 }
@@ -739,6 +781,7 @@ function validateModelName($modelName)
 * @argument model_name  What model name? [Thing]
 * @option use-upgrade-schema Create UpgradeSchema and UpgradeData classes instead of InstallSchema
 * @option use-upgrade-schema-with-scripts Same as use-upgrade-schema, but uses schema script helpers
+* @option use-install-schema-for-new-model Allows you to add another model definition to InstallSchema
 */
 function pestle_cli($argv, $options)
 {

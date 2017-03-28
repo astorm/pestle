@@ -19,7 +19,8 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\getOrCreateColumnsNode');
 /**
 * Generates a Magento 2.1 ui grid listing and support classes.
 *
-* @command magento2:generate:ui:add-column-sections
+* magento2:generate:ui:add-column-sections
+* @command library
 * @argument listing_file Which Listing File? []
 * @argument column_name Column Name? [ids]
 * @argument index_field Index Field/Primary Key? [entity_id]

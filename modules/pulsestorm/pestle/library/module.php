@@ -2,6 +2,7 @@
 namespace Pulsestorm\Pestle\Library;
 use ReflectionFunction;
 use ReflectionClass;
+use function Pulsestorm\Xml_Library\formatXmlString;
 
 function exitWithErrorMessage($message)
 {
@@ -115,6 +116,10 @@ function writeStringToFile($path, $contents)
     }
     file_put_contents($path, $contents);
     return $path;
+}
+
+function writeFormattedXmlStringToFile($path, $contents){
+    return writeStringToFile($path, formatXmlString($contents));
 }
 
 function bail($message)

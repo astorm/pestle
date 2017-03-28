@@ -26,7 +26,7 @@ function sendVerifyVerification($client, $verificationRequestId, $code)
 }
 
 /**
-* One Line Description
+* Nexmo Verify API: Second Step
 *
 * @command nexmo:verify-sendcode
 * @argument request_id Request ID? (from nexmo:verify-request) []
