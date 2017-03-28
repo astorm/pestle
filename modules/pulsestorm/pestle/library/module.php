@@ -170,21 +170,25 @@ function inputRawPhp()
     return $line;
 }
 
-function inputReadline()
+function inputReadline($prompt=null)
 {
-    return readline();
+    if(is_null($prompt))
+        return readline();
+
+    return readline($prompt);
 }
 
 function input($string, $default='')
 {
-    echo $string . " (".$default.")] ";
+    $prompt =  $string . " (".$default.")] ";
     if(!function_exists('readline'))
-    {
+    {   
+        echo($prompt);
         $line = inputRawPhp();
     }
     else
     {
-        $line = inputReadline();
+        $line = inputReadline($prompt);
     }
     if(trim($line))
     {
