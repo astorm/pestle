@@ -10338,16 +10338,17 @@ function getClassConstantFromType($type)
     $types = getColumnTypes();
     $types = array_flip($types);
     $constant = $types[$type];
-    if(strpos($constant, 'PS_') !== false && strpos($constant, '_TEXT') !== false)
-    {
-        $constant = 'TYPE_TEXT';
-    }
-    
+
     if(strpos($constant, 'PS_') !== false && strpos($constant, '_BLOB') !== false)
     {
         $constant = 'TYPE_BLOB';
     }
-        
+
+    if(strpos($constant, 'PS_') !== false)
+    {
+        $constant = 'TYPE_TEXT';
+    }
+            
     return '\Magento\Framework\DB\Ddl\Table::' . $constant;
 }
 
@@ -10358,7 +10359,7 @@ function getLengthFromType($type)
         'boolean'=>'null',
         'date'=>'null',
         'datetime'=>'null',
-        'decimal'=>'12,4',
+        'decimal'=>'[12,4]',
         'float'=>'null',
         'integer'=>'null',
         'smallint'=>'null',        
@@ -11306,21 +11307,27 @@ function inputRawPhp()
     return $line;
 }
 
-function inputReadline()
+function inputReadline($prompt=null)
 {
-    return readline();
+    if(is_null($prompt))
+    {
+        return readline();
+    }
+
+    return readline($prompt);
 }
 
 function input($string, $default='')
 {
-    echo $string . " (".$default.")] ";
+    $prompt =  $string . " (".$default.")] ";
     if(!function_exists('readline'))
-    {
+    {   
+        echo($prompt);
         $line = inputRawPhp();
     }
     else
     {
-        $line = inputReadline();
+        $line = inputReadline($prompt);
     }
     if(trim($line))
     {
@@ -11509,7 +11516,7 @@ function pestle_cli($argv)
 namespace Pulsestorm\Pestle\Version{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
-define('PULSESTORM_PESTLE_VERSION', '1.2.1');
+define('PULSESTORM_PESTLE_VERSION', '1.3.1');
 /**
 * Displays Pestle Version
 *
