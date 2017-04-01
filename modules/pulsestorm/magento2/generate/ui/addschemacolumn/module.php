@@ -63,16 +63,17 @@ function getClassConstantFromType($type)
     $types = getColumnTypes();
     $types = array_flip($types);
     $constant = $types[$type];
-    if(strpos($constant, 'PS_') !== false && strpos($constant, '_TEXT') !== false)
-    {
-        $constant = 'TYPE_TEXT';
-    }
-    
+
     if(strpos($constant, 'PS_') !== false && strpos($constant, '_BLOB') !== false)
     {
         $constant = 'TYPE_BLOB';
     }
-        
+
+    if(strpos($constant, 'PS_') !== false)
+    {
+        $constant = 'TYPE_TEXT';
+    }
+            
     return '\Magento\Framework\DB\Ddl\Table::' . $constant;
 }
 
@@ -83,7 +84,7 @@ function getLengthFromType($type)
         'boolean'=>'null',
         'date'=>'null',
         'datetime'=>'null',
-        'decimal'=>'12,4',
+        'decimal'=>'[12,4]',
         'float'=>'null',
         'integer'=>'null',
         'smallint'=>'null',        
