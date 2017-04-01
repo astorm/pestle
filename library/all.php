@@ -830,105 +830,12 @@ function pestle_cli()
     rename($tmpFile, $localPharPath);
     
     chmod($localPharPath, octdec($permissions));
-}}
-namespace Pulsestorm\Cli\Tax_Estimate{
-use function Pulsestorm\Pestle\Importer\pestle_import;
-
-
-function getFederalBrackets()
-{
-    //single filer, 2016
-    //key order signifigant, lowest to highest
-    return [
-        '10'    =>'9275',    
-        '15'    =>'37650',
-        '25'    =>'91150',
-        '28'    =>'190150',
-        '33'    =>'413350',
-        '35'    =>'415050',
-        '39.6'  =>'415051',                                                
-    ];
-
-}
-
-function getOregonBrackets()
-{
-    //oregon, single filer, 2016
-    //key order signifigant, lowest to highest
-    return [
-        '5'    =>'3350',    
-        '7'    =>'8400',
-        '9'    =>'125000',
-        '9.9'    =>'125001',
-    ];
-}
-
-function calculateTaxWithBrackets($taxable, $brackets)
-{
-    $top      = false;
-    $extra    = 0;
-    //find top bracket
-    $lastAmount = 0;
-    foreach($brackets as $percent=>$amount)
-    {
-        if($taxable < $amount)
-        {
-            $top   = $percent;
-            $extra = $taxable - $lastAmount;
-            break;
-        }
-        $lastAmount = $amount;
-    }
-
-    //filter out non-applicable brackets
-    $ourBrackets = [];
-    foreach($brackets as $percent=>$amount)
-    {
-        // echo $top, '>=', $percent,"\n";
-        if($percent < $top)
-        {
-            $ourBrackets[$percent] = $amount;
-        }
-    }    
-
-
-    \Pulsestorm\Pestle\Library\output("\$taxes = $extra * ($top/100.00)");
-    $taxes = $extra * ($top/100.00);
-    
-    $lastAmount = 0;
-    foreach($ourBrackets as $percent=>$amount)
-    {
-        $amount = $amount - $lastAmount;
-        \Pulsestorm\Pestle\Library\output("\$taxes += $amount * ($percent/100.00)"); 
-        $taxes += $amount * ($percent/100.00);
-               
-        $lastAmount = $amount;
-    }
-    
-    // output($top);
-    // output($brackets);    
-    // output($ourBrackets);
-    \Pulsestorm\Pestle\Library\output("Tax: " .  $taxes);
-}
-
-/**
-* BETA: Does some back of the electronic napkin tax calculations
-*
-* @command pulsestorm:tax-estimate
-* @argument taxable Taxable, (not gross) income? [80000]
-*/
-function pestle_cli($argv)
-{
-    $taxable = $argv['taxable'];
-    
-    \Pulsestorm\Pestle\Library\output("On $taxable taxable income");
-
-    calculateTaxWithBrackets($taxable, getFederalBrackets());
-    calculateTaxWithBrackets($taxable, getOregonBrackets());
 }
 }
 namespace Pulsestorm\Cli\Token_Parse{
 use function token_get_all as php_token_get_all;
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
 
 define('STATE_PARSING',                             0);
 define('STATE_FOUND_FUNCTION',                      1);
@@ -946,6 +853,95 @@ function pestle_cli()
 function getFunctionFromClass($string, $function_name)
 {
     return getFunctionFromCode($string, $function_name);
+}
+
+function removeWhitespaceAndReIndex(&$tokens)
+{
+    $array = array_filter($tokens, function($token){
+        return $token->token_name !== 'T_WHITESPACE';
+    });    
+    return array_values($array);
+    
+}
+
+function addPhpTagIfNeeded($string)
+{
+    $string = trim($string);
+    if($string[0] !== '<' && $string[1] !== '?')
+    {
+        $string = '<' . '?php ' . $string;
+    }
+    return $string;
+}
+
+function extractUntilSemiColon(&$tokens, $i, $toSkipValues)
+{
+    $tokenCount = count($tokens);
+    $imports = [];
+    for($i;$i<$tokenCount;$i++)
+    {
+        $token = $tokens[$i];
+        //if we've hit a semi-colon, that's the end
+        if($token->token_value === ';'){ break; }    
+
+        //skip the stuff we don't need
+        if(in_array($token->token_value, $toSkipValues))
+        {
+            continue;
+        }
+        
+        $imports[] = $token;        
+    }
+    if(count($imports) > 1)
+    {
+        var_dump($imports);
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("Not sure what to do about dynamic pestle_import");
+    }
+    
+    $includeString = $imports[0]->token_value;
+    $includeString = preg_replace('%[\'"]%', '', $includeString);
+    return $includeString;
+}
+
+function getPestleImportsFromCode($string)
+{
+    $string = addPhpTagIfNeeded($string);
+    $tokens = pestle_token_get_all($string);
+    $tokens = removeWhitespaceAndReIndex($tokens);  
+    $importNames = [];
+    $tokenCount = count($tokens);
+    for($i=0;$i<$tokenCount;$i++)
+    {
+        $token = $tokens[$i];
+        if($token->token_value == 'pestle_import' && $tokens[$i-1]->token_name !== 'T_NS_SEPARATOR')
+        {
+            $importNames[] = extractUntilSemiColon($tokens, $i, ['pestle_import','(',')']);            
+        }
+    }        
+    return $importNames;
+}
+
+function getFunctionNamesFromCode($string)
+{
+    $string = trim($string);
+    if($string[0] !== '<' && $string[1] !== '?')
+    {
+        $string = '<' . '?php ' . $string;
+    }
+
+    $tokens = pestle_token_get_all($string);
+    $tokens = removeWhitespaceAndReIndex($tokens);    
+    $tokenCount = count($tokens);
+    $functionNames = [];
+    for($i=0;$i<$tokenCount;$i++)
+    {
+        $token = $tokens[$i];
+        if($token->token_name == 'T_FUNCTION' && $tokens[$i-1]->token_name !== 'T_USE')
+        {
+            $functionNames[] = $tokens[$i+1];
+        }
+    }
+    return $functionNames;
 }
 
 function getFunctionFromCode($string, $function)
@@ -3547,13 +3543,26 @@ function prependInstallerCodeBeforeEndSetup($moduleInfo, $modelName, $contents, 
         $moduleInfo, $modelName);
     $install_code = \Pulsestorm\Cli\Code_Generation\generateInstallSchemaTable($table_name);
     $contents     = file_get_contents($path);
-    $end_setup    = '        ' . '$installer->endSetup();';
+    $end_setup    = '$installer->endSetup();';
     $contents     = str_replace($end_setup, 
         "\n        //START table setup\n" .
         $install_code .
         "\n        //END   table setup\n" .
         $end_setup, $contents);
     return $contents;
+}
+
+function appendInstallSchemaClass($moduleInfo, $modelName, $options)
+{
+    list($className, $interfaceName) = 
+        generateClassNameAndInterfaceNameForSchemaFromModuleInfoAndOptions(
+            $moduleInfo, $options);
+    $path       = \Pulsestorm\Magento2\Cli\Path_From_Class\getPathFromClass($className);         
+    $contents = prependInstallerCodeBeforeEndSetup(
+        $moduleInfo, $modelName, '', $path); 
+
+    \Pulsestorm\Pestle\Library\output("Adding model to InstallSchema");        
+    \Pulsestorm\Pestle\Library\writeStringToFile($path, $contents);                              
 }
 
 function createSchemaClass($moduleInfo, $modelName, $options)
@@ -3656,6 +3665,23 @@ the --use-upgrade-schema-with-scripts option.
 
 }
 
+function checkThatInstallSchemaClassExists($moduleInfo, $modelName)
+{
+    $className = generateInstallSchemaClassName($moduleInfo);
+    $path      = \Pulsestorm\Magento2\Cli\Path_From_Class\getPathFromClass($className);
+    
+    if(!file_exists($path))
+    {  
+        $message = 
+"\nIt looks like this module does not has an InstallSchema class.  This means 
+ee can't proceed.  The --use-install-schema-for-new-model options requires this
+class.  Try running the command with no -- options for initial generation.
+";                   
+
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage($message);    
+    }  
+}
+
 function checkForInstallSchemaClass($moduleInfo, $modelName)
 {
     $className = generateInstallSchemaClassName($moduleInfo);
@@ -3665,8 +3691,10 @@ function checkForInstallSchemaClass($moduleInfo, $modelName)
     {  
         $message = 
 "\nIt looks like this module already has an InstallSchema class.  This means 
-ee can't proceed.  If you're trying to add a second model to a module, 
-try using --use-upgrade-schema or --use-upgrade-schema-with-scripts\n";                   
+we can't proceed.  If you're trying to add a second model to a module, 
+try using --use-upgrade-schema, --use-upgrade-schema-with-scripts or
+--use-install-schema-for-new-model.
+";                   
 
         \Pulsestorm\Pestle\Library\exitWithErrorMessage($message);    
     }  
@@ -3741,6 +3769,10 @@ function checkForSchemaClasses($moduleInfo, $modelName, $options)
     {
         checkForNoInstallSchemaAndOurUpgrade($moduleInfo, $modelName);
     }    
+    else if(array_key_exists('use-install-schema-for-new-model', $options))
+    {
+        checkThatInstallSchemaClassExists($moduleInfo, $modelName);
+    }    
     else if(!array_key_exists('use-upgrade-schema-with-scripts', $options))
     {
         checkForInstallSchemaClass($moduleInfo, $modelName);
@@ -3795,6 +3827,12 @@ function createSchemaAndDataClasses($moduleInfo, $modelName, $options)
         invokeGenerateSchemaUpgrade($moduleInfo, $modelName, $options);
         return;
     }
+    
+    if(array_key_exists('use-install-schema-for-new-model', $options))
+    {
+        appendInstallSchemaClass($moduleInfo, $modelName, $options);
+        return;
+    }
     createSchemaClass($moduleInfo, $modelName, $options);
     createDataClass($moduleInfo, $modelName, $options);
 }
@@ -3810,6 +3848,7 @@ function validateModelName($modelName)
         \Pulsestorm\Pestle\Library\exitWithErrorMessage("Invalid (to us) model name -- try again with {$newModelName}?" . "\n" .
         "If this annoys you -- pull requests welcome at: https://github.com/astorm/pestle/issues/212");
     }
+    return $modelName;
 }
 
 /**
@@ -3823,6 +3862,7 @@ function validateModelName($modelName)
 * @argument model_name  What model name? [Thing]
 * @option use-upgrade-schema Create UpgradeSchema and UpgradeData classes instead of InstallSchema
 * @option use-upgrade-schema-with-scripts Same as use-upgrade-schema, but uses schema script helpers
+* @option use-install-schema-for-new-model Allows you to add another model definition to InstallSchema
 */
 function pestle_cli($argv, $options)
 {
@@ -4439,6 +4479,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 
 
 
+
 /**
 * Generates new module XML, adds to file system
 * This command generates the necessary files and configuration
@@ -4477,7 +4518,7 @@ function pestle_cli($argv)
     }
     
     mkdir($etc_dir, 0777, $etc_dir);
-    \Pulsestorm\Pestle\Library\writeStringToFile($etc_dir . '/module.xml', $xml);
+    \Pulsestorm\Pestle\Library\writeFormattedXmlStringToFile($etc_dir . '/module.xml', $xml);
     \Pulsestorm\Pestle\Library\output("Created: " . $etc_dir . '/module.xml');
     
     $register = \Pulsestorm\Cli\Code_Generation\templateRegistrationPhp($full_module_name);    
@@ -4488,7 +4529,8 @@ function pestle_cli($argv)
 function exported_pestle_cli($argv)
 {
     return pestle_cli($argv);
-}}
+}
+}
 namespace Pulsestorm\Magento2\Cli\Generate\Observer{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -5706,6 +5748,16 @@ function sortCommandsIntoSection($commands)
         $commandSections[$section][] = $command;
     }
     ksort($commandSections);
+    foreach($commandSections as $section=>$commands)
+    {
+        usort($commands, function($a, $b){
+            if ($a['command'] == $b['command']) {
+                return 0;
+            }
+            return ($a['command'] < $b['command']) ? -1 : 1;        
+        });
+        $commandSections[$section] = $commands;
+    }
     return $commandSections;
 }
 
@@ -6088,6 +6140,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 * @argument model_name  What model name? [Thing]
 * @option use-upgrade-schema Create UpgradeSchema and UpgradeData classes instead of InstallSchema
 * @option use-upgrade-schema-with-scripts Same as use-upgrade-schema, but uses schema script helpers
+* @option use-install-schema-for-new-model Allows you to add another model definition to InstallSchema
 */
 function pestle_cli($argv, $options)
 {
@@ -6121,6 +6174,11 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 
 
 
+function pharString($commandName, $pharName)
+{
+    return $pharName . ' ' . $commandName . ' ';
+}
+
 function getShellScript($argv, $options)
 {
     $packageName     = $argv['package_name'];//'Pulsestorm5';
@@ -6134,36 +6192,43 @@ function getShellScript($argv, $options)
     $moduleNameLowerCase      = strToLower($moduleName);
     $modelNameLowerCase       = strToLower($modelName);
     $modelNamePluralLowerCase = strToLower($modelNamePlural);
+    $fullModuleName           = $packageName . '_' . $moduleName;
+
 
     $pharName = 'pestle.phar';
-    if(array_key_exists('use-phar-name', $options) && $options['use-phar-name'])
+    if(array_key_exists('with-phar-name', $options) && $options['with-phar-name'])
     {
         $pharName = 'pestle_dev';
     }
-    
+
     $pathModule = 'app/code/'.$packageName . '/' . $moduleName;        
-    return '
+    $script = '
 #!/bin/bash
-' . $pharName . ' magento2:generate:module ' . $packageName . ' ' . $moduleName . ' 0.0.1
-' . $pharName . ' generate_crud_model ' . $packageName . '_' . $moduleName . ' ' . $modelName . '
-' . $pharName . ' magento2:generate:acl ' . $packageName . '_' . $moduleName . ' ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . '
-' . $pharName . ' magento2:generate:menu ' . $packageName . '_' . $moduleName . ' "" ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . ' ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . ' "' . $moduleName . ' ' . $modelNamePlural . '" ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '/index/index 10
-' . $pharName . ' magento2:generate:menu ' . $packageName . '_' . $moduleName . ' ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . ' ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . '_list ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . ' "' . $modelName . ' Objects" ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '/index/index 10
-' . $pharName . ' generate_route ' . $packageName . '_' . $moduleName . ' adminhtml ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '    
-' . $pharName . ' generate_view ' . $packageName . '_' . $moduleName . ' adminhtml ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index Main content.phtml 1column
-' . $pharName . ' magento2:generate:ui:grid ' . $packageName . '_' . $moduleName . ' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . ' \'' . $packageName . '\\' . $moduleName . '\Model\ResourceModel\\' . $modelName . '\Collection\' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNameLowerCase . '_id
-' . $pharName . ' magento2:generate:ui:form ' . $packageName . '_' . $moduleName . ' \'' . $packageName . '\\' . $moduleName . '\Model\\' . $modelName . '\' ' . $packageName . '_' . $moduleName . '::' . $modelNamePluralLowerCase . '
+' . pharString('magento2:generate:module',$pharName)              . $packageName . ' ' . $moduleName . ' 0.0.1
+' . pharString('generate_crud_model',$pharName)                   . $fullModuleName . ' ' . $modelName . '
+' . pharString('magento2:generate:acl',$pharName)                 . $fullModuleName . ' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . '
+' . pharString('magento2:generate:menu',$pharName)                . $fullModuleName . ' "" ' . $fullModuleName . '::' . $modelNamePluralLowerCase . ' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . ' "' . $moduleName . ' ' . $modelNamePlural . '" ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '/index/index 10
+' . pharString('magento2:generate:menu',$pharName)                . $fullModuleName . ' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . ' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . '_list ' . $fullModuleName . '::' . $modelNamePluralLowerCase . ' "' . $modelName . ' Objects" ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '/index/index 10
+' . pharString('generate_route',$pharName)                        . $fullModuleName . ' adminhtml ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '    
+' . pharString('generate_view',$pharName)                         . $fullModuleName . ' adminhtml ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index Main content.phtml 1column
+' . pharString('magento2:generate:ui:grid',$pharName)             . $fullModuleName . ' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . ' \'' . $packageName . '\\' . $moduleName . '\Model\ResourceModel\\' . $modelName . '\Collection\' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNameLowerCase . '_id
+' . pharString('magento2:generate:ui:add-column-text',$pharName)  . $pathModule . '/view/adminhtml/ui_component/' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '.xml title "Title"
+' . pharString('magento2:generate:ui:form',$pharName)             . $fullModuleName . ' \'' . $packageName . '\\' . $moduleName . '\Model\\' . $modelName . '\' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . '
+' . pharString('magento2:generate:ui:add_to_layout',$pharName)    . $pathModule . '/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_'.$modelNamePluralLowerCase.'_index_index.xml content ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '
+' . pharString('magento2:generate:acl:change_title',$pharName)    . $pathModule . '/etc/acl.xml '.$packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase.' "Manage '.$modelNamePluralLowerCase.'"
+' . pharString('magento2:generate:controller_edit_acl',$pharName) . $pathModule . '/Controller/Adminhtml/Index/Index.php ' . $packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase . '
+' . pharString('magento2:generate:remove-named-node',$pharName)   . $pathModule . '/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index.xml block '.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_block_main
 
-' . $pharName . ' magento2:generate:ui:add_to_layout '    . $pathModule.'/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_'.$modelNamePluralLowerCase.'_index_index.xml content ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '
-' . $pharName . ' magento2:generate:acl:change_title '    . $pathModule.'/etc/acl.xml '.$packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase.' "Manage '.$modelNamePluralLowerCase.'"
-' . $pharName . ' magento2:generate:controller_edit_acl ' . $pathModule.'/Controller/Adminhtml/Index/Index.php ' . $packageName.'_'.$moduleName.'::'.$modelNamePluralLowerCase . '
+php bin/magento module:enable '.$fullModuleName.'
+';
 
-' . $pharName . ' magento2:generate:remove-named-node '   . $pathModule . '/view/adminhtml/layout/'.$packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index.xml block '.$packageNameLowerCase . '_' . $moduleNameLowerCase.'_block_main
-
-php bin/magento module:enable '.$packageName . '_' . $moduleName.'
+    if(!is_null($options['with-setup-upgrade']))
+    {
+        $script .= '
 php bin/magento setup:upgrade
-
 ';    
+    }
+    return $script;
 
 }
 
@@ -6179,7 +6244,8 @@ function replaceTemplateVars($template, $argv)
 * @argument package_name Package Name? [Pulsestorm]
 * @argument module_name Module Name? [Helloworld]
 * @argument model_name One Word Model Name? [Thing]
-* @option use-phar-name Change pestle.phar to something like pestle_dev
+* @option with-phar-name Change pestle.phar to something like pestle_dev
+* @option with-setup-upgrade Add Setup Upgrade Call?
 */
 function pestle_cli($argv, $options)
 {
@@ -6289,6 +6355,32 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 
 
 
+
+function getModelName($arguments, $index, $newArguments)
+{    
+    // var_dump($arguments, $index);
+    $module      = $newArguments['module'];
+    $name        = $newArguments['observer_name'];
+    
+    $moduleParts = explode('_', $module);
+    $nameParts   = explode('_', $name);
+    
+    $nameParts   = array_map(function($item){
+        return ucWords($item);
+    }, $nameParts);
+
+    $nameParts   = array_filter($nameParts, function($item) use ($moduleParts){
+        return !in_array($item, $moduleParts);
+    });    
+    
+    $moduleParts[] = 'Observer';
+    $class = implode('\\', $moduleParts) . '\\' . 
+        implode('\\', $nameParts);
+
+    $value = \Pulsestorm\Pestle\Library\input('Class Name?', $class);
+    return $value;
+}
+
 /**
 * Generates Magento 2 Observer
 * This command generates the necessary files and configuration to add 
@@ -6300,10 +6392,11 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 * @argument module Full Module Name? [Pulsestorm_Generate]
 * @argument event_name Event Name? [controller_action_predispatch]
 * @argument observer_name Observer Name? [<$module$>_listener]
-* @argument model_name Class Name? [<$module$>\Model\Observer]
+* @argument model_name @callback getModelName
 */
 function pestle_cli($argv)
 {
+    //* @argument model_name Class Name? [<$module$>\Model\Observer]
     return \Pulsestorm\Magento2\Cli\Generate\Observer\exported_pestle_cli($argv);
 }
 }
@@ -6551,15 +6644,14 @@ function generatePageActionsClassFromListingXmlFileAndXml($file, $xml)
         ucwords(preg_replace('%[^a-zA-Z0-9]%', '', $gridId)) . '\\' .
         'PageActions';
         
-    var_dump($pageActionsClassName);        
-    exit;
-    return $actionsClass = 'Foo\Baz\Bar\Actions';
+    return $pageActionsClassName;        
 }
 
 /**
 * Generates a Magento 2.1 ui grid listing and support classes.
 *
-* @command magento2:generate:ui:add-column-actions
+* magento2:generate:ui:add-column-actions
+* @command library
 * @argument listing_file Which Listing File? []
 * @argument index_field Index Field/Primary Key? [entity_id]
 */
@@ -6614,7 +6706,8 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 /**
 * Generates a Magento 2.1 ui grid listing and support classes.
 *
-* @command magento2:generate:ui:add-column-sections
+* magento2:generate:ui:add-column-sections
+* @command library
 * @argument listing_file Which Listing File? []
 * @argument column_name Column Name? [ids]
 * @argument index_field Index Field/Primary Key? [entity_id]
@@ -7491,11 +7584,12 @@ function generateDatasourceNode($xml, $dataSourceName, $providerClass, $database
     return $dataSource;
 }
 
-function addBaseColumnItemNodes($config, $width, $indexField)
+function addBaseColumnItemNodes($config, $width, $indexField, $sortOrder=10)
 {
     \Pulsestorm\Magento2\Cli\Library\addItem($config, 'resizeEnabled', 'boolean', 'false');
     \Pulsestorm\Magento2\Cli\Library\addItem($config, 'resizeDefaultWidth', 'string', $width);
     \Pulsestorm\Magento2\Cli\Library\addItem($config, 'indexField', 'string', $indexField);
+    \Pulsestorm\Magento2\Cli\Library\addItem($config, 'sortOrder', 'number', $sortOrder);
 }
 
 function addIdColumnToColumns($columns, $data, $idColumn)
@@ -7520,7 +7614,7 @@ function addActionsColumnToColumns($columns, $pageActionsClassName, $idColumn)
     $actionsColumn->addAttribute('class',$pageActionsClassName);
     $data = \Pulsestorm\Magento2\Cli\Library\addArgument($actionsColumn, 'data','array');
     $config = \Pulsestorm\Magento2\Cli\Library\addItem($data, 'config', 'array');
-    addBaseColumnItemNodes($config, '107', $idColumn);        
+    addBaseColumnItemNodes($config, '107', $idColumn, 200);        
     return $actionsColumn;
 }
 
@@ -7532,7 +7626,7 @@ function generateColumnsNode($xml, $columnsName, $pulsestorm_commercebug_log_id,
     $data = \Pulsestorm\Magento2\Cli\Library\addArgument($sectionColumns, 'data', 'array');
     $config = \Pulsestorm\Magento2\Cli\Library\addItem($data, 'config', 'array');
         
-    addBaseColumnItemNodes($config, '55', $pulsestorm_commercebug_log_id);            
+    addBaseColumnItemNodes($config, '55', $pulsestorm_commercebug_log_id, 10);            
     addIdColumnToColumns($columns, $data, $pulsestorm_commercebug_log_id);
     addActionsColumnToColumns($columns, $pageActionsClassName, $pulsestorm_commercebug_log_id);
                 
@@ -9192,12 +9286,7 @@ function randomUiComponentStuff()
     //reportDataProviderToListingXmlFileMap($xmls);    
 }
 
-/**
-* Test Command
-* @command testbed
-* @Xargument folder Which Folder?
-*/
-function pestle_cli($arguments, $options)
+function tumblrBackupExtract()
 {
     $files = glob('/Users/alanstorm/Documents/tumblr-backup/2017-02-03/*');
     foreach($files as $file)
@@ -9215,6 +9304,49 @@ function pestle_cli($arguments, $options)
             );
         }
     }
+
+}
+/**
+* Test Command
+* @command testbed
+* @Xargument folder Which Folder?
+*/
+function pestle_cli($arguments, $options)
+{
+    $cmd    = 'find vendor/magento -wholename \'*ui_component/*.xml\'';
+    $files  = explode("\n", `$cmd`);    
+    $files  = array_filter($files);
+    $files  = array_map(function($file){
+        $xml = simplexml_load_file($file);
+        return $xml;
+    }, $files);
+    
+    $files = array_filter($files, function($xml){
+        return $xml->getName() === 'listing';
+        return true;
+    });
+    
+    $allColumns = [];
+    foreach($files as $xml)
+    {
+        $columns = $xml->xpath('//column');
+        $allColumns = array_merge($allColumns, $columns);
+    }    
+    
+    foreach($allColumns as $column)
+    {        
+        #output($column->children()->count());        
+        \Pulsestorm\Pestle\Library\output($column->asXml());
+        
+        
+        foreach($column->argument->item as $item)
+        {
+            
+        }
+        exit;
+    }
+//     var_dump($allColumns);
+//     exit;
 }
 }
 namespace Pulsestorm\Magento2\Cli\Xml_Template{
@@ -9363,7 +9495,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 
 
 /**
- * One Line Description
+ * returns MIT license for complex generated files
  */
 function getMitLicenseTextAsComment()
 {
@@ -9923,6 +10055,558 @@ function exportedSchemaUpgrade($argv, $options)
 {
     return pestle_cli($argv, $options);
 }}
+namespace Pulsestorm\Magento2\Generate\Ui\Addcolumntext{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+
+
+
+function getColumnsNodes($xml)
+{
+    $columns = $xml->xpath('//columns');
+    return $columns;
+}
+
+function validateXml($xml, $argv)
+{
+    if($xml->getName() !== 'listing')
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage('ERROR: This does not look like a <listing/> file.');
+    }
+    
+    $columns = getColumnsNodes($xml);
+    if(count($columns) !== 1)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage('ERROR: File must have exactly one <columns/> node.');
+    }
+    
+    $name = $argv['column_name'];
+    $nodes = $xml->xpath('//*[self::column or self::actionsColumn or self::selectionsColumn]');
+    $column = array_filter($nodes, function($item) use ($name){
+        return (string) $item['name'] === $name;
+    });
+    
+    if(count($column) > 0)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("We already have a {$name} column.");
+    }
+}
+
+function getParentNode($node, $times=1)
+{
+    for($i=0;$i<$times;$i++)
+    {
+        $results = $node->xpath('parent::*');
+        $parent  = array_shift($results);    
+        if(!$parent){ break; } //reached top
+        $node    = $parent;
+    }
+    
+    return $parent;
+}
+
+function getSortOrder($xml)
+{
+    //grab all sortOrder nodes
+    $sortOrderNodes = $xml->xpath('//*[@name="sortOrder"]');
+    if(count($sortOrderNodes) === 0)
+    {
+        return 10; //default
+    }
+    
+    //make sure sort order nodes are for our columns node and not something else
+    $numbers = array_map(function($node){
+        $parent = getParentNode($node,4);
+        if($parent->getName() !== 'columns')
+        {
+            return null;
+        }
+        return (int)$node;
+    }, $sortOrderNodes);
+    $numbers = array_filter($numbers);
+    
+    //If no sortOrder nodes, start with 10
+    if(count($numbers) === 0)
+    {
+        return 10;
+    }
+    
+    //if only one sort order node, take 1 off the max
+    if(count($numbers) === 1)
+    {
+        return max($numbers) - 1;
+    }
+    
+    //Find number between highest two numbers to slide our column in
+    //right before the last one
+    sort($numbers);
+    $max = array_pop($numbers);
+    $min = array_pop($numbers);
+    $numbers = range($min, $max);
+    $count   = count($numbers);
+    //if there's less than three numbers in the array, numbers
+    //are too close for a middle number
+    if($count < 3)
+    {
+        return max($numbers) - 1;
+    }
+    
+    $index = (int) $count / 2;
+    return $numbers[$index];
+}
+
+/**
+* Adds a simple text column to a UI Component Grid
+*
+* @command magento2:generate:ui:add-column-text
+* @argument listing_file Which Listing XML File?
+* @argument column_name New Column Field? [title]
+* @argument column_label New Column Label? [Title]
+*/
+function pestle_cli($argv)
+{
+    $xml = simplexml_load_file($argv['listing_file']);
+    validateXml($xml, $argv);
+    
+    $columns     = getColumnsNodes($xml);
+    $columnsNode = array_shift($columns);
+    
+    $column      = $columnsNode->addChild('column');
+    $column->addAttribute('name', $argv['column_name']);
+    
+    $argument           = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('argument',$column, 'data', 'array');
+    $itemNamedConfig    = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $argument, 'config', 'array');           
+    $label              = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $itemNamedConfig, 'label','string', $argv['column_label']);    
+    $sortOrder          = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $itemNamedConfig, 'sortOrder','number', getSortOrder($xml));    
+    
+    \Pulsestorm\Pestle\Library\output("Adding to {$argv['listing_file']}");
+    \Pulsestorm\Pestle\Library\writeStringToFile($argv['listing_file'], \Pulsestorm\Xml_Library\formatXmlString($xml->asXml()));
+}
+}
+namespace Pulsestorm\Magento2\Generate\Ui\Addformfield{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+
+
+
+function validateXml($xml, $argv)
+{
+    if($xml->getName() !== 'form')
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage('ERROR: This does not look like a <form/> file.');
+    }
+    
+    $fieldsets = $xml->xpath('/form/fieldset[@name="'.$argv['fieldset'].'"]');
+    if(count($fieldsets) !== 1)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage('ERROR: XML file should have exactly one name="'.$argv['fieldset'].'" fieldset.');
+    }
+
+    $fields = $xml->xpath('/form/fieldset/field[@name="'.$argv['field'].'"]');
+    if(count($fields) > 0)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("ERROR: XML file already has a name=\"{$argv['field']}\" field.");
+    }
+}
+
+function getNextSortOrderFromXml($xml)
+{
+    $nodes = $xml->xpath('//item[@name="sortOrder"]');
+    $max   = array_reduce($nodes, function($carry, $item){
+        $item = (int) $item;
+        if($carry > $item)
+        {
+            return $carry;
+        }
+        return $item;
+    }, 0);
+    
+    return $max + 10;
+}
+
+
+/**
+* One Line Description
+*
+* @command magento2:generate:ui:add-form-field
+* @argument path_xml Path to Form XML File? 
+* @argument field Field Name? [title]
+* @argument label Label? [Title]
+* @argument fieldset Fieldset Name? [general]
+* @option is-required Is field required?
+*/
+function pestle_cli($argv, $options)
+{    
+    $xml = simplexml_load_file($argv['path_xml']);
+    validateXml($xml, $argv);
+    $fieldsets  = $xml->xpath('/form/fieldset[@name="'.$argv['fieldset'].'"]');        
+    $fieldset   = array_shift($fieldsets);
+    
+    $dataType = 'text';
+    $formElement = 'input';
+    $sortOrder   = '25';
+    
+    $field      = $fieldset->addChild('field');
+    $field->addAttribute('name', $argv['field']);
+    // addSpecificChild('field', $fieldset,);
+    $argument           = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('argument', $field, 'data', 'array');
+    $itemConfig         = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $argument, 'config', 'array');
+    $itemDataType       = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $itemConfig, 'dataType', 'string', $dataType);
+    $itemLabel          = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $itemConfig, 'label', 'string', $argv['label']);        
+    $itemFormElement    = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $itemConfig, 'formElement', 'string', $formElement);
+    $itemSortOrder      = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $itemConfig, 'sortOrder', 'string', getNextSortOrderFromXml($fieldset));
+    $itemDataScope      = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $itemConfig, 'dataScope', 'string', $argv['field']);    
+        
+    $itemValidation     = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $itemConfig, 'validation', 'array');    
+    $required           = is_null($options['is-required']) ? 'false' : 'true';
+    $itemRequiredEntry  = \Pulsestorm\Magento2\Cli\Library\addSpecificChild('item', $itemValidation, 'required-entry', 'boolean', $required);    
+        
+    \Pulsestorm\Pestle\Library\writeStringToFile(
+        $argv['path_xml'],
+        \Pulsestorm\Xml_Library\formatXmlString($xml->asXml())
+    );
+}
+
+
+
+}
+namespace Pulsestorm\Magento2\Generate\Ui\Addschemacolumn{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+
+
+
+
+function getColumnTypes()
+{
+    return [
+        'TYPE_BIGINT'  =>'bigint',
+        'TYPE_BOOLEAN' =>'boolean',
+        'TYPE_DATE'    =>'date',
+        'TYPE_DATETIME'=>'datetime',
+        'TYPE_DECIMAL' =>'decimal',
+        'TYPE_FLOAT'   =>'float',
+        'TYPE_INTEGER' =>'integer',
+        'TYPE_SMALLINT'=>'smallint',
+        
+        'PS_TYPE_VARCHAR'   =>'varchar',
+        'PS_TYPE_VARBINARY' =>'varbinary',     
+                
+        'PS_TYPE_TEXT' =>'text',
+        'PS_TYPE_BLOB' =>'blob',        
+        
+        'PS_TYPE_MEDIUM_TEXT' =>'mediumtext',
+        'PS_TYPE_MEDIUM_BLOB' =>'mediumblob',        
+
+        'PS_TYPE_LONG_TEXT' =>'longtext',
+        'PS_TYPE_LONG_BLOB' =>'longblob',   
+                
+        'PS_TYPE_TEXT' =>'text',
+        'PS_TYPE_BLOB' =>'blob',                        
+        // 'TYPE_TIMESTAMP'=>'timestamp',
+    ];
+}
+
+function selectColumnType($arguments, $index, $fullArguments)
+{
+    if(isset($arguments[$index]))
+    {
+        return $arguments[$index];
+    }
+    $types = array_values(getColumnTypes());
+    $value = \Pulsestorm\Magento2\Cli\Generate\Menu\inputFromArray("Column Type?", $types, 1);
+    return $value;
+}
+
+function validateColumnType($type)
+{
+    $types = getColumnTypes();
+    if(!in_array($type, $types))
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage("ERROR: Unknown column type {$type}");
+    }
+}
+
+function getClassConstantFromType($type)
+{
+    $types = getColumnTypes();
+    $types = array_flip($types);
+    $constant = $types[$type];
+    if(strpos($constant, 'PS_') !== false && strpos($constant, '_TEXT') !== false)
+    {
+        $constant = 'TYPE_TEXT';
+    }
+    
+    if(strpos($constant, 'PS_') !== false && strpos($constant, '_BLOB') !== false)
+    {
+        $constant = 'TYPE_BLOB';
+    }
+        
+    return '\Magento\Framework\DB\Ddl\Table::' . $constant;
+}
+
+function getLengthFromType($type)
+{
+    $legend = [
+        'bigint'=>'null',
+        'boolean'=>'null',
+        'date'=>'null',
+        'datetime'=>'null',
+        'decimal'=>'12,4',
+        'float'=>'null',
+        'integer'=>'null',
+        'smallint'=>'null',        
+        'varchar'=>'255',
+        'varbinary'=>'255',                     
+        'text'=>'"64K"',
+        'blob'=>'"64K"',                
+        'mediumtext'=>'"2M"',
+        'mediumblob'=>'"2M"',        
+        'longtext'=>'"4G"',
+        'longblob'=>'"4G"',   
+    ]; 
+    return $legend[$type];   
+}
+
+function getPropertyArrayFromType($type)
+{
+    $legend = [
+        'bigint'        =>"['nullable' => false, 'default' => 0]",
+        'boolean'       =>"['nullable' => false, 'default' => 0]",        
+        'date'          =>"[]",
+        'datetime'      =>"[]",
+        'decimal'       =>"['nullable' => false, 'default' => '0.0000']",
+        'float'         =>"['nullable' => false, 'default' => '0.0000']",        
+        'integer'       =>"['nullable' => false, 'default' => 0]",
+        'smallint'      =>"['nullable' => false, 'default' => 0]",        
+        'varchar'       =>"['nullable' => false, 'default' => '']",
+        'varbinary'     =>"['nullable' => true, 'default' => null]",                     
+        'text'          =>"['nullable' => true, 'default' => null]",
+        'blob'          =>"['nullable' => true, 'default' => null]",                
+        'mediumtext'    =>"['nullable' => true, 'default' => null]",
+        'mediumblob'    =>"['nullable' => true, 'default' => null]",        
+        'longtext'      =>"['nullable' => true, 'default' => null]",
+        'longblob'      =>"['nullable' => true, 'default' => null]",   
+    ]; 
+    
+    return $legend[$type];
+}
+
+function getColumnProps($type)
+{
+    
+    return [
+        'typeConstant'   => getClassConstantFromType($type),    //'\Magento\Framework\DB\Ddl\Table::TYPE_TEXT',
+        'length'         => getLengthFromType($type),           //'255',
+        'propertyArray'  => getPropertyArrayFromType($type),    //"['nullable' => false]",
+        'comment'        => '',
+    ];
+}
+
+function generateAddColumn($name, $type)
+{
+    $props = getColumnProps($type);
+    $props['comment'] = '"' . $name . ' field"';
+    extract($props);
+    $string = "
+->addColumn('$name',
+            $typeConstant,
+            $length,
+            $propertyArray,
+            $comment
+        )";
+        
+    return $string;        
+}
+
+function getNextNonWhitespaceToken(&$tokens, $i, $count, $flag=false)
+{
+    $i++;
+    for($i=$i;$i<$count;$i++)
+    {
+        $token = $tokens[$i];
+        //skip whitespace
+        if($token->token_name === 'T_WHITESPACE') { continue; }
+        
+        //if we're at the end, return false
+        if(!isset($tokens[$i+1]))
+        {        
+            return false;
+        }         
+        return $token;        
+    }
+    return false;
+}
+
+//scan until we find a newTable T_STRING followed by a ( T_SINGLE_CHAR
+function scanFoundNewTable($state, $token, $nextToken)
+{
+    return $state === 'start' && 
+            ($token->token_name     === 'T_STRING' && $token->token_value === 'newTable') && 
+            ($nextToken->token_name === 'T_SINGLE_CHAR' && $nextToken->token_value === '(');
+}
+
+function scanIsOurTableAndReturnIndex($tokens, $i, $count, $tableName)
+{
+    $result           = fetchTokensUntilAddColumn($tokens, $i, $count);
+
+    //if we reached the end of the file, bail
+    if(!$result){ return 'end-of-file'; } 
+
+    $newTableTokens   = $result['newTableTokens'];
+    $i                = $result['i'];
+
+
+    $string = implode('', array_map(function($item){
+        return $item->token_value;
+    }, $newTableTokens));
+
+    //check if tokens contain our table            
+    if(strpos($string, $tableName) === false)
+    {
+        //if not, start over
+        return 'start-over';
+    }
+    //if so, set mode and continue
+    $state = 'scanningToStatementEnd';
+    return $i;
+}
+
+function fetchTokensUntilAddColumn(&$tokens, $i, $count)
+{
+    $newTableTokens = [];
+    for($i=$i;$i<$count;$i++)
+    {   
+        $token = $tokens[$i];
+        $newTableTokens[] = $token;
+        if(($token->token_name === 'T_STRING' && $token->token_value === 'addColumn'))
+        {
+            return [
+                'newTableTokens'=>$newTableTokens,
+                'i'=>$i];
+        }
+    }
+    
+    return false;
+}
+
+function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
+{    
+    $tokens                 = \Pulsestorm\Cli\Token_Parse\pestle_token_get_all(file_get_contents($file));
+    $count                  = count($tokens);
+    $state                  = 'start'; //scanningNewtable, scanningToStatementEnd
+    $newTableTokens         = [];
+    $tokensWithNewAddColumn = [];
+    for($i=0;$i<$count;$i++)
+    {        
+        //get current token and next token, breaking
+        //out if there's no new token  
+        $token      = $tokens[$i];
+        $nextToken  = getNextNonWhitespaceToken($tokens, $i, $count);
+        
+        //skip whitespace
+        if($token->token_name === 'T_WHITESPACE') { continue; }
+        
+        //scan until we find a newTable T_STRING followed by a ( T_SINGLE_CHAR
+        if(scanFoundNewTable($state, $token, $nextToken))
+        {
+            $state = 'scanningNewTable';
+            continue;
+        }
+        
+        //pull out everything until we hit an addColumn
+        //does the pulled out string contain our table name?
+        if($state === 'scanningNewTable')
+        {
+            $index = scanIsOurTableAndReturnIndex($tokens, $i, $count, $table);
+            if($index === 'end-of-file') { 
+                break; 
+            }
+            if($index === 'start-over') {
+                $state = 'start';
+                continue;            
+            }
+            $i     = $index;
+            $state = 'scanningToStatementEnd';
+            continue;
+        }    
+        
+        //if so, scan until ending ;
+        if($state === 'scanningToStatementEnd')
+        {
+            if($token->token_name='T_SINGLE_CHAR' && $token->token_value === ';')
+            {
+                //then insert our code block into tokens and break
+                $beforeTokens = array_slice($tokens, 0, $i);
+                $afterTokens  = array_slice($tokens, $i);
+                
+                $token = new \stdClass;
+                $token->token_name  = 'T_FAKE_INSERT_HACK';
+                $token->token_value = trim($columnCode);
+                $middleTokens = [$token];
+                
+                $tokensWithNewAddColumn = array_merge(
+                    $beforeTokens, $middleTokens, $afterTokens
+                );
+                //return our new tokens
+                return $tokensWithNewAddColumn;
+            }
+        }                           
+    }    
+    
+    //return empty array, indicating error
+    return $tokensWithNewAddColumn;   
+}
+/**
+* Genreated a Magento 2 addColumn DDL definition and inserts into file
+*
+* Command scans creates column definition code and, if provided
+* attempts to insert it into provided php_file.  Inserting means
+* looking for this pattern.
+*   newTable($installer->getTable('table_name'))->addColumn
+* and if found, scanning to the ; and inserting the addColumn         
+*
+* @command magento2:generate:ui:add-schema-column
+* @argument php_file PHP file with newTable call? [skip]
+* @argument table Database Table? (packagename_modulename_modelnames)
+* @argument column Columns Name? (new_column)
+* @argument column_type @callback selectColumnType
+*/
+function pestle_cli($argv)
+{
+    validateColumnType($argv['column_type']);
+    $columnCode = generateAddColumn($argv['column'], $argv['column_type']);
+    if($argv['php_file'] === 'skip')
+    {
+        \Pulsestorm\Pestle\Library\output($columnCode);
+    }
+    
+    $tokens     = getTokensWithInsertedCodeFromSourceFile(
+        $columnCode, $argv['php_file'], $argv['table']); 
+
+    if(!$tokens)
+    {
+        \Pulsestorm\Pestle\Library\exitWithErrorMessage(
+            "We couldn't find a newTable call with {$argv['table']}" . "\n" . 
+            "Exiting with an error, but here's the code." . "\n" . 
+            $columnCode
+        );
+    }        
+    
+    \Pulsestorm\Pestle\Library\output("Adding addColumn Call to file");
+    $string = implode('', array_map(function($item){
+        return $item->token_value;
+    }, $tokens));
+
+    \Pulsestorm\Pestle\Library\writeStringToFile($argv['php_file'], $string);   
+}
+}
 namespace Pulsestorm\Nexmo\Sendtext{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -10014,7 +10698,7 @@ function writeToCredentialFile($data)
 }
 
 /**
-* One Line Description
+* Stores Nexmo API in temp file
 *
 * @command nexmo:store-credentials
 * @argument key Key? []
@@ -10107,7 +10791,7 @@ function sendVerifyVerification($client, $verificationRequestId, $code)
 }
 
 /**
-* One Line Description
+* Nexmo Verify API: Second Step
 *
 * @command nexmo:verify-sendcode
 * @argument request_id Request ID? (from nexmo:verify-request) []
@@ -10150,12 +10834,18 @@ function pestle_cli($argv)
         'src/chapter-layouthandles.md',        
         'src/chapter2.md',            
         'src/chapter3.md',         
+        'src/chapter-page-layout.md',
         'src/chapter4.md',         
         'src/chapter5.md',         
         'src/chapter6.md',         
         'src/chapter7.md',         
         'src/chapter8.md',         
-        'src/chapter9.md',                                                         
+        'src/chapter9.md',  
+        'src/appendix-components.md',
+        'src/appendix-view-source.md',
+        'src/appendix-magento-modes.md',
+        'src/appendix-areas.md',
+        'src/appendix-di.md',                
     ];
     
     $raw = [];
@@ -10199,47 +10889,6 @@ function pestle_cli($argv)
     `$cmd`;
     readfile('wordcount.txt');
     // echo `cat wordcount.txt`;
-}
-}
-namespace Pulsestorm\Parsing\Wf{
-use function Pulsestorm\Pestle\Importer\pestle_import;
-
-
-/**
-* One Line Description
-*
-* @command parsing:wf
-* @argument path Path to File?
-* @argument starting_num Starting Number? [1]
-*/
-function pestle_cli($argv)
-{
-    $handle = fopen($argv['path'],'r');
-    
-    $c = $argv['starting_num'];
-    \Pulsestorm\Pestle\Library\output('Due on X/XX/XX:    ');
-    while($data = fgetcsv($handle))
-    {    
-        if(count($data) !== 5)
-        {
-            continue;
-        }
-        
-        if($data[1] > 0 && $data[4] === 'BILL PAY PAYMENT')
-        {
-            continue;
-        }
-        
-        if($data[1] > 0 && $data[4] !== 'BILL PAY PAYMENT')
-        {
-            exit("Unknown Thing?");
-            \Pulsestorm\Pestle\Library\output($data);
-        }
-        $memo = str_replace('#','', $data[4]);
-        \Pulsestorm\Pestle\Library\output('    ' . $c . '-Paid On ' . $data[0] . ':' . abs($data[1]) . ' ' . $memo);
-        
-        $c++;  
-    }
 }
 }
 namespace Pulsestorm\Paypal\Csv_To_Iif{
@@ -10386,9 +11035,110 @@ function pestle_cli($argv, $options)
     return \Pulsestorm\Magento2\Cli\Pestle_Clear_Cache\pestle_cli_exported($argv, $options);
 }
 }
+namespace Pulsestorm\Pestle\Exportassymfony{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+
+
+
+
+
+
+
+function getSymfonyConsoleBaseUse()
+{
+    return '
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;    
+';    
+}
+
+function getSymfonyConsoleBaseBody()
+{
+    return '
+    protected function configure()
+    {
+
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+
+    }    
+';    
+}
+
+function getFunctionBodiesFromCommandModueContents($contents)
+{
+    $functions     = \Pulsestorm\Cli\Token_Parse\getFunctionNamesFromCode($contents);        
+    $functionNameToBody = [];
+    foreach($functions as $function)
+    {
+        $functionName = $function->token_value;
+        $functionNameToBody[$functionName] = \Pulsestorm\Cli\Token_Parse\getFunctionFromCode($contents, $functionName);
+    }
+    
+    return $functionNameToBody;    
+}
+
+function getPestleImportsFunctionBodiesFromContents($contents)
+{
+    $imports            = \Pulsestorm\Cli\Token_Parse\getPestleImportsFromCode($contents);    
+    $importedFunctionsToFiles   = array_combine($imports, 
+        array_map(function($function){
+            return \Pulsestorm\Pestle\Importer\getPathFromFunctionName($function);
+        }, $imports));    
+    $importedFunctionsToContents = array_map(function($file){
+        return file_get_contents($file);
+    }, $importedFunctionsToFiles);        
+    
+    $functionsFromImport = [];
+    foreach($importedFunctionsToContents as $function=>$contents)
+    {
+        $parts = explode('\\', $function);
+        $functionName = array_pop($parts);
+        $functionsFromImport[$functionName] = \Pulsestorm\Cli\Token_Parse\getFunctionFromCode($contents, $functionName);
+    }
+    return $functionsFromImport;
+}
+
+/**
+* Exports a Pestle Module as a Symfony Console Command
+*
+* @command pestle:export-as-symfony
+* @argument command_to_export Export Which Pestle Command? [hello-world]
+* @argument full_class_name Full Symfony Class Name [Pulsestorm\SymfonyConsole\TestCommand]
+*/
+function pestle_cli($argv)
+{
+    \Pulsestorm\Pestle\Library\output("@TODO: replace function calls with $this->functionCall");
+    \Pulsestorm\Pestle\Library\output("@TODO: Functions from pestle import: Need to rename to avoid naming conflicts");
+    \Pulsestorm\Pestle\Library\output("       Maybe use a slashless full namespace name?");
+    // $list = loadSerializedCommandListFromCache();
+    $commandModule = \Pulsestorm\Pestle\Runner\loadSerializedCommandListFromCache()[$argv['command_to_export']];
+    $contents      = file_get_contents($commandModule);
+        
+    $functions              = getFunctionBodiesFromCommandModueContents($contents);
+    $functionsFromImports   = getPestleImportsFunctionBodiesFromContents($contents);
+    
+    $classBody = getSymfonyConsoleBaseBody() . 
+        implode("\n\n", $functions) .                         
+        implode("\n\n", $functionsFromImports);
+
+    $class = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($argv['full_class_name'], 'Command');
+    $class = str_replace('<$use$>'  , getSymfonyConsoleBaseUse(), $class);
+    $class = str_replace('<$body$>' , $classBody, $class);
+    \Pulsestorm\Pestle\Library\output($class);
+    \Pulsestorm\Pestle\Library\output("Done");
+}
+}
 namespace Pulsestorm\Pestle\Library{
 use ReflectionFunction;
 use ReflectionClass;
+use function Pulsestorm\Xml_Library\formatXmlString;
 
 function exitWithErrorMessage($message)
 {
@@ -10502,6 +11252,10 @@ function writeStringToFile($path, $contents)
     }
     file_put_contents($path, $contents);
     return $path;
+}
+
+function writeFormattedXmlStringToFile($path, $contents){
+    return writeStringToFile($path, formatXmlString($contents));
 }
 
 function bail($message)
@@ -10738,7 +11492,8 @@ function parseArgvIntoCommandAndArgumentsAndOptions($argv)
 function pestle_cli($argv)
 {
     
-}}
+}
+}
 namespace Pulsestorm\Pestle\Runfile\Run_File{
 /**
 * ALPHA: Stub for running a single PHP file in a pestle context
@@ -10754,9 +11509,9 @@ function pestle_cli($argv)
 namespace Pulsestorm\Pestle\Version{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
-define('PULSESTORM_PESTLE_VERSION', '1.1.2');
+define('PULSESTORM_PESTLE_VERSION', '1.2.1');
 /**
-* One Line Description
+* Displays Pestle Version
 *
 * @command version
 */
@@ -10799,1078 +11554,6 @@ if ( ! function_exists('glob_recursive'))
     }
 }
 }
-namespace Pulsestorm\Twitter\Twitter\Api\Oauth{
-use function Pulsestorm\Pestle\Importer\pestle_import;
-use Abraham\TwitterOAuth\TwitterOAuth;
-use DomDocument;
-
-
-
-function getUserDir()
-{
-    return trim(`echo ~`);
-}
-
-function getConfigPath()
-{
-    return getUserDir() . '/.pestle.twitter.json';    
-}
-
-function getTwitterConfig()
-{
-    $path = getConfigPath();
-    
-    if(!file_exists($path))
-    {
-        file_put_contents($path, '{}');
-    }
-    
-    return (array) json_decode(file_get_contents($path));
-}
-
-function saveTwitterConfig($config)
-{
-    $path = getConfigPath();
-    return file_put_contents($path, json_encode($config)); 
-}
-
-function mergeConfigWithOptions($config, $options)
-{
-    $options = array_filter($options);
-    $config = array_merge($config, $options);
-    return $config;
-}
-
-function getRateLimitRemainingMessage($connection)
-{
-    $headers = $connection->getLastXHeaders();
-    $message = 'No Rate Limit Header';
-    if(isset($headers['x_rate_limit_remaining'])){ 
-        $message = $headers['x_rate_limit_remaining'];
-    }
-    return $message;
-}
-
-function deleteTweet($connection, $id)
-{
-    //delete it
-    $content = $connection->post('statuses/destroy',['id'=>$id]);
-    // var_dump($url);
-    // var_dump($content);
-    // $content = $connection->get('statuses/show', ['id'=>$id]);
-    \Pulsestorm\Pestle\Library\output('Deleted:              ' . $id);        
-    
-    $message = getRateLimitRemainingMessage($connection);
-    \Pulsestorm\Pestle\Library\output('Rate Limit Remaining: ' . $message);        
-}
-
-function getPathToIdFile()
-{
-    return '/Users/alanstorm/Documents/twitter-archive/615493_779e4ae7ef168ed562e8906c02252460bf4f9b67/ids.csv';    
-}
-
-function getConsumerAndoAuthAuthenticatedConnectionFromConfig($config)
-{
-    $connection = new TwitterOAuth(
-        $config['consumer_key'], 
-        $config['consumer_secret'],
-        $config['oauth_token'],
-        $config['oauth_token_secret']
-    );
-    return $connection;
-}
-
-function deleteNTweetsFromArrayOfIds($n, $ids, $config)
-{
-    $connection = getConsumerAndoAuthAuthenticatedConnectionFromConfig($config);
-    $n          = $n;
-    $first_n    = array_slice($ids, 0, $n);
-    $n_removed  = array_slice($ids, $n);
-
-    array_map(function($id) use ($connection){      
-        $id      = trim($id);  
-        deleteTweet($connection, $id);
-        return $id;
-    }, $first_n);
-    // var_dump(var_dump($connection->getLastXHeaders()));
-    return $n_removed;        
-}
-
-function commandTestbed($config)
-{
-    $connection = getConsumerAndoAuthAuthenticatedConnectionFromConfig($config);
-    $tweets = $connection->get('statuses/user_timeline',[
-        'count'=>200,
-        'max_id'=>'809863258391846912'
-    ]);
-    foreach($tweets as $tweet)
-    {
-//         var_dump($tweet->created_at);
-//         var_dump($tweet->id);
-//         var_dump($tweet->text);
-        // exit;
-    }
-    exit;
-    commandDeleteN($config);
-}
-
-function commandDeleteN($config)
-{
-    $pathToIds  = getPathToIdFile();
-    $lines      = file($pathToIds);        
-    $idsLeft    = deleteNTweetsFromArrayOfIds(10, $lines, $config);
-    file_put_contents($pathToIds, implode($idsLeft));    
-}
-
-function run($command, $config)
-{
-    switch($command)
-    {
-        case 'testbed':
-            return commandTestbed($config);
-        case 'delete-n':
-            return commandDeleteN($config);            
-        case 'oauth_url':
-            return commandOauthUrl($config);
-        case 'oauth_post':
-            return commandOauthPost($config);
-        default:
-            \Pulsestorm\Pestle\Library\output("Unknown Command");
-            exit;
-    }
-    \Pulsestorm\Pestle\Library\output("How did you get here?");
-    exit;
-}
-
-function postToUrl($url, $params)
-{
-    $fieldsString = http_build_query($params);
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $fieldsString);           
-    // curl_setopt($ch, CURLOPT_VERBOSE, 1);
-    curl_setopt($ch, CURLOPT_HEADER, 1);           
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);    
-    
-    $server_output = curl_exec($ch);    
-    curl_close($ch);
-
-    return $server_output;
-}
-
-function fetchUrl($url)
-{
-    $contents = file_get_contents($url);
-    return $contents;
-}
-
-function fetchUrlAsSimpleXml($url)
-{
-    $contents = fetchUrl($url);
-    $dom = new DomDocument;
-    $dom->loadHtml($contents);
-    $xml = simplexml_load_string($dom->saveXml());
-    return $xml;
-}
-
-function commandOauthPost($config)
-{
-    $url = getOauthUrl($config);
-    \Pulsestorm\Pestle\Library\output($url);
-    $xml = fetchUrlAsSimpleXml($url);    
-    
-    $nodes = $xml->xpath('//form[@id="oauth_form"]');
-    $form = array_pop($nodes);    
-    $url = (string) $form['action'];
-    
-    $nodes = $xml->xpath('//form[@id="oauth_form"]//input');
-    $params = [];
-    foreach($nodes as $node)
-    {
-        $name = (string) $node['name'];
-        if(in_array($name, ['authenticity_token','redirect_after_login','oauth_token']))
-        {
-            $params[$name] = (string) $node['value'];
-        }
-    }    
-    // $params['auth_token'] = '4c5528bcc8b0d4fcc2ec1061f49b6c493b247c65';
-    $results = postToUrl($url, $params);
-    
-    $headers = [];
-    $lines   = preg_split('%[\r\n]%',$results);
-    foreach($lines as $line)
-    {
-        $parts  = explode(':', $line);
-        $name   = array_shift($parts);
-        $value  = trim(implode(':', $parts));
-        $headers[$name] = $value;
-    }    
-    $url = $headers['location'];
-    \Pulsestorm\Pestle\Library\output($url);
-}
-
-function commandOauthUrl($config)
-{
-    $url = getOauthUrl($config);
-    \Pulsestorm\Pestle\Library\output($url);
-}
-
-function getOauthUrl($config)
-{
-    $connection = new TwitterOAuth(
-        $config['consumer_key'], 
-        $config['consumer_secret'] 
-    );
-    
-    $request_token = $connection->oauth(
-        'oauth/request_token', 
-        array('oauth_callback' => null)
-    );
-
-    var_dump($request_token);
-
-    $url = $connection->url(
-        'oauth/authorize', 
-        array('oauth_token' => $request_token['oauth_token'])
-    );
-    return $url;    
-}
-
-/**
-* ALPHA: Experiments with the twitter oauth based REST API
-*
-* @command twitter:api:oauth
-* @argument command Which Command? [testbed]
-* @option consumer_key Twitter Application Consumer Key
-* @option consumer_secret Twitter Application Consumer Secret
-* @option oauth_token Authorized Token
-* @option oauth_token_secret Authorized Secret
-*/
-function pestle_cli($argv, $options)
-{
-    $config = getTwitterConfig($options);   
-    $config = mergeConfigWithOptions($config, $options);    
-    
-    run($argv['command'], $config);
-    
-    saveTwitterConfig($config);    
-    // var_dump($config);
-}
-}
-namespace Pulsestorm\Wordpress\Export\Xml{
-use function Pulsestorm\Pestle\Importer\pestle_import;
-
-
-
-/**
-* ALPHA: WordPress export script
-*
-* @command wordpress:export:xml
-*/
-function pestle_cli($argv)
-{
-    return \Pulsestorm\Wordpress\Export_Xml\pestle_cli_exported($argv);
-}
-}
-namespace Pulsestorm\Wordpress\Export_Xml{
-use function Pulsestorm\Pestle\Importer\pestle_import;
-
-
-
-
-
-
-
-use Michelf\Markdown;
-use DomDocument;
-use Exception;
-
-class PestleXmlElement extends \SimpleXMLElement
-{
-    public function setText($text)
-    {
-        $this[0]   = $text;
-    }
-    
-    public function addChildCdata($name, $value=null, $namespace=null )
-    {
-        return $this->addChild($name, '<![CDATA[' . $value . ']>', $namespace);
-    }
-    
-    public function addChild($name, $value=null, $namespace=null )
-    {        
-        if(strpos($value, '<![CDATA[') !== 0)
-        {
-            $node = parent::addChild($name, $value, $namespace);
-        }
-        else
-        {
-        
-            $value = substr($value, 9);
-            $value = substr($value, 0, strlen($value) -2);
-            $child = parent::addChild($name, null, $namespace);
-        
-            $node = dom_import_simplexml($child); 
-            $no   = $node->ownerDocument; 
-            $node->appendChild($no->createCDATASection($value));         
-            $node = simplexml_import_dom($node);
-        }
-        return $node;
-    }
-    
-    public function addMetaKey($key, $value)
-    {
-        $this->addChildCdata('wp:meta_key', $key, 'wp');
-        $this->addChildCdata('wp:meta_value', $value, 'wp');
-        return $this;
-    }
-}
-
-function getInitialNode()
-{
-    $xml                  = new PestleXmlElement('<rss/>');
-
-    $xml['version']       = '2.0';
-    $xml['xmlns:excerpt'] = 'http://wordpress.org/export/1.2/excerpt/';
-    $xml['xmlns:content'] = 'http://purl.org/rss/1.0/modules/content/';
-    $xml['xmlns:wfw']     = 'http://wellformedweb.org/CommentAPI/';
-    $xml['xmlns:dc']      = 'http://purl.org/dc/elements/1.1/';
-    $xml['xmlns:wp']      = 'http://wordpress.org/export/1.2/'; 
-    return $xml;
-}
-
-function cleanContent($content)
-{
-    $content = str_replace('<p><promo></promo></p>',   '', $content);
-    $content = str_replace('<p><series /></p>',        '', $content);
-
-    if(strpos($content, '<' . '?' . 'php') !== false)
-    {
-        echo($content);
-        var_dump(__FUNCTION__);
-        exit;
-    }         
-    return $content;
-}
-
-function createItem($xml, $post)
-{
-    $item                 = $xml->addChild('item');
-    $title                = $item->addChild('title', $post->title);
-    $pubDate              = $item->addChild('pubDate', date('D, d M Y H:i:s +0000', strToTime($post->date)));
-    $post_date            = $item->addChild('wp:post_date', date('Y-m-d H:i:s', strToTime($post->date)), 'wp');
-    $post_date_gmt        = $item->addChild('wp:post_date_gmt', date('Y-m-d H:i:s', strToTime($post->date)), 'wp');
-    $creator              = $item->addChildCdata('dc:creator','astorm','dc');
-    $post_name            = $item->addChild('wp:post_name', trim($post->slug,'/'),'wp');
-    $post_type            = $item->addChild('wp:post_type', 'post','wp');                     
-    $status               = $item->addChild('wp:status', 'publish', 'wp');
-    
-    $content_encoded      = $item->addChildCdata('content:encoded',cleanContent($post->content),'content');
-    $excerpt_encoded      = $item->addChildCdata('excerpt:encoded',$post->excerpt,'excerpt');
-    
-    if(isset($post->category))
-    {
-        $category               = $item->addChildCdata('category', 
-            getCategoryNameFromNiceName($post->category));
-        $category['domain']     = 'category';
-        $category['nicename']   = $post->category;    
-        
-        if($post->series && $post->series['seriesSlug'] === 'magento-2-object-system')
-        {
-            $category               = $item->addChildCdata('category', 
-                getCategoryNameFromNiceName('magento-2'));
-            $category['domain']     = 'category';
-            $category['nicename']   = 'magento-2';            
-        }
-    }
-    
-    if(isset($post->series))
-    {        
-        $nodeSeries               = $item->addChildCdata('category', $post->series['title']);
-        $nodeSeries['domain']     = 'series';
-        $nodeSeries['nicename']   = $post->series['seriesSlug'];
-
-        $wp_postmeta          = $item->addChild('wp:postmeta','','wp');         
-        $series_meta_callback = function($slug, $info){
-            $filtered = array_filter($info['articles'], function($array) use ($slug){
-                return $slug === $array['link'];
-            });
-            if(count($filtered) > 1)
-            {
-                throw new Exception("Whhhhhhhhhat?");
-            }
-            $keys = array_keys($filtered);
-            return [
-                'place_in_series'=>array_shift($keys),
-                'info'=>array_shift($filtered)
-            ];
-        };                
-        $series_meta          = call_user_func($series_meta_callback,$post->slug, $post->series);
-        
-        $wp_postmeta->addMetaKey('_series_part',$series_meta['place_in_series']);
-        
-    }
-//     $link                 = $item->addChild('link','');
-//     $pubDate              = $item->addChild('pubDate','');
-//     $dc_creator           = $xml->addChild('dc:creator', '<![CDATA[astorm]]>');
-//     $guid                 = $item->addChild('guid','');
-//     $guid['isPermaLink']  ="false";
-//     $description          = $item->addChild('description','');
-//     $content_encoded      = $item->addChild('content:encoded','');
-//     $excerpt_encoded      = $item->addChild('excerpt:encoded','');
-//     $wp_post_id           = $item->addChild('wp:post_id','');
-//     $wp_post_date         = $item->addChild('wp:post_date','');
-//     $wp_post_date_gmt     = $item->addChild('wp:post_date_gmt','');
-//     $wp_comment_status    = $item->addChild('wp:comment_status','');
-//     $wp_ping_status       = $item->addChild('wp:ping_status','');
-//     $wp_post_name         = $item->addChild('wp:post_name','');
-//     $wp_status            = $item->addChild('wp:status','');
-//     $wp_post_parent       = $item->addChild('wp:post_parent','');
-//     $wp_menu_order        = $item->addChild('wp:menu_order','');
-//     $wp_post_type         = $item->addChild('wp:post_type','');
-//     $wp_post_password     = $item->addChild('wp:post_password','');
-//     $wp_is_sticky         = $item->addChild('wp:is_sticky','');
-//     $wp_postmeta          = $item->addChild('wp:postmeta','');
-//     $wp_meta_key          = $item->addChild('wp:meta_key','');
-//     $wp_meta_value        = $item->addChild('wp:meta_value','');
-//     $wp_postmeta          = $item->addChild('wp:postmeta',''); 
-    return $item; 
-}
-
-function loadSeriesInformation()
-{
-    $series = [];
-    $series['magento2-advanced-javascript'] = 'Magento 2: Advanced Javascript';    
-    $files = glob('/Users/alanstorm/Documents/github_private/pair-websites/public_html/alanstorm.com/content-store-local/series/*.php');
-    foreach($files as $file)
-    {
-        $info = include($file);
-        $parts = explode('#',$info->link);
-        $slug = str_replace('_','-',array_pop($parts));
-        $series[$slug] = (array)$info;
-    }
-    return $series;
-}
-
-function taskGenerateSeries()
-{
-    $series = loadSeriesInformation();
-    foreach($series as $slug=>$info)
-    {
-        $term = $channel->addChild('wp:term',null,'wp');
-        $term->addChild('wp:term_taxonomy', '<![CDATA[series]]>','wp');
-        $term->addChild('wp:term_slug',     '<![CDATA['.$slug.']]>','wp');
-        $term->addChild('wp:term_parent',   '<![CDATA[]]>','wp');
-        $term->addChild('wp:term_name',     '<![CDATA['.$info['title'].']]>','wp');
-        $term->addChild('wp:term_description',     '<![CDATA['.$info['descriptionFull'].']]>','wp');
-// 		<wp:term_taxonomy><![CDATA[series]]></wp:term_taxonomy>
-// 		<wp:term_slug><![CDATA[magento-2-mvc]]></wp:term_slug>
-// 		<wp:term_parent><![CDATA[]]></wp:term_parent>
-// 		<wp:term_name><![CDATA[Magento 2 for PHP MVC Developers]]></wp:term_name>        
-    }
-}
-
-function getTitleFromContents($markdownContents)
-{
-    $parts = explode('==================================================',
-        $markdownContents);
-        	
-    $title = trim(strip_tags(array_shift($parts)));
-    if(!$title)
-    {
-        exit(__FUNCTION__);
-    }
-    
-    if(count(preg_split('%[\r\n]%', $title)) > 1)
-    {
-        var_dump(__FUNCTION__);
-        var_dump($title);
-        exit;    
-    }
-    
-    return $title;
-}
-
-function getSlugFromContents($markdownContents)
-{
-    $parts = explode('==================================================',
-        $markdownContents);
-    
-    $anchor = array_shift($parts);
-    preg_match('%href="(.+?)"%i',$anchor, $matches);
-    $slug = $matches[1];
-    if(!$slug)
-    {
-        exit(__FUNCTION__);
-    }
-    return $slug;
-}
-
-function getPostContentsFromContents($htmlContents)
-{
-    $parts = explode('</h1>', $htmlContents);
-    array_shift($parts);
-    $contents = implode('</h1>', $parts);
-            
-    if(!$contents)
-    {
-        var_dump(__FUNCTION__);
-        exit;
-    }
-    
-    return $contents;
-}
-
-function getExcerptFromPost($post)
-{
-    $post = strip_tags($post);
-    $wordCount = 45;
-    //From: http://stackoverflow.com/a/12445298/4668
-    $excerpt = implode( 
-        '', 
-        array_slice( 
-            preg_split(
-                '/([\s,\.;\?\!]+)/', 
-                $post, 
-                $wordCount*2+1, 
-                PREG_SPLIT_DELIM_CAPTURE
-            ),
-            0,
-            $wordCount*2-1
-        )
-    );    
-    
-    $parts = preg_split('%[\r\n]%', trim($excerpt));
-    $excerpt = array_shift($parts);
-    if(!$excerpt)
-    {
-        var_dump(__FUNCTION__);
-        exit;
-    }
-    return $excerpt;
-}
-
-function getPostToSkip()
-{
-    $prefix = '/Users/alanstorm/Documents/github_private/pair-websites/public_html/content-store/alanstorm.com/';
-    return [
-//             $prefix . 'objective_c_selector_part_2.php',
-//             $prefix . 'objective_c_selector_part_3.php',
-//             $prefix . 'objective_c_selector_part_4.php',
-            
-            //weird slug vs. filename vs. a problem.  Leave this magneto_listener_lifecycle_block.php skip in.
-            $prefix .'magneto_listener_lifecycle_block.php',
-            
-            //stuff below this line is ok to skip
-            $prefix . 'atom.php',            
-            $prefix . 'home.php',            
-            $prefix . 'css.php',
-            $prefix . 'copyright.php',
-            $prefix . 'magento-articles.php',
-            $prefix . 'category/drupal.php',
-            $prefix . 'category/magento.php',
-            $prefix . 'category/python.php',
-            $prefix . 'category/webos.php',
-            $prefix . 'category/zend-framework.php',            
-            $prefix . 'categorypython.php',
-            $prefix . 'archives.php',
-            $prefix . 'php_prototype.php',
-            $prefix . 'projects.php', 
-            $prefix . 'stage.php' ,           
-            $prefix . 'webos.php',
-            $prefix . 'zend-framework.php',                                   
-        ];
-}
-
-function getPostDateFromConetnts($htmlContents)
-{
-    $parts = explode('<div class="date">Originally published ', $htmlContents);
-    $string = array_pop($parts);
-    $parts = explode('</div>', $string);
-    $date = array_shift($parts);
-    if(!$date)
-    {
-        exit(__METHOD__);
-    }
-    return $date;   
-} //Originally published February  2, 2006
-
-function deTab($markdownContents)
-{
-    return str_replace("\t", '    ', $markdownContents);
-}
-
-function taskGetPostInformation()
-{
-    $information = taskGetPostInformationContentCourier();
-    $information = array_merge($information, taskGetPostInformationTtf());    
-    return $information;
-}
-
-function taskGetPostInformationTtf()
-{
-    $files = glob('/Users/alanstorm/Documents/github_private/pair-websites' . 
-        '/public_html/alanstorm.com/2004/includes/*.php');
-        
-    $toSkip = ['projects','404','about','archive','archives','contact', 
-        'whatismyip1', 'next_time__I_ll_pay_attention', 'dot_com_envy', 'test',
-        'testing','asdfasd','test1','test2','test3', 'iebank1','testing1',
-        'linklog','Testing_Markdown','home',
-        
-        //damaged utf8
-        ];        
-    $posts = [];       
-    foreach($files as $file)        
-    {
-        // output($file);        
-        $pathInfo = pathInfo($file);
-        if(in_array($pathInfo['filename'], $toSkip)) { continue; }
-        // var_dump($pathInfo);
-        $tmp = [];
-        $lines    = file($file);
-        $contents = implode('', $lines);
-        if(strpos($contents, '<h2>') === false) { continue; }
-        
-        $tmp['title']   = trim(strip_tags(array_shift($lines)));
-        // output($tmp['title']);
-        $tmp['slug']    = $pathInfo['filename'];        
-        $tmp['date']    = trim((
-            str_replace(
-                'Originally published ',
-                '',
-                strip_tags(array_pop($lines))
-            )
-        ));    
-        $tmp['content'] = contentFilterForOldTtf(implode('',$lines));
-        $tmp['excerpt'] = getExcerptFromPost($tmp['content']);                
-        $posts[] = (object) $tmp;
-    }
-    
-    return $posts;
-}
-
-function contentFilterForOldTtf($string)
-{
-    $string = preg_replace(
-        '%\<\?php.+?Your IP Address is: </strong>.+?\?>%si',
-        'Your IP Adress is: <strong><em>An older feature, disabled in this age of rugged, clumsy CMS systems.</em></strong>',
-        $string
-    );
-    return $string;
-}
-
-function taskGetPostInformationContentCourier()
-{
-    $items = \Pulsestorm\Phpdotnet\glob_recursive(
-        '/Users/alanstorm/Documents/github_private/pair-websites' . 
-            '/public_html/content-store/*.php'
-    );
-
-    $toSkip       = getPostToSkip();    
-    $series       = loadSeriesInformation();
-    $categories   = loadCategoryInformation();
-    
-    $information = [];                
-    foreach($items as $item)
-    {        
-        if(in_array($item,$toSkip))
-        {
-            continue;
-        }
-        $tmp = (object) [];
-        // output('Parsing: ' .  $item);
-        $contents = file_get_contents($item);
-        $contents = deTab($contents);
-        
-        ob_start();
-        $_GET['widget'] = false;
-        eval('?>'.$contents);           
-        $markdownContents = deTab( ob_get_clean() );        
-        unset($_GET['widget']);
-        
-        $htmlContents     = Markdown::defaultTransform($markdownContents);                    
-        
-        $title    = getTitleFromContents($markdownContents);
-        // output("    TITLE: $title");
-        $tmp->title = $title;
-        
-        $slug     = getSlugFromContents($markdownContents);
-
-        // output("    SLUG:  $slug");  
-        $tmp->slug = $slug;
-        
-        $post     = getPostContentsFromContents($htmlContents);
-        
-        $tmp->content = $post;
-        
-        $excerpt  = getExcerptFromPost($post);
-        // output("    EXCERPT: $excerpt");
-        $tmp->excerpt = $excerpt;
-        
-        $date     = getPostDateFromConetnts($htmlContents);
-        // output("    DATE: $date");
-        $tmp->date = $date;
-        
-        $category_callback = function($slug) use ($categories){
-            foreach($categories as $category=>$urls)
-            {
-                if(!in_array($slug, $urls))
-                {
-                    continue;
-                }
-                return $category;
-            }
-            return null;
-        };
-        
-        $tmp->category = call_user_func($category_callback, $slug);
-        
-        $closure = function($slug) use ($series){
-            foreach($series as $seriesSlug=>$info)
-            {            
-                $links = array_map(function($array){
-                    return $array['link'];
-                }, $info['articles']);
-                if(in_array($slug, $links))
-                {
-                    $info['seriesSlug'] = $seriesSlug;
-                    return $info;
-                }                
-            }
-        };
-        $tmp->series = $closure($slug);
-        
-        $information[] = $tmp;
-    }
-
-    return $information;
-}
-
-function loadCategoryInformation()
-{
-    $filename = '/tmp' . '/alanstorm_dot_com_categories_' . date('Y-m-d',time()) . '.ser';
-    if(!file_exists($filename))
-    {    
-        $urls = \Pulsestorm\Magento2\Cli\Orphan_Content\fetchAllUrls();
-        $urls = \Pulsestorm\Magento2\Cli\Orphan_Content\normalizeUrls($urls);
-        $urls = \Pulsestorm\Magento2\Cli\Orphan_Content\removeIrrelevantDataFromUrls($urls);
-        unset($urls['archive']);
-        $urls = json_encode($urls);        
-        file_put_contents($filename, $urls);
-    }   
-    return json_decode(file_get_contents($filename));
-}
-
-function getCategoryNameFromNiceName($nicename)
-{
-    $names = [
-        'magento'=>'Magento',
-        'magento-2'=>'Magento 2',
-        'laravel'=>'Laravel',
-        'oro'=>'OroCRM',
-        'modern_php'=>'Modern PHP',  
-        'sugarcrm'=>'SugarCRM',      
-        'applescript'=>'AppleScript',       
-        'drupal'=>'Drupal',
-        'webos'=>'WebOS',
-        'python'=>'Python',        
-    ];
-    if(!isset($names[$nicename]))
-    {
-        throw new Exception("Need nice name label for $nicename at " . __LINE__);
-    }
-    return $names[$nicename];
-}
-
-/**
- * Dupe slugs from renames, etc.
- */
-function getEditedNotPublishedSlugs()
-{
-    return ['/improving_bbedits_go_to_line'      , 
-        '/magento_admin_hello_world_revisited '  ,
-        '/magento_commerce_bug_access_controle'  ,
-        '/magento_config_a_critiqu_and_caching'  ,
-        '/magento_connect_validate '             ,
-        '/magento_layout_diectory_climbing'      ,
-        '/magento_ultimate_module_creator_review_1',
-        '/magneto_2_object_manager_instance_objects',
-        '/magento_module_creator_ultimate_review',
-//         '/magneto_listener_lifecycle_block',
-//         '/magento_listener_lifecycle_block'
-        ];
-}
-
-function addPostsItemsToXml($xml)
-{
-    $information = taskGetPostInformation();
-    $slugsToSkip = getEditedNotPublishedSlugs();
-    foreach($information as $post)
-    {
-        if(in_array($post->slug, $slugsToSkip)) { continue; }
-        createItem($xml, $post);
-    }	
-}
-
-function addCategoriesToXml($xml)
-{
-    $categories   = loadCategoryInformation();
-    foreach($categories as $category=>$urls)
-    {
-// 	<wp:category>
-// 		<wp:term_id>11</wp:term_id>
-// 		<wp:category_nicename><![CDATA[applescript]]></wp:category_nicename>
-// 		<wp:category_parent><![CDATA[]]></wp:category_parent>
-// 		<wp:cat_name><![CDATA[AppleScript]]></wp:cat_name>
-// 	</wp:category>
-	    $xmlCategory = $xml->addChild('wp:category',null,'wp');
-        $xmlCategory->addChildCdata('wp:category_nicename', $category, 'wp');
-        $xmlCategory->addChildCdata('wp:cat_name', getCategoryNameFromNiceName($category), 'wp');
-
-    }
-}
-
-function checkForDupes($series)
-{
-    foreach($series as $key=>$info)
-    {
-        \Pulsestorm\Pestle\Library\output("Starting $key");
-        $slugs = array_map(function($info){
-            return $info['link'];
-        }, $info['articles']);
-        
-        foreach($slugs as $slug)
-        {
-            $filtered = array_filter($series, function($info) use ($slug){
-                $slugs = array_map(function($article){
-                    return $article['link'];
-                }, $info['articles']);
-                
-                return in_array($slug, $slugs);
-            });
-            if(count($filtered) > 1)
-            {
-                \Pulsestorm\Pestle\Library\output("$slug appears in " . count($filtered) ." series");
-                $titles = array_map(function($item){
-                    \Pulsestorm\Pestle\Library\output('    Series: ' . $item['title']);            
-                }, $filtered);
-            }
-        }        
-        \Pulsestorm\Pestle\Library\output("Processed $key");
-    }
-}
-
-function addSeriesToXml($xml)
-{
-    $series = loadSeriesInformation();
-    checkForDupes($series);
-    
-    foreach($series as $info)
-    {
-        $term           = $xml->addChild('wp:term', null, 'wp');
-        $tax            = $term->addChildCdata('wp:term_taxonomy', 'series', 'wp');
-        $slug           = $term->addChildCdata('wp:term_slug', (explode('#', $info['link']))[1], 'wp');
-        $parent         = $term->addChildCdata('wp:term_parent', '', 'wp');
-        $name           = $term->addChildCdata('wp:term_name', $info['title'], 'wp');
-        $description    = $term->addChildCdata('wp:term_description', $info['descriptionFull'], 'wp');
-    }
-}
-
-/**
-* ALPHA: WordPress export script
-* @command wp-export-xml
-*/
-function pestle_cli($argv)
-{
-
-    // output("2004 articles");
-//     output("\$toSkip articles");
-//     output("Articles without structure category information. Apple Script, Drupal, Python, Web OS articles");
-// output("DONE: Add Categories to XML");
-// output("DONE: Add Series to XML");
-//     output("DONE: Remove <promo>");
-//     output('DONE: Post "Improving BBEdit\'s "Go To Line"" already exists.
-// DONE: Post "Magento 2: KnockoutJS Integration" already exists.
-// DONE: Post "Magento Admin Hello World Revisited" already exists.
-// DONE: Post "Commerce Bug Tutorial: Access Control" already exists.
-// DONE: Post "Magento Config: A Critique and Caching" already exists.
-// DONE: Post "Validating a Magento Connect Extension" already exists.
-// DONE: Post "Directory Climbing in Magento Layout" already exists.
-// DONE: Post "Magento Ultimate Module Creator Review" already exists.
-// DONE: Post "Magento Ultimate Module Creator Review" already exists.
-// DONE: Post "Magento Block Lifecycle Methods" already exists.');
-
-    $xml  = getInitialNode();
-    $channel = $xml->addChild('channel');
-    $channel->addChild('wp:wxr_version','1.2', 'wp');
-    
-    addPostsItemsToXml($channel);
-    addCategoriesToXml($channel);
-    addSeriesToXml($channel);        
-
-    $xmlString = $xml->asXml();
-
-    $xmlString = str_replace(' xmlns:wp="wp"','', $xmlString);
-    $xmlString = str_replace(' xmlns:excerpt="excerpt"','', $xmlString);
-    $xmlString = str_replace(' xmlns:dc="dc"','', $xmlString);     
-    $xmlString = str_replace(' xmlns:content="content"','', $xmlString);         
-     
-    \Pulsestorm\Pestle\Library\output(
-        // formatXmlString(
-            $xmlString
-        // )
-    );
-    
-}
-
-function pestle_cli_exported($argv)
-{
-    return pestle_cli($argv);
-}}
-namespace Pulsestorm\Wordpress\Parse\Urls{
-use function Pulsestorm\Pestle\Importer\pestle_import;
-
-
-
-/**
-* ALPHA: WordPress file parser
-* @command wordpress:parse:urls
-*/
-function pestle_cli($argv)
-{
-    return \Pulsestorm\Wordpress\Urls\pestle_cli_exported($argv);
-}
-}
-namespace Pulsestorm\Wordpress\Urls{
-use function Pulsestorm\Pestle\Importer\pestle_import;
-
-
-
-
-
-
-
-
-function getUrlType($url)
-{
-    $parts = parse_url($url);
-    
-    //homepage
-    if($parts['path'] === '/')
-    {
-        return 'homepage';
-    }
-    
-    //static content
-    $pathParts = explode('/', $parts['path']);
-    $pathParts = array_values(array_filter($pathParts));
-    if($pathParts[0] === 'wp-content')
-    {
-        return 'static-wp-content';
-    }
-    
-    if($pathParts[0] === 'wp-includes')
-    {
-        return 'static-wp-includes';
-    }
-
-    if($pathParts[0] === 'wp-json')
-    {
-        return 'wp-json';
-    }
-     
-    if($pathParts[0] === 'category')
-    {
-        return 'listing-category';
-    }
-     
-    if($pathParts[0] === 'author')
-    {
-        return 'listing-author';
-    }
-
-    if($pathParts[0] === 'series')
-    {
-        return 'listing-series';
-    }
-                        
-    //an RSS feed
-    $last = array_pop($pathParts);
-    $pathParts[] = $last;
-    if($last === 'feed')
-    {
-        return 'feed';
-    }
-    
-    if(count($pathParts) === 1)
-    {
-        return 'page-or-post';
-    }
-    
-    if( count($pathParts) === 2     && 
-        is_numeric($pathParts[0])   &&
-        is_numeric($pathParts[1]))
-    {
-        return 'listing-date';
-    }
-    
-    throw new \Exception("Unknown URL type");
-}
-
-function taskUrlTypes()
-{
-
-    $array = include '/private/tmp/export.urls.php';
-    $report = [];    
-    foreach($array as $url=>$boolean)
-    {
-        $tmp = array();
-        $type = getUrlType($url);        
-        \Pulsestorm\Pestle\Library\output($type . '::' . $url);
-        
-//         $parts = preg_split('https?://', $url);
-//         var_dump($parts);
-        // $report[$url] = $tmp;
-    }
-    
-    // var_dump($report);
-    // exit;
-
-}
-
-/**
-* ALPHA: WordPress file parser
-* @command wp-urls
-*/
-function pestle_cli($argv)
-{
-    $xml = simplexml_load_file('/Users/alanstorm/Desktop/import.xml');
-    
-    $children = [];
-    $namespaces = $xml->getNameSpaces(true);
-    foreach($xml->channel->children() as $item)
-    {
-        if($item->getName() !== 'item') { continue; }
-        foreach($item->children($namespaces['wp']) as $child)
-        {
-            if($child->getName() !== 'post_name'){ continue;}
-            $children[] = (string) $child;
-        }
-    }
-    
-    $children = array_filter($children, function($item){
-        return strToLower($item) !== $item;
-    });
-    var_dump($children);
-    
-}
-
-function pestle_cli_exported($argv, $options=[])
-{
-    return pestle_cli($argv);
-}    }
 namespace Pulsestorm\Xml_Library{
 use DomDocument;
 use Exception;
