@@ -86,7 +86,7 @@ function createControllerClassForRoute($module, $area, $controller, $action, $ac
 * @argument area Which Area (frontend, adminhtml)? [frontend]
 * @argument frontname Frontname/Route ID? [pulsestorm_helloworld]
 * @argument controller Controller name? [Index]
-* @argument action action? [Index]
+* @argument action Action name? [Index]
 */
 function pestle_cli($argv)
 {    
