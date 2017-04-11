@@ -210,7 +210,7 @@ function applyCommandNameAlias($command_name)
     switch($command_name)
     {
         case 'list':
-            return 'list_commands';
+            return 'list-commands';
         case '--version':
             return 'version';
         case '-v':
