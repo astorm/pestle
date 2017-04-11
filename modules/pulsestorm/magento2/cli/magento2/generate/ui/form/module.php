@@ -175,7 +175,7 @@ function createControllerClassBody($module_info, $aclRule)
         \Magento\Framework\View\Result\PageFactory $resultPageFactory)
     {
         $this->resultPageFactory = $resultPageFactory;        
-        return parent::__construct($context);
+        parent::__construct($context);
     }
     
     public function execute()

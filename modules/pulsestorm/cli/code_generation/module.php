@@ -322,7 +322,7 @@ function createControllerClass($class, $area, $acl='ACL RULE HERE')
         \Magento\Framework\View\Result\PageFactory $resultPageFactory)
     {
         $this->resultPageFactory = $resultPageFactory;        
-        return parent::__construct($context);
+        parent::__construct($context);
     }
     
     public function execute()
