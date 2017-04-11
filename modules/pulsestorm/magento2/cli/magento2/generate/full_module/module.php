@@ -35,12 +35,12 @@ function getShellScript($argv, $options)
     $script = '
 #!/bin/bash
 ' . pharString('magento2:generate:module',$pharName)              . $packageName . ' ' . $moduleName . ' 0.0.1
-' . pharString('generate_crud_model',$pharName)                   . $fullModuleName . ' ' . $modelName . '
+' . pharString('magento2:generate:crud-model',$pharName)                   . $fullModuleName . ' ' . $modelName . '
 ' . pharString('magento2:generate:acl',$pharName)                 . $fullModuleName . ' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . '
 ' . pharString('magento2:generate:menu',$pharName)                . $fullModuleName . ' "" ' . $fullModuleName . '::' . $modelNamePluralLowerCase . ' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . ' "' . $moduleName . ' ' . $modelNamePlural . '" ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '/index/index 10
 ' . pharString('magento2:generate:menu',$pharName)                . $fullModuleName . ' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . ' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . '_list ' . $fullModuleName . '::' . $modelNamePluralLowerCase . ' "' . $modelName . ' Objects" ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '/index/index 10
-' . pharString('generate_route',$pharName)                        . $fullModuleName . ' adminhtml ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '    
-' . pharString('generate_view',$pharName)                         . $fullModuleName . ' adminhtml ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index Main content.phtml 1column
+' . pharString('magento2:generate:route',$pharName)                        . $fullModuleName . ' adminhtml ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '    
+' . pharString('magento2:generate:view',$pharName)                         . $fullModuleName . ' adminhtml ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '_index_index Main content.phtml 1column
 ' . pharString('magento2:generate:ui:grid',$pharName)             . $fullModuleName . ' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . ' \'' . $packageName . '\\' . $moduleName . '\Model\ResourceModel\\' . $modelName . '\Collection\' ' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNameLowerCase . '_id
 ' . pharString('magento2:generate:ui:add-column-text',$pharName)  . $pathModule . '/view/adminhtml/ui_component/' . $packageNameLowerCase . '_' . $moduleNameLowerCase . '_' . $modelNamePluralLowerCase . '.xml title "Title"
 ' . pharString('magento2:generate:ui:form',$pharName)             . $fullModuleName . ' \'' . $packageName . '\\' . $moduleName . '\Model\\' . $modelName . '\' ' . $fullModuleName . '::' . $modelNamePluralLowerCase . '
