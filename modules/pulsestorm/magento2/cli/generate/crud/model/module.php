@@ -456,7 +456,7 @@ function conditionalWriteStringToFile($path, $contents)
     }
 }
 
-function prependInstallerCodeBeforeEndSetup($moduleInfo, $modelName, $contents, $path)
+function prependInstallerCodeBeforeEndSetup($moduleInfo, $modelName, $path)
 {
     $table_name = createTableNameFromModuleInfoAndModelName(
         $moduleInfo, $modelName);
@@ -478,7 +478,7 @@ function appendInstallSchemaClass($moduleInfo, $modelName, $options)
             $moduleInfo, $options);
     $path       = getPathFromClass($className);         
     $contents = prependInstallerCodeBeforeEndSetup(
-        $moduleInfo, $modelName, '', $path); 
+        $moduleInfo, $modelName, $path); 
 
     output("Adding model to InstallSchema");        
     writeStringToFile($path, $contents);                              
@@ -498,7 +498,7 @@ function createSchemaClass($moduleInfo, $modelName, $options)
     conditionalWriteStringToFile($path, $contents);   
     
     $contents = prependInstallerCodeBeforeEndSetup(
-        $moduleInfo, $modelName, $contents, $path);
+        $moduleInfo, $modelName, $path);
             
     writeStringToFile($path, $contents);
 }
