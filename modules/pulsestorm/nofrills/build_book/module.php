@@ -27,6 +27,8 @@ function pestle_cli($argv)
         'src/chapter2.md',            
         'src/chapter3.md',         
         'src/chapter-page-layout.md',
+        'src/chapter-advanced-xml-loading.md',
+        'src/chapter-themes.md',        
         'src/chapter4.md',         
         'src/chapter5.md',         
         'src/chapter6.md',         

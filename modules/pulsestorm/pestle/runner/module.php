@@ -123,7 +123,13 @@ function includeLibraryForCommand($command, $try_again=true)
         
     if(!array_key_exists($command, $command_list))
     {    
-        output("Can't find [$command] in " . __FUNCTION__);
+        $string = "[$command]";
+        if(strpos($string, '_') !== false || strpos($string, '-') !== false)
+        {        
+            $string = '[' . str_replace('-', '_', $command) . ']' . 
+            ' or [' . str_replace('_', '-', $command) . ']';
+        }
+        output("Can't find $string in " . __FUNCTION__);
         exit;    
     }
     
@@ -210,7 +216,7 @@ function applyCommandNameAlias($command_name)
     switch($command_name)
     {
         case 'list':
-            return 'list_commands';
+            return 'list-commands';
         case '--version':
             return 'version';
         case '-v':
