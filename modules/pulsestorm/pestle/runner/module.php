@@ -21,6 +21,9 @@ function getBaseProjectDir()
     }    
     return __DIR__ . '/../../../..';
 }
+if(!file_exists(getBaseProjectDir()  . '/vendor/autoload.php')){
+    echo("\033[31mDid you forget to run 'composer install'?\n\033[0m");
+}
 require getBaseProjectDir()  . '/vendor/autoload.php';
 require getBaseProjectDir()  . '/modules/pulsestorm/pestle/importer/module.php';
 
