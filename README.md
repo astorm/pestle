@@ -20,7 +20,7 @@ The easiest way to get started is to grab the latest build using curl
     
 You can see a list of commands with the following
 
-    php pestle.phar list 
+    php pestle.phar list-commands
 
 and get help for a specific command with
 
