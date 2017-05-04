@@ -13,6 +13,8 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFile');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse');
 pestle_import('Pulsestorm\Cli\Code_Generation\templateInterface');
 pestle_import('Pulsestorm\Cli\Code_Generation\templateMethod');
+pestle_import('Pulsestorm\Magento2\Cli\Magento2\Generate\Preference\generateDiConfiguration');
+
 function generateWebApiXml($moduleInfo, $uri, $repositoryClass, $resourceId)
 {
     $path   = $moduleInfo->folder . '/etc/webapi.xml';    
@@ -38,15 +40,18 @@ function generateWebApiXml($moduleInfo, $uri, $repositoryClass, $resourceId)
     
     $resource = $route->addChild('resources')->addChild('resource');
     $resource->addAttribute('ref', $resourceId);
-    
-    
+        
     writeStringToFile($path, formatXmlString($xml->asXml()));
 }
 
-function generateRepositoryClassAndInterface($moduleInfo, $repositoryName, $repositoryInterfaceName)
+function generateRepositoryClassAndInterface($moduleInfo, $repositoryName, $repositoryInterfaceName, $modelInterface)
 {
-    $contents = createClassTemplateWithUse($repositoryName, false, $repositoryInterfaceName);
-    $contents = str_replace('<$body$>', templateMethod('public', 'get'), $contents);
+    $contents = createClassTemplateWithUse($repositoryName, false, '\\' . $repositoryInterfaceName);
+    $docBlock = '
+    /**
+     * {@inheritdoc}
+     */';   
+    $contents = str_replace('<$body$>', templateMethod('public', 'get', $docBlock), $contents);
     $contents = str_replace('<$use$>', '', $contents);
     $contents = str_replace('<$params$>', '', $contents);
     $methodBody = 
@@ -56,8 +61,83 @@ function generateRepositoryClassAndInterface($moduleInfo, $repositoryName, $repo
     $contents = str_replace('<$methodBody$>', $methodBody, $contents);
     createClassFile($repositoryName,$contents);
     
+    $docBlock = trim('
+    /**
+     * @return \\'.$modelInterface.'
+     */');      
     $contents = templateInterface($repositoryInterfaceName,['get']);
+    $functionGet = 'function get';
+    $contents = str_replace($functionGet, $docBlock . "\n" . '    '.$functionGet, $contents);
     createClassFile($repositoryInterfaceName,$contents);        
+}
+
+function getMethodsFromProperties($properties)
+{
+    return array_map(function($item){
+        return 'get' . ucwords($item);
+    }, array_keys($properties));
+}
+
+function snakeToCamel($string)
+{
+    $string = str_replace('_', ' ', $string);
+    $string = ucwords($string);
+    $string = str_replace(' ', '', $string);
+    return $string;
+}
+
+function generateClassAndInterface($modelToSign, $interfaceName, $properties)
+{
+
+    $methods = getMethodsFromProperties($properties);
+    
+    $contents = createClassTemplateWithUse($modelToSign, false, '\\' . $interfaceName);    
+    $classBody      = '';
+    $interfaceBody  = '';
+    foreach($properties as $propName=>$type)
+    {
+        $camelPropName = snakeToCamel($propName);
+        $classBody .= '
+    /**
+     * {@inheritdoc}
+     */
+     public function get'.$camelPropName.'()
+     {
+        return $this->'.$propName.';
+     }        
+     
+    /**
+     * {@inheritdoc}
+     */     
+     public function set'.$camelPropName.'($'.$propName.')
+     {
+        $this->'.$propName.' = $'.$propName.';
+        return $this;
+     }
+';
+
+        $interfaceBody .= '
+    /**
+     * @return '.$type.'
+     */
+     function get'.$camelPropName.'();
+     
+    /**
+     * @return $this     
+     */   
+     public function set'.$camelPropName.'($'.$propName.');
+';          
+     
+    }
+
+    $contents = str_replace('<$body$>', $classBody, $contents);
+    $contents = str_replace('<$use$>', '', $contents);
+    createClassFile($modelToSign, $contents);
+    
+    // $contents = templateInterface($interfaceName,$methods);
+    $contents = templateInterface($interfaceName,[]);
+    $contents = str_replace('{', "{\n" . $interfaceBody, $contents);
+    createClassFile($interfaceName, $contents);
 }
 
 /**
@@ -86,8 +166,15 @@ function pestle_cli($argv, $options)
     
     $moduleInfo              = getModuleInformation($moduleName);
     
-    #generateWebApiXml($moduleInfo, $apiEndpoint, $repositoryInterfaceName, $resourceId);    
-    generateRepositoryClassAndInterface($moduleInfo, $repositoryName, $repositoryInterfaceName);
+    output("@TODO: need di.xml");
+        
+    generateDiConfiguration([
+        'module'=>$moduleName,
+        'for'   =>$repositoryInterfaceName,
+        'type'  =>$repositoryName]);        
+    generateWebApiXml($moduleInfo, $apiEndpoint, $repositoryInterfaceName, $resourceId);    
+    generateRepositoryClassAndInterface($moduleInfo, $repositoryName, $repositoryInterfaceName, $interfaceName);
+    generateClassAndInterface($modelToSign, $interfaceName, $properties);
     
     output("@TODO: Generate Repository");
     output("@TODO: Generate Interface");        

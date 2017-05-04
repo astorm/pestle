@@ -1,5 +1,5 @@
 <?php
-namespace Pulsestorm\Magento2\Cli\Magento2_Generate_Preference;
+namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Preference;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');

@@ -251,9 +251,9 @@ function templateInterface($interface, $functions=[])
     return $template;
 }
 
-function templateMethod($accessLevel, $name)
+function templateMethod($accessLevel, $name, $docBlock='')
 {
-    return '
+    return $docBlock . '
     '.$accessLevel.' function '.$name.'(<$params$>)
     {
 <$methodBody$>        
