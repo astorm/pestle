@@ -80,6 +80,12 @@ function getBlankXmlLayout_handle()
 </page>';
 }
 
+function getBlankXmlWebapi()
+{
+    return '<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+</routes>';
+}
 /**
 * Converts Zend Log Level into PSR Log Level
 * @command library

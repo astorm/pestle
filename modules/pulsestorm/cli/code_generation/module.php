@@ -240,10 +240,25 @@ function templateInterface($interface, $functions=[])
     $name       = array_pop($parts);
     $template   = '<' . '?' . 'php' . "\n" .
     'namespace ' . implode('\\',$parts) . ";\n" . 
-    "interface $name \n{\n\n";
+    "interface $name \n{\n";
+    foreach($functions as $function)
+    {
+        $template .=
+'    function '.$function.'();' . "\n";
+    }
     $template   .= "}";    
     
     return $template;
+}
+
+function templateMethod($accessLevel, $name)
+{
+    return '
+    '.$accessLevel.' function '.$name.'(<$params$>)
+    {
+<$methodBody$>        
+    }
+';    
 }
 
 function createClassTemplateWithUse($class, $extends=false, $implements=false, $includeUse=false)
