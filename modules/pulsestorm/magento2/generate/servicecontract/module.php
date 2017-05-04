@@ -44,30 +44,60 @@ function generateWebApiXml($moduleInfo, $uri, $repositoryClass, $resourceId)
     writeStringToFile($path, formatXmlString($xml->asXml()));
 }
 
-function generateRepositoryClassAndInterface($moduleInfo, $repositoryName, $repositoryInterfaceName, $modelInterface)
+function generateRepositoryGetMethod()
+{
+    $docBlock = '';
+    $methodBodyGet = 
+'        $object = $this->factory->create();
+        $object->setId($id);
+        return $object;';    
+    $methodGet = templateMethod('public', 'get', $docBlock);
+    $methodGet  = str_replace('<$params$>', '$id', $methodGet);
+    $methodGet  = str_replace('<$methodBody$>', $methodBodyGet, $methodGet);
+    return $methodGet;
+}
+
+function generateRepositoryConstructMethod($model)
+{
+    $docBlock = '';   
+    $methodBody = 
+'        $this->factory = $factory;';    
+    $method = templateMethod('public', '__construct', $docBlock);
+    $method  = str_replace('<$params$>', '\\' . $model . 'Factory $factory', $method);
+    $method  = str_replace('<$methodBody$>', $methodBody, $method);
+    
+    $props = '
+    /**
+    * @var ' . $model . 'Factory
+    */        
+    protected $factory;';
+    return $props . "\n" . $method;
+}
+
+function generateRepositoryClassAndInterface($moduleInfo, $repositoryName, 
+    $repositoryInterfaceName, $modelInterface, $modelName)
 {
     $contents = createClassTemplateWithUse($repositoryName, false, '\\' . $repositoryInterfaceName);
-    $docBlock = '
-    /**
-     * {@inheritdoc}
-     */';   
-    $contents = str_replace('<$body$>', templateMethod('public', 'get', $docBlock), $contents);
-    $contents = str_replace('<$use$>', '', $contents);
-    $contents = str_replace('<$params$>', '', $contents);
-    $methodBody = 
-'        $object = new \Pulsestorm\Apitest\Model\Thing;
-        $object->setId(1);
-        return $object;';    
-    $contents = str_replace('<$methodBody$>', $methodBody, $contents);
-    createClassFile($repositoryName,$contents);
+
     
+    $methodGet = generateRepositoryGetMethod();
+    $methodConstruct = generateRepositoryConstructMethod($modelName);
+    
+    $classBody = implode('', [$methodConstruct, $methodGet]);
+    $contents = str_replace('<$body$>', $classBody, $contents);
+    $contents = str_replace('<$use$>', '', $contents);
+    createClassFile($repositoryName,$contents);
+
     $docBlock = trim('
     /**
+     * @param int $id
      * @return \\'.$modelInterface.'
      */');      
     $contents = templateInterface($repositoryInterfaceName,['get']);
     $functionGet = 'function get';
     $contents = str_replace($functionGet, $docBlock . "\n" . '    '.$functionGet, $contents);
+    $contents = str_replace($functionGet . '(', $functionGet . '($id', $contents);
+
     createClassFile($repositoryInterfaceName,$contents);        
 }
 
@@ -93,27 +123,28 @@ function generateClassAndInterface($modelToSign, $interfaceName, $properties)
     
     $contents = createClassTemplateWithUse($modelToSign, false, '\\' . $interfaceName);    
     $classBody      = '';
+    $classBodyProps = '';
     $interfaceBody  = '';
+    
     foreach($properties as $propName=>$type)
     {
         $camelPropName = snakeToCamel($propName);
+        $classBodyProps .= '
+    /**
+     * @var '.$type.' $'.$propName.'
+     */                
+    protected $' . $propName . ';';
+    
         $classBody .= '
-    /**
-     * {@inheritdoc}
-     */
-     public function get'.$camelPropName.'()
-     {
-        return $this->'.$propName.';
-     }        
-     
-    /**
-     * {@inheritdoc}
-     */     
-     public function set'.$camelPropName.'($'.$propName.')
-     {
-        $this->'.$propName.' = $'.$propName.';
-        return $this;
-     }
+    public function get'.$camelPropName.'()
+    {
+       return $this->'.$propName.';
+    }        
+    public function set'.$camelPropName.'($'.$propName.')
+    {
+       $this->'.$propName.' = $'.$propName.';
+       return $this;
+    }
 ';
 
         $interfaceBody .= '
@@ -123,6 +154,7 @@ function generateClassAndInterface($modelToSign, $interfaceName, $properties)
      function get'.$camelPropName.'();
      
     /**
+     * @param '.$type.' $'.$propName.'   
      * @return $this     
      */   
      public function set'.$camelPropName.'($'.$propName.');
@@ -130,6 +162,8 @@ function generateClassAndInterface($modelToSign, $interfaceName, $properties)
      
     }
 
+    $classBody = $classBodyProps . "\n" . $classBody;
+    
     $contents = str_replace('<$body$>', $classBody, $contents);
     $contents = str_replace('<$use$>', '', $contents);
     createClassFile($modelToSign, $contents);
@@ -138,6 +172,20 @@ function generateClassAndInterface($modelToSign, $interfaceName, $properties)
     $contents = templateInterface($interfaceName,[]);
     $contents = str_replace('{', "{\n" . $interfaceBody, $contents);
     createClassFile($interfaceName, $contents);
+}
+
+function generateDiConfigurations($moduleName, $repositoryInterfaceName, 
+    $repositoryName, $interfaceName, $modelToSign)
+{
+    generateDiConfiguration([
+        'module'=>$moduleName,
+        'for'   =>$repositoryInterfaceName,
+        'type'  =>$repositoryName]);                
+          
+    generateDiConfiguration([
+        'module'=>$moduleName,
+        'for'   =>$interfaceName,
+        'type'  =>$modelToSign]);                        
 }
 
 /**
@@ -156,9 +204,9 @@ function pestle_cli($argv, $options)
     $moduleName              = 'Pulsestorm_Apitest2';
     $modelToSign             = 'Pulsestorm\Apitest2\Model\Thing';
     $interfaceName           = 'Pulsestorm\Apitest2\Api\Data\ThingInterface';
-    $repositoryName          = 'Pulsestorm\Apitest2\Model\Thing\Repository';
+    $repositoryName          = 'Pulsestorm\Apitest2\Model\ThingRepository';
     $repositoryInterfaceName = 'Pulsestorm\Apitest2\Api\ThingRepositoryInterface';    
-    $apiEndpoint             = 'V1/pulsestorm_apitest2/thing';
+    $apiEndpoint             = '/V1/pulsestorm_apitest2/things/:id';
     $resourceId              = 'anonymous';
     $properties              = [
         'id'=>'int'
@@ -166,24 +214,34 @@ function pestle_cli($argv, $options)
     
     $moduleInfo              = getModuleInformation($moduleName);
     
-    output("@TODO: need di.xml");
         
-    generateDiConfiguration([
-        'module'=>$moduleName,
-        'for'   =>$repositoryInterfaceName,
-        'type'  =>$repositoryName]);        
+    generateDiConfigurations($moduleName, $repositoryInterfaceName, 
+        $repositoryName, $interfaceName, $modelToSign);        
+    
     generateWebApiXml($moduleInfo, $apiEndpoint, $repositoryInterfaceName, $resourceId);    
-    generateRepositoryClassAndInterface($moduleInfo, $repositoryName, $repositoryInterfaceName, $interfaceName);
+    generateRepositoryClassAndInterface($moduleInfo, $repositoryName, $repositoryInterfaceName, $interfaceName, $modelToSign);
     generateClassAndInterface($modelToSign, $interfaceName, $properties);
     
-    output("@TODO: Generate Repository");
-    output("@TODO: Generate Interface");        
-    output("@TODO: generate accessors on data interface");
+    //output("@TODO: need di.xml");        
+    //output("@TODO: Naming classes with one word per namespace leaves not very expressive base names when using PHP 5.3 namespaces and class imports.");
+    //output("@TODO: The PHPDoc annotation {@inheritdoc} is only noise");    
+    //output("@TODO: In the ThingInterface the setter argument type should be specified using a @param annotation.");    
+    //output("@TODO: Personally I think returning void from a setter is more appropriate than returning $this, if the expectation is that the object state is changed.");
+    //output("@TODO: I think it would be good if ThingRepositoryInterface::get() would take an $id parameter.");        
+    //output("@TODO: The etc/di.xml file should also contain a <preference> mapping the ThingInterface to the Thing implementation.");    
+    //output("@TODO: The class property \$id is declared dynamically. According to current \"best practice\" it should be declared as a class property using one of the visibility keywords, like");
     
-    output("@TODO: Make this work with actual arguments");            
-    output("@TODO: Decide what crud generation should do vs. this should do");                
+    //output("@TODO: the repository should have a \Pulsestorm\Apitest2\Api\Data\ThingInterfaceFactory as constructor dependency");        
+    output("@TODO: Make this work with actual arguments");
+    output("@TODO: Decide what crud generation should do vs. this should do");
     output("@TODO: Attempt to extract interface name from generated model?");                    
     output("@TODO: What to do it repository already exists");
     output("@TODO: Attempt to extract fields from schema file? Or seperate command?");
-    output("@TODO: Base repository inimplemention (and webapi.xml URLs to match?)");
+    output("@TODO: Base repository inimplemention (and webapi.xml URLs to match?)");    
+
+    
+    // output("@TODO: Generate Repository");
+    // output("@TODO: Generate Interface");        
+    // output("@TODO: generate accessors on data interface");    
+    //output("@TODO: the data model implementing the Api Data interface should not be the regular ORM model, but rather a separate data model as can be seen in the customer module,");
 }
