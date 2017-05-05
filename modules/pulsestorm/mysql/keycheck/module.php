@@ -2,7 +2,7 @@
 namespace Pulsestorm\Mysql\Keycheck;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
-
+pestle_import('Pulsestorm\Pestle\Library\inputPassword');
 pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
 
 function getTableNames($pdo)
@@ -141,17 +141,21 @@ function reportOnSql($tablesToForeignKeys)
 * One Line Description
 *
 * @command mysql:key-check
+* @argument server DB Server? [127.0.0.1]
+* @argument port DB Port? [3306]
+* @argument username DB Username? [root]
 * @argument schema Schema Name?
 * @option use-sql-report Include SQL Statments in Reporting
 */
 function pestle_cli($argv, $options)
 {
-    $server = '127.0.0.1';
-    $port   = '3306';
-    $username = '';
-    $password = '';
-    
-    $schema = $argv['schema'];
+    $server     = $argv['server'];
+    $port       = $argv['port'];
+    $username   = $argv['username'];
+    $schema     = $argv['schema'];
+
+    $password = inputPassword('MySQL Password: ');
+    // $password = 'ididit27';
     
     $pdo = new \PDO(
         'mysql:host='.$server.';dbname='.$schema, $username, $password);

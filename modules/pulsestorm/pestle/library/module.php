@@ -180,6 +180,17 @@ function inputReadline($prompt=null)
     return readline($prompt);
 }
 
+function inputPassword($prompt='')
+{
+    echo $prompt;
+    system('stty -echo');
+    $password = trim(fgets(STDIN));
+    system('stty echo');
+    // add a new line since the users CR didn't echo
+    output('');
+    return $password;
+}
+
 function input($string, $default='')
 {
     $prompt =  $string . " (".$default.")] ";
