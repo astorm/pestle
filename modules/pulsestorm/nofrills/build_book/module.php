@@ -35,11 +35,16 @@ function pestle_cli($argv)
         'src/chapter7.md',         
         'src/chapter8.md',         
         'src/chapter9.md',  
+        'src/chapter-adding-frontend-files-to-module.md',
+        'src/chapter-adding-frontend-layout-xml.md',
+        'src/chapter-serving-frontend-file.md',                
         'src/appendix-components.md',
         'src/appendix-view-source.md',
         'src/appendix-magento-modes.md',
         'src/appendix-areas.md',
         'src/appendix-di.md',                
+        'src/appendix-unix-find.md',        
+        'src/appendix-frontend-build.md',                             
     ];
     
     $raw = [];
