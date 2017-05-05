@@ -148,10 +148,13 @@ function pestle_cli($argv, $options)
 {
     $server = '127.0.0.1';
     $port   = '3306';
+    $username = '';
+    $password = '';
+    
     $schema = $argv['schema'];
     
     $pdo = new \PDO(
-        'mysql:host='.$server.';dbname='.$schema, 'root', 'ididit27');
+        'mysql:host='.$server.';dbname='.$schema, $username, $password);
 
     $tables = getTableNames($pdo);        
     $tablesToForeignKeys = extractForeignKeys($pdo, $tables);
