@@ -155,7 +155,6 @@ function pestle_cli($argv, $options)
     $schema     = $argv['schema'];
 
     $password = inputPassword('MySQL Password: ');
-    // $password = '***REMOVED***';
     
     $pdo = new \PDO(
         'mysql:host='.$server.';dbname='.$schema, $username, $password);
