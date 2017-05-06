@@ -6,7 +6,7 @@ require_once 'PestleTestIntegration.php';
 
 class GenerateModuleTest extends PestleTestIntegration
 {
-    const COMMAND = 'generate_module Pulsestore Testbed 0.0.1';
+    const COMMAND = 'generate_module Pulsestore Testbed 0.0.1 Index Index Index';
 
     /**
      * @var string

@@ -6,7 +6,7 @@ require_once 'PestleTestIntegration.php';
 
 class GenerateRouteTest extends PestleTestIntegration
 {
-    const COMMAND = 'generate_route Pulsestorm_HelloWorld frontend pulsestorm_helloworld';
+    const COMMAND = 'generate_route Pulsestorm_HelloWorld frontend pulsestorm_helloworld Index Index Index';
 
     /**
      * @var string
@@ -20,8 +20,8 @@ class GenerateRouteTest extends PestleTestIntegration
     {
         parent::setUp();
 
-        $this->runCommand(GenerateModuleTest::COMMAND);
-        $this->result = $this->runCommand();
+        $this->runCommand(self::COMMAND);
+        // $this->result = $this->runCommand();
     }
 
     /**
