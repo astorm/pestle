@@ -11,6 +11,8 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Route\exported_pestle_cli');
 * @argument module_name Which Module? [Pulsestorm_HelloWorld]
 * @argument area Which Area (frontend, adminhtml)? [frontend]
 * @argument frontname Frontname/Route ID? [pulsestorm_helloworld]
+* @argument controller Controller name? [Index]
+* @argument action Action name? [Index]
 */
 function pestle_cli($argv)
 {
