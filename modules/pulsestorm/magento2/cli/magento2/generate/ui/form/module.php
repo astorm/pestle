@@ -254,6 +254,10 @@ function createDataProviderUseString($module_info, $modelClass)
     $collectionClassName = createCollectionClassNameFromModelName($modelClass);
         
     return 'use '.$collectionClassName.';
+use Magento\Framework\Api\FilterBuilder;
+use Magento\Framework\Api\Search\ReportingInterface;
+use Magento\Framework\Api\Search\SearchCriteriaBuilder;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Request\DataPersistorInterface;';
 }
 
@@ -275,9 +279,14 @@ function createDataProviderClassBodyString($module_info, $modelClass)
     protected $loadedData;
 
     /**
+     * DataProvider constructor.
      * @param string $name
      * @param string $primaryFieldName
      * @param string $requestFieldName
+     * @param ReportingInterface $reporting
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param RequestInterface $request
+     * @param FilterBuilder $filterBuilder
      * @param CollectionFactory $collectionFactory
      * @param DataPersistorInterface $dataPersistor
      * @param array $meta
@@ -287,6 +296,10 @@ function createDataProviderClassBodyString($module_info, $modelClass)
         $name,
         $primaryFieldName,
         $requestFieldName,
+        ReportingInterface $reporting,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        RequestInterface $request,
+        FilterBuilder $filterBuilder,
         CollectionFactory $collectionFactory,
         DataPersistorInterface $dataPersistor,
         array $meta = [],
@@ -294,7 +307,7 @@ function createDataProviderClassBodyString($module_info, $modelClass)
     ) {
         $this->collection = $collectionFactory->create();
         $this->dataPersistor = $dataPersistor;
-        parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
+        parent::__construct($name, $primaryFieldName, $requestFieldName, $reporting,$searchCriteriaBuilder, $request, $filterBuilder, $meta, $data);
         $this->meta = $this->prepareMeta($this->meta);
     }
 
@@ -357,7 +370,7 @@ function createDataProvider($module_info, $modelClass)
     $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);
     $contents           = createClassWithUse(
         $dataProviderClassName, 
-        '\Magento\Ui\DataProvider\AbstractDataProvider',
+        '\Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider',
         createDataProviderUseString($module_info, $modelClass),
         createDataProviderClassBodyString($module_info, $modelClass)        
     );        
