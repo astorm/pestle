@@ -22,13 +22,12 @@ function validateXml($xml, $argv)
 
 }
 /**
-* One Line Description
+* Add a Fieldset to a Form 
 *
 * @command magento2:generate:ui:add-form-fieldset
 * @argument path_xml Path to Form XML File? 
 * @argument fieldset Fieldset Name? [newfieldset]
 * @argument label Label? [NewFieldset]
-* @option 
 */
 function pestle_cli($argv)
 {
