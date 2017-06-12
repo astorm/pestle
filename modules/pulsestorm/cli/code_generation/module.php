@@ -58,6 +58,8 @@ function createNamespaceFromNamespaceAndCommandName($namespace_module, $command_
     //$namespace = 'Pulsestorm\Magento2\Cli\\' . $namespace_portion;
     $namespace_module = trim($namespace_module, '\\');
     $namespace = $namespace_module . '\\' . $namespace_portion;
+    
+    $namespace = str_replace('-', '', $namespace);
     return $namespace;
 }
 
