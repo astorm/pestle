@@ -138,7 +138,7 @@ function reportOnSql($tablesToForeignKeys)
 }
 
 /**
-* One Line Description
+* Looks for Invalid Keys in a MySQL Database
 *
 * @command mysql:key-check
 * @argument server DB Server? [127.0.0.1]

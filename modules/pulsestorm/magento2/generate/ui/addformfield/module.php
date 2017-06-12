@@ -44,7 +44,7 @@ function getNextSortOrderFromXml($xml)
 
 
 /**
-* One Line Description
+* Adds a Form Field
 *
 * @command magento2:generate:ui:add-form-field
 * @argument path_xml Path to Form XML File? 

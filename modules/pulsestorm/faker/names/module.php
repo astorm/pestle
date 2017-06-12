@@ -7,7 +7,7 @@ pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
 
 use Faker;
 /**
-* One Line Description
+* Creates some Fake Name
 *
 * @command faker:names
 * @argument how_many How many names? [10]
