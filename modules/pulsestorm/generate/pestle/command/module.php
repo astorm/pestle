@@ -13,7 +13,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Mage2_Command\pestle_cli_exporte
 *
 * @command pestle:generate-command
 * @argument command_name New Command Name? [foo_bar]
-* @argument namespace_module Create in PHP Namespace? [Pulsestorm\Magento2\Cli]
+* @argument namespace_module Create in PHP Namespace? [Pulsestorm]
 */
 function pestle_cli($argv, $options)
 {
