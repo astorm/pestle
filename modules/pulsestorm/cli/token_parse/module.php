@@ -186,6 +186,10 @@ function getFunctionFromCode($string, $function)
         $values = array_map(function($token){
             return $token->token_value;
         }, $new_tokens);
+        if(!$values)
+        {
+            return false;
+        }
         return 'function ' . implode('',  $values);        
     }
     
@@ -281,4 +285,200 @@ function outputChangedFile($file, $buffer)
     
     
     return outputTokens($tokens, $buffer);
+}
+
+
+function extractClassInformationFromClassContentsDefinition(&$tokens)
+{
+    $information = [
+        'class'=>[],
+        'extends'=>[],        
+        'implements'=>[],                
+    ];
+    $step = PARSE_STEP_START;
+    foreach($tokens as $token)
+    {
+        $v = $token->token_value;
+        if($step != PARSE_STEP_START && $v === '{')
+        {
+            $step = PARSE_STEP_DONE;
+            break;
+        }
+        if($step === PARSE_STEP_START && $v === 'class')
+        {
+            $step = PARSE_STEP_CLASS;
+            continue;
+        }
+        
+        if($step != PARSE_STEP_START && $v === 'extends')
+        {
+            $step = PARSE_STEP_EXTENDS;
+            continue;            
+        }
+
+        if($step != PARSE_STEP_START && $v === 'implements')
+        {
+            $step = PARSE_STEP_IMPLEMENTS;
+            continue;            
+        }
+                        
+        if($step === PARSE_STEP_CLASS)
+        {
+            $information['class'][] = $token;
+        }
+
+        if($step === PARSE_STEP_EXTENDS)
+        {
+            $information['extends'][] = $token;
+        }        
+        
+        if($step === PARSE_STEP_IMPLEMENTS)
+        {
+            $information['implements'][] = $token;
+        }        
+    }
+    $joinCallback = function($token){
+        return $token->token_value;
+    };
+    
+    $information['class'] = implode('',array_map($joinCallback, $information['class']));
+    $information['extends'] = implode('',array_map($joinCallback, $information['extends']));
+    $information['implements'] = implode('',array_map($joinCallback, $information['implements']));
+    return $information;
+}
+
+define('PARSE_STEP_START',1);
+define('PARSE_STEP_CLASS',2);
+define('PARSE_STEP_EXTENDS',3);
+define('PARSE_STEP_IMPLEMENTS',4);
+define('PARSE_STEP_DONE',5);
+define('PARSE_STEP_USE',5);
+
+function extractClassInformationFromClassContentsNamespace($tokens)
+{
+    $array = extractClassInformationFromClassContentsStatementStartsWith($tokens, 'namespace');
+    return array_shift($array);
+}
+
+function extractClassInformationFromClassContentsUse($tokens)
+{
+    return extractClassInformationFromClassContentsStatementStartsWith($tokens, 'use');
+}
+
+function extractClassInformationFromClassContentsStatementStartsWith($tokens, $startsWith='use')
+{
+    $step = PARSE_STEP_START;
+    $information = [];
+    $current = [];
+    foreach($tokens as $token)
+    {
+        $v = $token->token_value;
+        if($step === PARSE_STEP_START && $v === $startsWith)
+        {
+            $step = PARSE_STEP_USE;
+            continue;
+        }
+        
+        if($step === PARSE_STEP_USE && $v === ';')
+        {
+            $step = PARSE_STEP_START;
+            $information[] = $current;            
+            $current = [];
+            continue;
+        }
+        
+        if($step === PARSE_STEP_USE)
+        {
+            $current[] = $token;
+        }        
+    }
+
+    $information = array_map(function($tokens){
+        $joinCallback = function($token){
+            return $token->token_value;
+        };
+        return implode('',array_map($joinCallback, $tokens));                
+    }, $information);  
+    return $information;
+}
+
+function extractFullClassNameFromClassInformation($information)
+{
+    return trim($information['namespace']) . '\\' . trim($information['class']);
+}
+
+function extractFullExtendsFromClassInformation($information)
+{
+    $extends = trim($information['extends']);
+    if(!$extends)
+    {
+        return false;
+    }
+
+    if($extends[0] === '\\')
+    {
+        return trim($extends,'\\');
+    }
+    
+    //test use statements
+    foreach($information['use'] as $use)
+    {
+        $use = trim($use);
+        $parts = explode('\\', $use);
+        $last = array_pop($parts);
+        //var_dump("$last === $extends");
+        if($last === $extends)
+        {
+            return implode('\\',$parts) . '\\' . $extends;
+        }
+    }
+    
+    //test multi-part use
+    foreach($information['use'] as $use)
+    {
+        $use = trim($use);
+        $partsUse = explode('\\', $use);
+        $lastUse = array_pop($partsUse);        
+        $partsExtends = explode('\\', $extends);
+        $firstExtends = array_shift($partsExtends);        
+        if($lastUse === $firstExtends)
+        {
+            return implode('\\',$partsUse) . '\\' . $extends;
+        }
+    }
+
+    //test namespaces
+    $parts = explode('\\', trim($information['namespace']));
+    $last  = array_pop($parts);    
+    if(strpos($extends, $last) === 0)
+    {
+        return implode('\\',$parts) . '\\' . $extends;
+    }
+
+    return 'IMPLEMENT ME IN extractFullExtendsFromClassInformation';
+}
+
+function extractClassInformationFromClassContents($contents)
+{
+    $tokens = pestle_token_get_all($contents);
+    $information = extractClassInformationFromClassContentsDefinition($tokens);
+    $information['use'] = extractClassInformationFromClassContentsUse($tokens);
+    
+    $information['namespace'] = extractClassInformationFromClassContentsNamespace($tokens);
+    $information['full-class'] = extractFullClassNameFromClassInformation($information);
+    $information['full-extends'] = extractFullExtendsFromClassInformation($information);
+    return $information;
+}
+
+function extractVariablesFromConstructor($function)
+{
+    $tokens = pestle_token_get_all('<' . '?php ' . $function);
+    $tokens = array_filter($tokens, function($token){
+        return $token->token_name === 'T_VARIABLE';
+    });
+    $variables = array_map(function($token){
+        return $token->token_value;
+    }, $tokens);
+    
+    return $variables;
 }
