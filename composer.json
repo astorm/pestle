@@ -16,5 +16,8 @@
     "autoload": {
         "files": ["library/autoload.php"]
     },
-    "license": "MIT"
+    "license": "MIT",
+    "scripts":{
+        "test":"php vendor/bin/phpunit tests"
+    }
 }
