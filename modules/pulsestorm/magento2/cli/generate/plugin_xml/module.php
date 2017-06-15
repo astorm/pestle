@@ -44,10 +44,12 @@ function underscoreClass($class)
 * @argument module_name Create in which module? [Pulsestorm_Helloworld]
 * @argument class Which class are you plugging into? [Magento\Framework\Logger\Monolog]
 * @argument class_plugin What's your plugin class name? [<$module_name$>\Plugin\<$class$>]
+* @option use-type-hint Add type hint to subject?
 * @command generate-plugin-xml
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options)
 {
+    $useTypeHint = is_null($options['use-type-hint']) ? false : true;
     // $module_info = askForModuleAndReturnInfo($argv);
     $module_info    = getModuleInformation($argv['module_name']);
     $class          = $argv['class'];
@@ -78,17 +80,22 @@ function pestle_cli($argv)
     writeStringToFile($path_di, formatXmlString($xml->asXml()));
     output("Added nodes to $path_di");
     
+    $typeHint = '';
+    if($useTypeHint)
+    {
+        $typeHint = '\\' . $class . ' ';
+    }
     $path_plugin = getPathFromClass($class_plugin);  
     $body = implode("\n", [
-        '    //function beforeMETHOD(\\' . $class . ' $subject, $arg1, $arg2){}',
-        '    //function aroundMETHOD(\\' . $class . ' $subject, $proceed, $arg1, $arg2){return $proceed($arg1, $arg2);}',
-        '    //function afterMETHOD(\\' . $class . ' $subject, $result){return $result;}']);
+        '    //function beforeMETHOD(' . $typeHint . '$subject, $arg1, $arg2){}',
+        '    //function aroundMETHOD(' . $typeHint . '$subject, $proceed, $arg1, $arg2){return $proceed($arg1, $arg2);}',
+        '    //function afterMETHOD(' . $typeHint . '$subject, $result){return $result;}']);
     $class_definition = str_replace('<$body$>', "\n$body\n", createClassTemplate($class_plugin));
     writeStringToFile($path_plugin, $class_definition);
     output("Created file $path_plugin");
 }
 
-function exported_pestle_cli($argv)
+function exported_pestle_cli($argv, $options)
 {
-    return pestle_cli($argv);
+    return pestle_cli($argv, $options);
 }
