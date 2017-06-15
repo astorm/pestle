@@ -61,6 +61,8 @@ function pestle_cli($argv)
         output("Created new $path_di");
     }
     
+    $class = ltrim($class, '\\');
+    
     $xml            =  simplexml_load_file($path_di);   
 //     $plugin_name    = strToLower($module_info->name) . '_' . underscoreClass($class);
 //     simpleXmlAddNodesXpath($xml,
@@ -78,9 +80,9 @@ function pestle_cli($argv)
     
     $path_plugin = getPathFromClass($class_plugin);  
     $body = implode("\n", [
-        '    //function beforeMETHOD($subject, $arg1, $arg2){}',
-        '    //function aroundMETHOD($subject, $procede, $arg1, $arg2){return $proceed($arg1, $arg2);}',
-        '    //function afterMETHOD($subject, $result){return $result;}']);
+        '    //function beforeMETHOD(\\' . $class . ' $subject, $arg1, $arg2){}',
+        '    //function aroundMETHOD(\\' . $class . ' $subject, $proceed, $arg1, $arg2){return $proceed($arg1, $arg2);}',
+        '    //function afterMETHOD(\\' . $class . ' $subject, $result){return $result;}']);
     $class_definition = str_replace('<$body$>', "\n$body\n", createClassTemplate($class_plugin));
     writeStringToFile($path_plugin, $class_definition);
     output("Created file $path_plugin");
