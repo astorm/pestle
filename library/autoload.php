@@ -17,7 +17,7 @@ if(isset($top['file']))
 { 
     $file = strToLower($top['file']);
 }
-$parts = explode('/', $file);
+$parts = explode(DIRECTORY_SEPARATOR, $file);
 $last  = array_pop($parts);
 if(strpos($last, 'phpunit') !== false)
 {
@@ -28,7 +28,7 @@ if(strpos($last, 'phpunit') !== false)
 global $argv;
 if(isset($argv[0]))
 {    
-    $parts = explode('/', $argv[0]);
+    $parts = explode(DIRECTORY_SEPARATOR, $argv[0]);
     $last = strToLower(array_pop($parts));
     if(in_array($last, ['pestle', 'pestle_dev', 'pestle.phar']))
     {
