@@ -390,23 +390,23 @@ _pestleAutocomplete ()
     _get_comp_words_by_ref -n : cur prev words cword
 
     local counter=1
-	while [ $counter -lt $cword ]; do
-		case "${words[$counter]}" in
+    while [ $counter -lt $cword ]; do
+	    case "${words[$counter]}" in
             #skip switches
-			-*)
-				;;
+            -*)
+                ;;
             #skip long-opts
-			=)
-				(( counter++ ))
-				;;
-			*)
-				command="${words[$counter]}"
-				command_pos=$counter
-				break
-				;;
-		esac
-		(( counter++ ))
-	done
+            =)
+                (( counter++ ))
+                ;;
+            *)
+                command="${words[$counter]}"
+                command_pos=$counter
+                break
+                ;;
+        esac
+        (( counter++ ))
+    done
 
     if [ "$command" == "magento2:generate:observer" ] ; then
         let command_input=cword-command_pos
