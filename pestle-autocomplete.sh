@@ -213,7 +213,7 @@ _observer_list(){
     echo "catalog_product_get_final_price"
     echo "catalog_product_get_final_price"
     echo "adminhtml_system_config_advanced_disableoutput_render_before"
-    echo "admin_system_config_changed_section_{$this->getSection()}"
+    echo "admin_system_config_changed_section_"
     echo "category_prepare_ajax_response"
     echo "catalog_category_prepare_save"
     echo "catalog_controller_category_delete"
