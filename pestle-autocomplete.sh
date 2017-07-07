@@ -385,8 +385,7 @@ _observer_list(){
 
 _pestleAutocomplete ()
 {
-    local cur
-    local all
+    local all cur prev words cword command command_input
     _get_comp_words_by_ref -n : cur prev words cword
 
     local counter=1
@@ -408,6 +407,7 @@ _pestleAutocomplete ()
         (( counter++ ))
     done
 
+    command=$(echo "$command" | sed 's/\\//g')
     if [ "$command" == "magento2:generate:observer" ] ; then
         let command_input=cword-command_pos
         #the event input is the 2nd option passed to magento2:generate:observer
