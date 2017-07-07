@@ -407,6 +407,7 @@ _pestleAutocomplete ()
         (( counter++ ))
     done
 
+    command=$(echo "$command" | sed 's/\\//g')
     if [ "$command" == "magento2:generate:observer" ] ; then
         let command_input=cword-command_pos
         #the event input is the 2nd option passed to magento2:generate:observer
