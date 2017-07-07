@@ -385,8 +385,7 @@ _observer_list(){
 
 _pestleAutocomplete ()
 {
-    local cur
-    local all
+    local all cur prev words cword command command_input
     _get_comp_words_by_ref -n : cur prev words cword
 
     local counter=1
