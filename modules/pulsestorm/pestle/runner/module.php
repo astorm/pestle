@@ -368,6 +368,16 @@ function bootstrapPhp()
     error_reporting(E_ALL);
 }
 
+function commandNameToDocBlockParts($command_name){
+    //include in the library for this command
+    includeLibraryForCommand($command_name);   
+    $command = getReflectedCommand($command_name);
+    return [ 
+        'docBlockParts' => parseDocBlockIntoParts($command->getDocComment()), 
+        'command' => $command
+    ];
+}
+
 /**
 * Main entry point
 */
@@ -386,13 +396,10 @@ function main($argv)
         $command_name               = 'pestle_run_file';        
         $parsed_argv['command']     = $command_name;        
     }        
-    //include in the library for this command
-    includeLibraryForCommand($command_name);            
-    $command        = getReflectedCommand($command_name);
-    $doc_block      = parseDocBlockIntoParts($command->getDocComment());
+    $docBlockAndCommand      = commandNameToDocBlockParts($command_name);
 
     list($arguments, $options) = 
-        getArgumentsAndOptionsFromParsedArgvAndDocComment($parsed_argv, $doc_block, $command);
+        getArgumentsAndOptionsFromParsedArgvAndDocComment($parsed_argv, $docBlockAndCommand['docBlockParts'], $docBlockAndCommand['command']);
     
-    $command->invokeArgs([$arguments, $options]);
+    $docBlockAndCommand['command']->invokeArgs([$arguments, $options]);
 }

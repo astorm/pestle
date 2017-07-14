@@ -383,9 +383,38 @@ _observer_list(){
     return 0;
 }
 
+#echos the command arguement types in order
+_pestleBootStrapCommandArgTypes () {
+    local machine_readable output 
+    machine_readable='--is-machine-readable'
+    output=( $($1 list-commands $machine_readable $2) )
+    echo ${output[*]} 
+}
+
+#given the pestle executable,
+#a command,
+#the position of the current word and 
+#the position of the command
+#will return the arguement type to suggest for
+_getArgTypeToSuggestFor (){
+    local command_input
+
+    #have_suggestions_for and pestle_arg_types_suggestions are global
+    #need this to decide whether we need to rebootstrap pestle or not
+    #because running pestle is laggy and not ideal on every tab hit
+    if [[ "'$have_suggestions_for'" != "'$2'" ]]; then 
+        pestle_arg_types_suggestions=( $(_pestleBootStrapCommandArgTypes $1 $2) )
+    fi
+    have_suggestions_for="$2"
+
+    let command_input=$3-$4
+    let command_input=$command_input-1
+    echo ${pestle_arg_types_suggestions[*]}
+    currently_suggesting=${pestle_arg_types_suggestions[$command_input]}
+}
 _pestleAutocomplete ()
 {
-    local all cur prev words cword command command_input
+    local all cur prev words cword command command_input suggesting_a
     _get_comp_words_by_ref -n : cur prev words cword
 
     local counter=1
@@ -408,14 +437,15 @@ _pestleAutocomplete ()
     done
 
     command=$(echo "$command" | sed 's/\\//g')
-    if [ "$command" == "magento2:generate:observer" ] ; then
-        let command_input=cword-command_pos
-        #the event input is the 2nd option passed to magento2:generate:observer
-        if [ "2" -eq $command_input ] ; then
-            all=$(_observer_list)
-        else
-            #TODO
-            all=
+    if [[ "$command" =~ magento2\:generate\:[a-zA-Z] ]] ; then 
+        _getArgTypeToSuggestFor $1 $command $cword $command_pos
+        if [ "$command" == "magento2:generate:observer" ] ; then
+            if [ "$currently_suggesting" == "event_name" ] ; then
+                all=$(_observer_list)
+            else
+                #TODO
+                all=
+            fi
         fi
     else
         all=$(_commandList)
