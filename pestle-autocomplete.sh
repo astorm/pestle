@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# 'globals' within bash context
+pestle_magento2_base_directory=""
+pestle_module_suggestions=""
+have_suggestions_for=""
+pestle_arg_types_suggestions=""
+currently_suggesting=""
+
 _commandList ()
 {
     echo "magento2:base-dir"
@@ -410,9 +417,26 @@ _getArgTypeToSuggestFor (){
 
     let command_input=$3-$4
     let command_input=$command_input-1
-    echo ${pestle_arg_types_suggestions[*]}
     currently_suggesting=${pestle_arg_types_suggestions[$command_input]}
 }
+
+#obtain the magento2_base_directory and cache it
+_getMagentoRootDirectory (){
+    if [[ "$pestle_magento2_base_directory" == "" ]]; then
+        pestle_magento2_base_directory=$($1 magento2:base-dir)
+    fi
+}
+
+_generateModuleSuggestions (){
+    #TODO properly have pestle exit with correct exit values
+    #and check $? instead of checking for said string
+    #TODO automatically detect new modules under app/code and regen suggestions
+    if [[ "$pestle_module_suggestions" == "" ]] && [[ "$pestle_magento2_base_directory" != "Could not find base Magento directory" ]]; then
+        _getMagentoRootDirectory $1
+        pestle_module_suggestions=$(find "$pestle_magento2_base_directory/app/code" -maxdepth 2 -type d | sed 's/.*app\/code\///g' | sed 's/\//_/g')
+    fi
+}
+
 _pestleAutocomplete ()
 {
     local all cur prev words cword command command_input suggesting_a
@@ -440,12 +464,15 @@ _pestleAutocomplete ()
     command=$(echo "$command" | sed 's/\\//g')
     if [[ "$command" =~ magento2\:generate\:[a-zA-Z] ]] ; then 
         _getArgTypeToSuggestFor $1 $command $cword $command_pos
+        #TODO: fix this type inconsistency in commands (example: generate:observer vs generate:command)
+        #one takes one the other takes the other
+        if [[ "$currently_suggesting" == "module" ]] || [[ "$currently_suggesting" == "module" ]]; then
+            _generateModuleSuggestions $1
+            all=$pestle_module_suggestions
+        fi
         if [ "$command" == "magento2:generate:observer" ] ; then
             if [ "$currently_suggesting" == "event_name" ] ; then
                 all=$(_observer_list)
-            else
-                #TODO
-                all=
             fi
         fi
     else
