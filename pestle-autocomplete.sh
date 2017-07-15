@@ -2,6 +2,7 @@
 
 _commandList ()
 {
+    echo "magento2:base-dir"
     echo "codecept:convert-selenium-id-for-codecept"
     echo "magento2:check-templates"
     echo "magento2:class-from-path"
