@@ -1,7 +1,17 @@
 #!/bin/bash
 
+# 'globals' within bash context
+# used for caching purposes to avoid calling
+# pestle unless we have to
+pestle_magento2_base_directory=""
+pestle_module_suggestions=""
+pestle_have_suggestions_for=""
+pestle_arg_types_suggestions=""
+pestle_currently_suggesting=""
+
 _commandList ()
 {
+    echo "magento2:base-dir"
     echo "codecept:convert-selenium-id-for-codecept"
     echo "magento2:check-templates"
     echo "magento2:class-from-path"
@@ -383,9 +393,55 @@ _observer_list(){
     return 0;
 }
 
+#echos the command arguement types in order
+_pestleBootStrapCommandArgTypes () {
+    local machine_readable output 
+    machine_readable='--is-machine-readable'
+    output=( $($1 list-commands $machine_readable $2) )
+    echo ${output[*]} 
+}
+
+#given the pestle executable,
+#a command,
+#the position of the current word and 
+#the position of the command
+#will return the arguement type to suggest for
+_getArgTypeToSuggestFor (){
+    local command_input
+
+    #pestle_have_suggestions_for and pestle_arg_types_suggestions are global
+    #need this to decide whether we need to rebootstrap pestle or not
+    #because running pestle is laggy and not ideal on every tab hit
+    if [[ "'$pestle_have_suggestions_for'" != "'$2'" ]]; then 
+        pestle_arg_types_suggestions=( $(_pestleBootStrapCommandArgTypes $1 $2) )
+    fi
+    pestle_have_suggestions_for="$2"
+
+    let command_input=$3-$4
+    let command_input=$command_input-1
+    pestle_currently_suggesting=${pestle_arg_types_suggestions[$command_input]}
+}
+
+#obtain the magento2_base_directory and cache it
+_getMagentoRootDirectory (){
+    if [[ "$pestle_magento2_base_directory" == "" ]]; then
+        pestle_magento2_base_directory=$($1 magento2:base-dir)
+    fi
+}
+
+_generateModuleSuggestions (){
+    #TODO properly have pestle exit with correct exit values
+    #and check $? instead of checking for said string
+    #TODO automatically detect new modules under app/code and regen suggestions
+    if [[ "$pestle_module_suggestions" == "" ]] && [[ "$pestle_magento2_base_directory" != "Could not find base Magento directory" ]]; then
+        _getMagentoRootDirectory $1
+        pestle_module_suggestions=$(find "$pestle_magento2_base_directory/app/code" -maxdepth 2 -type d | sed 's/.*app\/code\///g' | sed 's/\//_/g')
+    fi
+}
+
 _pestleAutocomplete ()
 {
-    local all cur prev words cword command command_input
+    local all cur prev words cword command command_input suggesting_a
     _get_comp_words_by_ref -n : cur prev words cword
 
     local counter=1
@@ -408,14 +464,18 @@ _pestleAutocomplete ()
     done
 
     command=$(echo "$command" | sed 's/\\//g')
-    if [ "$command" == "magento2:generate:observer" ] ; then
-        let command_input=cword-command_pos
-        #the event input is the 2nd option passed to magento2:generate:observer
-        if [ "2" -eq $command_input ] ; then
-            all=$(_observer_list)
-        else
-            #TODO
-            all=
+    if [[ "$command" =~ magento2\:generate\:[a-zA-Z] ]] ; then 
+        _getArgTypeToSuggestFor $1 $command $cword $command_pos
+        #TODO: fix this type inconsistency in commands (example: generate:observer vs generate:command)
+        #one takes one the other takes the other
+        if [[ "$pestle_currently_suggesting" == "module" ]] || [[ "$pestle_currently_suggesting" == "module_name" ]]; then
+            _generateModuleSuggestions $1
+            all=$pestle_module_suggestions
+        fi
+        if [ "$command" == "magento2:generate:observer" ] ; then
+            if [ "$pestle_currently_suggesting" == "event_name" ] ; then
+                all=$(_observer_list)
+            fi
         fi
     else
         all=$(_commandList)

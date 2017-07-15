@@ -6,14 +6,16 @@ pestle_import('Pulsestorm\Pestle\Library\getAtCommandFromDocComment');
 pestle_import('Pulsestorm\Pestle\Library\getDocCommentAsString');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Cli\Build_Command_List\includeAllModuleFiles');
+pestle_import('Pulsestorm\Pestle\Runner\commandNameToDocBlockParts');
 /**
 * Lists help
 * Read the doc blocks for all commands, and then
 * outputs a list of commands along with thier doc
 * blocks.  
+* @option is-machine-readable pipable/processable output?
 * @command list-commands
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options)
 {
     includeAllModuleFiles();
     
@@ -45,6 +47,15 @@ function pestle_cli($argv)
                 $s['command'] === str_replace('_','-',$command_to_check);
         });
     }
+
+    if(array_key_exists('is-machine-readable', $options) && !is_null($options['is-machine-readable'])){
+        $docBlockAndCommand = commandNameToDocBlockParts($command_to_check);
+        foreach ($docBlockAndCommand['docBlockParts']['argument'] as $argument){
+            output(getAtArguementType($argument));
+        }
+        return;
+    }
+
     output('');
     
     if(count($commands) > 1)
@@ -73,6 +84,19 @@ function pestle_cli($argv)
         output('');
         output('');
     }
+}
+
+function getAtArguementType($arguement){
+    preg_match('/^[a-zA-Z0-9_]+/', $arguement, $matches);
+    if(count($matches) < 1){
+        return '';
+    }
+
+    if(count($matches) > 1){
+        throw new Exception('Multiple types found for arguement');
+    }
+
+    return $matches[0];
 }
 
 function getWhitespaceForCommandList($commands, $command_name)
