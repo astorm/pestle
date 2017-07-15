@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # 'globals' within bash context
+# used for caching purposes to avoid calling
+# pestle unless we have to
 pestle_magento2_base_directory=""
 pestle_module_suggestions=""
-have_suggestions_for=""
+pestle_have_suggestions_for=""
 pestle_arg_types_suggestions=""
-currently_suggesting=""
+pestle_currently_suggesting=""
 
 _commandList ()
 {
@@ -407,17 +409,17 @@ _pestleBootStrapCommandArgTypes () {
 _getArgTypeToSuggestFor (){
     local command_input
 
-    #have_suggestions_for and pestle_arg_types_suggestions are global
+    #pestle_have_suggestions_for and pestle_arg_types_suggestions are global
     #need this to decide whether we need to rebootstrap pestle or not
     #because running pestle is laggy and not ideal on every tab hit
-    if [[ "'$have_suggestions_for'" != "'$2'" ]]; then 
+    if [[ "'$pestle_have_suggestions_for'" != "'$2'" ]]; then 
         pestle_arg_types_suggestions=( $(_pestleBootStrapCommandArgTypes $1 $2) )
     fi
-    have_suggestions_for="$2"
+    pestle_have_suggestions_for="$2"
 
     let command_input=$3-$4
     let command_input=$command_input-1
-    currently_suggesting=${pestle_arg_types_suggestions[$command_input]}
+    pestle_currently_suggesting=${pestle_arg_types_suggestions[$command_input]}
 }
 
 #obtain the magento2_base_directory and cache it
@@ -466,12 +468,12 @@ _pestleAutocomplete ()
         _getArgTypeToSuggestFor $1 $command $cword $command_pos
         #TODO: fix this type inconsistency in commands (example: generate:observer vs generate:command)
         #one takes one the other takes the other
-        if [[ "$currently_suggesting" == "module" ]] || [[ "$currently_suggesting" == "module" ]]; then
+        if [[ "$pestle_currently_suggesting" == "module" ]] || [[ "$pestle_currently_suggesting" == "module_name" ]]; then
             _generateModuleSuggestions $1
             all=$pestle_module_suggestions
         fi
         if [ "$command" == "magento2:generate:observer" ] ; then
-            if [ "$currently_suggesting" == "event_name" ] ; then
+            if [ "$pestle_currently_suggesting" == "event_name" ] ; then
                 all=$(_observer_list)
             fi
         fi

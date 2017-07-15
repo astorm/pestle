@@ -48,7 +48,7 @@ function pestle_cli($argv, $options)
         });
     }
 
-    if(array_key_exists('is-machine-readable', $options)){
+    if(array_key_exists('is-machine-readable', $options) && !is_null($options['is-machine-readable'])){
         $docBlockAndCommand = commandNameToDocBlockParts($command_to_check);
         foreach ($docBlockAndCommand['docBlockParts']['argument'] as $argument){
             output(getAtArguementType($argument));
