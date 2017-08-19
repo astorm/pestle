@@ -111,6 +111,7 @@ function templateRepositoryInterfaceUse($longModelInterfaceName)
 {
     return "
 use {$longModelInterfaceName};
+use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Api\SearchCriteriaInterface;
 ";
 }
