@@ -378,6 +378,14 @@ function commandNameToDocBlockParts($command_name){
     ];
 }
 
+function nameNewRelicTransactionIfInstalled($command_name)
+{
+    if(function_exists('newrelic_name_transaction'))
+    {
+        newrelic_name_transaction('pestle ' . $command_name);  
+    }    
+}
+
 /**
 * Main entry point
 */
@@ -395,7 +403,10 @@ function main($argv)
         $parsed_argv['arguments'][] = $command_name;
         $command_name               = 'pestle_run_file';        
         $parsed_argv['command']     = $command_name;        
-    }        
+    }      
+    
+    nameNewRelicTransactionIfInstalled($command_name);
+    
     $docBlockAndCommand      = commandNameToDocBlockParts($command_name);
 
     list($arguments, $options) = 
