@@ -485,4 +485,5 @@ _pestleAutocomplete ()
     __ltrim_colon_completions "$cur"
     return 0
 }
-complete -F _pestleAutocomplete -o filenames pestle.phar
+complete -o default -F _pestleAutocomplete pestle.phar
+complete -o default -F _pestleAutocomplete pestle_dev
