@@ -11,16 +11,18 @@ use Faker;
 *
 * @command faker:names
 * @argument how_many How many names? [10]
+* @option domain Domain name for email address 
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options)
 {
+    $domain = isset($options['domain']) ? $options['domain'] : 'example.com';
     $faker = Faker\Factory::create();
 
     for($i=0;$i<$argv['how_many'];$i++)
     {
         // $name = $faker->name;
         $name   = $faker->name;
-        $email  = preg_replace('%[^a-zA-Z0-9_-]%','',$name) . '@kriahapp.dev';
+        $email  = preg_replace('%[^a-zA-Z0-9_-]%','',$name) . '@' . $domain;
         output($name . "\t" . $email);
     }
 }
