@@ -29,7 +29,7 @@ function createHandleFile($module_info, $area, $template, $class, $handle, $layo
         strToLower(getShortClassNameFromClass($class));
     
     simpleXmlAddNodesXpath($xml,
-        'referenceBlock[@name=content]/block[' . 
+        'referenceContainer[@name=content]/block[' . 
         '@template=' . $template . ',' .
         '@class='    . $class    . ',' .
         '@name='     . $name     . ']'
