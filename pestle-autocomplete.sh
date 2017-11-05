@@ -435,7 +435,7 @@ _generateModuleSuggestions (){
     #TODO automatically detect new modules under app/code and regen suggestions
     if [[ "$pestle_module_suggestions" == "" ]] && [[ "$pestle_magento2_base_directory" != "Could not find base Magento directory" ]]; then
         _getMagentoRootDirectory $1
-        pestle_module_suggestions=$(find "$pestle_magento2_base_directory/app/code" -maxdepth 2 -type d | sed 's/.*app\/code\///g' | sed 's/\//_/g')
+        pestle_module_suggestions=$(find "$pestle_magento2_base_directory/app/code" -maxdepth 2 -type d | sed 's/.*app\/code\///g' | grep '/' | sed 's/\//_/g' | tail -n+2)
     fi
 }
 
