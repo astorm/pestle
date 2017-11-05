@@ -422,19 +422,34 @@ _getArgTypeToSuggestFor (){
     pestle_currently_suggesting=${pestle_arg_types_suggestions[$command_input]}
 }
 
-#obtain the magento2_base_directory and cache it
-_getMagentoRootDirectory (){
+# returns 0 if we have a valid magento root directory
+#TODO properly have pestle exit with correct exit values
+#and check $? instead of checking string output
+_haveMagentoRootDirectory () {
+    if [[ "$pestle_magento2_base_directory" == "Could not find base Magento directory" ]]; then
+        return 1
+    fi
+
     if [[ "$pestle_magento2_base_directory" == "" ]]; then
+        return 1
+    fi
+
+    return 0
+}
+
+#obtain the magento2_base_directory and cache it
+# TODO: at some point we need to detect a change in magento
+# root directories, and refresh the cache for commands that
+# depend on it
+_getMagentoRootDirectory (){
+    if ! _haveMagentoRootDirectory; then
         pestle_magento2_base_directory=$($1 magento2:base-dir)
     fi
 }
 
 _generateModuleSuggestions (){
-    #TODO properly have pestle exit with correct exit values
-    #and check $? instead of checking for said string
     #TODO automatically detect new modules under app/code and regen suggestions
-    if [[ "$pestle_module_suggestions" == "" ]] && [[ "$pestle_magento2_base_directory" != "Could not find base Magento directory" ]]; then
-        _getMagentoRootDirectory $1
+    if [[ "$pestle_module_suggestions" == "" ]] && _haveMagentoRootDirectory; then
         pestle_module_suggestions=$(find "$pestle_magento2_base_directory/app/code" -maxdepth 2 -type d | sed 's/.*app\/code\///g' | grep '/' | sed 's/\//_/g' | tail -n+2)
     fi
 }
@@ -469,6 +484,7 @@ _pestleAutocomplete ()
         #TODO: fix this type inconsistency in commands (example: generate:observer vs generate:command)
         #one takes one the other takes the other
         if [[ "$pestle_currently_suggesting" == "module" ]] || [[ "$pestle_currently_suggesting" == "module_name" ]]; then
+            _getMagentoRootDirectory $1
             _generateModuleSuggestions $1
             all=$pestle_module_suggestions
         fi
