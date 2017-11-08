@@ -8,6 +8,7 @@ pestle_module_suggestions=""
 pestle_have_suggestions_for=""
 pestle_arg_types_suggestions=""
 pestle_currently_suggesting=""
+pestle_pluggable_class_suggestions=""
 
 _commandList ()
 {
@@ -454,6 +455,12 @@ _generateModuleSuggestions (){
     fi
 }
 
+_generatePluggableClassSuggestions (){
+    if [[ "$pestle_pluggable_class_suggestions" == "" ]] && _haveMagentoRootDirectory; then
+        pestle_pluggable_class_suggestions="$($1 magento2:class-list | sed 's/\\/\\\\/g')"
+    fi
+}
+
 _pestleAutocomplete ()
 {
     local all cur prev words cword command command_input suggesting_a
@@ -488,6 +495,13 @@ _pestleAutocomplete ()
             _generateModuleSuggestions $1
             all=$pestle_module_suggestions
         fi
+
+        if [[ "$pestle_currently_suggesting" == "class" ]] ; then
+            _getMagentoRootDirectory $1
+            _generatePluggableClassSuggestions $1
+            all=$pestle_pluggable_class_suggestions
+        fi
+
         if [ "$command" == "magento2:generate:observer" ] ; then
             if [ "$pestle_currently_suggesting" == "event_name" ] ; then
                 all=$(_observer_list)
@@ -497,7 +511,7 @@ _pestleAutocomplete ()
         all=$(_commandList)
     fi
 
-    COMPREPLY=( $(compgen -W "$all" $cur) )
+    COMPREPLY=( $(compgen -W "$all" $cur | sed 's/\\/\\\\/g' ) )
     __ltrim_colon_completions "$cur"
     return 0
 }
