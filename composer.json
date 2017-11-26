@@ -6,7 +6,8 @@
         "ext-xml": "*",
         "abraham/twitteroauth": "0.7.2",
         "fzaninotto/faker": "1.6.0",
-        "nexmo/client":"@beta"
+        "nexmo/client":"@beta",
+        "pear/numbers_words":"0.18.1"		        
     },
     
     "require-dev": {
