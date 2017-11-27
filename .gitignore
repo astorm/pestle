@@ -6,3 +6,4 @@ build2.sh
 test.php
 .idea
 .vscode
+modules/pulsestorm/parsing

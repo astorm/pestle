@@ -7,7 +7,9 @@
         "abraham/twitteroauth": "0.7.2",
         "fzaninotto/faker": "1.6.0",
         "nexmo/client":"@beta",
-        "pear/numbers_words":"0.18.1"		        
+        "pear/numbers_words":"0.18.1",
+        
+        "phpspec/prophecy":"7.0.0"		        
     },
     
     "require-dev": {

@@ -84,7 +84,7 @@ function getCheckPostScript($date, $amount, $to, $accountFrom, $addressOne, $add
 }
 
 /**
-* One Line Description
+* Outputs the PostScript code needed to print a check
 *
 * @command postscript:check
 * @argument check_date Date on Check? [11/25/17]

@@ -62,7 +62,10 @@ function pestle_cli($argv)
     
     $lastFolder = getMostRecentStaticFolder($staticFolders, $path);
     $path       = $path . '/' . $lastFolder . '/';
-    output('rsync -r ' . 
+    $cmd = ('rsync -r ' . 
         $path . ' ' .
         $argv['remote_server']);
+
+    output($cmd);
+    output(`$cmd`);                
 }
