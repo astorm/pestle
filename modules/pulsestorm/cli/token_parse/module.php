@@ -88,7 +88,7 @@ function getPestleImportsFromCode($string)
     return $importNames;
 }
 
-function getFunctionNamesFromCode($string)
+function getFunctionInfoFromCodeWithCallback($string, $callback)
 {
     $string = trim($string);
     if($string[0] !== '<' && $string[1] !== '?')
@@ -105,10 +105,75 @@ function getFunctionNamesFromCode($string)
         $token = $tokens[$i];
         if($token->token_name == 'T_FUNCTION' && $tokens[$i-1]->token_name !== 'T_USE')
         {
-            $functionNames[] = $tokens[$i+1];
+            $functionNames[] = call_user_func($callback, $tokens, $i);
         }
     }
     return $functionNames;
+}
+
+function getParsedFunctionInfoFromCode($codeAsString)
+{
+    $infos = getFunctionInfoFromCodeWithCallback($codeAsString, function($tokens, $position){
+        $importantTokens    = [];
+        // $importantTokens[]  = $tokens[$position+1];        
+        
+        $accessLevels = ['public','private','protected'];
+        $thingsWeWant = array_merge(['static'], $accessLevels);
+        
+        for($i=$position-1;$i>($position-10);$i--)  //ten is arbitrary to 
+        {                                           //avoid infinite back
+                                                    //since I'm not confident
+                                                    //I know all the ways a 
+                                                    //method might be declared            
+            $token = $tokens[$i];
+            if(in_array($token->token_value, $thingsWeWant))
+            {
+                $importantTokens[] = $token;
+            }
+            else
+            {
+                break;
+            }
+        }
+        $info = new \stdClass;
+        $info->function_name = $tokens[$position+1]->token_value;
+        $info->isStatic      = false;
+        $info->accessLevel   = 'none';
+        foreach($importantTokens as $token)
+        {
+            if($token->token_value === 'static')
+            {
+                $info->isStatic = true;
+            }
+            else if(in_array($token->token_value, $accessLevels))
+            {
+                $info->accessLevel = $token->token_value;
+            }
+        }
+        return $info;
+    });
+    
+    //filter out anons for now
+    $infos = array_filter($infos, function($info){
+        return $info->function_name !== '(';
+    });
+    
+    //array_values to reindex
+    return array_values($infos);
+}
+
+function getFunctionNamesFromCode($string)
+{
+    return getFunctionInfoFromCodeWithCallback($string, function($tokens, $position){
+        static $anonCount = 0;
+        $token = $tokens[$position+1];
+        $token->is_anon_function = false;
+        if('(' === $token->token_value)
+        {   
+            $token->is_anon_function = true;
+        }
+        return $token;
+    });
 }
 
 function getFunctionFromCode($string, $function)
