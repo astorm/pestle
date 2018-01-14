@@ -43,6 +43,7 @@ function appendMax($string, $items)
 * @command alanstormdotcom:rsync
 * @argument base_folder Base Folder? [.]
 * @argument remote_server Remote SSH Addres and Folder? [.]
+* @argument ssh_key Path to private key? [.]
 */
 function pestle_cli($argv)
 {
@@ -63,9 +64,10 @@ function pestle_cli($argv)
     $lastFolder = getMostRecentStaticFolder($staticFolders, $path);
     $path       = $path . '/' . $lastFolder . '/';
     $cmd = ('rsync -r ' . 
+        '-e "ssh -i '.$argv['ssh_key'].'" ' .
         $path . ' ' .
         $argv['remote_server']);
 
-    output($cmd);
+    output("Running: " . $cmd);
     output(`$cmd`);                
 }
