@@ -26,7 +26,7 @@ and get help for a specific command with
 
     php pestle.phar help generate_module    
 
-If you want to build your own `phar`, we've got a `phing` `build.xml` file setup so all you *should* need to do to build a stand along `pestle.phar` executable is 
+If you want to build your own `phar`, we've got a `phing` `build.xml` file setup so all you *should* need to do to build a stand alone `pestle.phar` executable is 
 
 - `git checkout git@github.com:astorm/pestle.git`
 - composer.phar install
@@ -77,6 +77,6 @@ And then import pestle code via native PHP namespaces to your heart's content.
     
 Our specific strategy around this may change in the future, but our plan is for these sorts of changes to be user-transparent.  If we ever split the generated library into multiple files, or figure out a sane way to incorporate `pestle_import` into native PHP code and you're using this project as a composer library — those changes should be transparent to you. 
 
-Do you have strong options about this sort of compilation/"transpiling"/module-importing?  We're love to have you involved in the project. Yell at us in a GitHub issues and/or pull request.  
+Do you have strong options about this sort of compilation/"transpiling"/module-importing?  We'd love to have you involved in the project. Yell at us in a GitHub issues and/or pull request.  
 
 Want to learn more?  We'll [be using the wiki](https://github.com/astorm/pestle/wiki) for documentation until we outgrow it. 
