@@ -8,7 +8,7 @@ class FunctionNameParsingTest extends PestleBaseTest
 {
     protected function loadFixture($method)
     {
-        return file_get_contents(__DIR__ . '/fixtures/' . 
+        return file_get_contents(__DIR__ . '/fixtures/FunctionNameParsing/' . 
             preg_replace('%^.*?::test%','',$method) . '.php' );
     }
     
