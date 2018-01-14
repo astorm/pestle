@@ -6,6 +6,9 @@ pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
 pestle_import('Pulsestorm\Xml_Library\formatXmlString');
 pestle_import('Pulsestorm\Cli\Token_Parse\pestle_token_get_all');
+pestle_import('Pulsestorm\Cli\Token_Parse\getFunctionNamesFromCode');
+pestle_import('Pulsestorm\Cli\Token_Parse\getFunctionFromCode');
+pestle_import('Pulsestorm\Cli\Token_Parse\getParsedFunctionInfoFromCode');
 
 function getFrontendModelNodesFromMagento1SystemXml($xmls)
 {
@@ -905,12 +908,8 @@ function tumblrBackupExtract()
     }
 
 }
-/**
-* Test Command
-* @command testbed
-* @Xargument folder Which Folder?
-*/
-function pestle_cli($arguments, $options)
+
+function magentoSomeUiComponentSearch($argv, $options)
 {
     $cmd    = 'find vendor/magento -wholename \'*ui_component/*.xml\'';
     $files  = explode("\n", `$cmd`);    
@@ -946,4 +945,20 @@ function pestle_cli($arguments, $options)
     }
 //     var_dump($allColumns);
 //     exit;
+}
+
+/**
+* Test Command
+* @command testbed
+* @Xargument folder Which Folder?
+*/
+function pestle_cli($arguments, $options)
+{
+    $code = file_get_contents('/Users/alanstorm/Documents/github/laravel/framework/src/Illuminate/Queue/Console/WorkCommand.php');    
+    $functions = getParsedFunctionInfoFromCode($code);
+    $functions = array_map(function($function) use ($code){
+        $function->as_string = getFunctionFromCode($code, $function->function_name);
+        return $function;
+    }, $functions);
+    var_dump($functions);
 }
