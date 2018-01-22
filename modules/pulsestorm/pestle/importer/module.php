@@ -46,6 +46,18 @@ function extractFunctionNameAndNamespace($full)
     ];
 }
 
+function getModuleFolders()
+{
+    $paths = [getBaseProjectDir() . '/modules/'];    
+    $home = trim(`echo ~`);
+    $pathConfig = $home . '/.pestle/module-folders.json';    
+    if(is_dir($home) && file_exists($pathConfig) && $config = json_decode(file_get_contents($pathConfig)))
+    {
+        $paths = array_merge($paths, $config->{'module-folders'});
+    }
+    return $paths;
+}
+
 function getPathFromFunctionName($function_name)
 {
     $function_name = strToLower($function_name);
@@ -53,7 +65,19 @@ function getPathFromFunctionName($function_name)
     $short_name    = array_pop($parts);
     $namespace     = implode('/',$parts);
     $file          = $namespace . '/module.php';
-    return getBaseProjectDir() . '/modules/' . $file;
+    
+    $folders = getModuleFolders();
+    foreach($folders as $folder)
+    {
+        $fullPath = $folder . '/' . $file;
+        if(file_exists($fullPath))
+        {
+            return $fullPath;
+        }
+    }
+    
+    exit("Could not find $file in any folder.\n");
+    // return getBaseProjectDir() . '/modules/' . $file;
 }
 
 function includeModule($function_name)

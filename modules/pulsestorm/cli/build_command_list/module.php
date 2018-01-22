@@ -2,6 +2,7 @@
 namespace Pulsestorm\Cli\Build_Command_List;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
+use AppendIterator;
 use ReflectionFunction;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
@@ -9,15 +10,21 @@ pestle_import('Pulsestorm\Pestle\Library\getDocCommentAsString');
 pestle_import('Pulsestorm\Pestle\Importer\getCacheDir');
 pestle_import('Pulsestorm\Pestle\Runner\getBaseProjectDir');
 pestle_import('Pulsestorm\Pestle\Library\parseDocBlockIntoParts');
+pestle_import('Pulsestorm\Pestle\Importer\getModuleFolders');
 
 function getListOfFilesInModuleFolder()
 {
-    $path = getBaseProjectDir() . '/modules/';
-    $objects = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($path), 
-        RecursiveIteratorIterator::SELF_FIRST
-    );
-    return $objects;
+    $iterator = new AppendIterator();    
+    foreach(getModuleFolders() as $path)
+    {
+        $objects = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path), 
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+        $iterator->append($objects);
+    }    
+    return $iterator;
+    // return $objects;
 }
 
 function includeAllModuleFiles()
