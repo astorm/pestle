@@ -31,7 +31,7 @@ function inputFromArray($string='Please select the item:',$array)
     $end = '] ';
     $array = array_map(function($value) use (&$num,$end){        
         $num++;
-        $value = '[' . $num . $end . $value;        
+        $value = '[' . $num . $end . $value . '\n';        
         return $value;
     }, $array);
     array_unshift($array, $string);
