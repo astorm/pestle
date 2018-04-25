@@ -4988,6 +4988,11 @@ function templateCacheTag($tag_name)
     return "\n    const CACHE_TAG = '$tag_name';\n";
 }
 
+function templateStatusEnabled()
+{
+    return "\n    const STATUS_ENABLED = 1;\n";
+}
+
 function getModelInterfaceShortName($modelName)
 {
     return $modelName . 'Interface';
@@ -5004,7 +5009,8 @@ function createModelClass($moduleInfo, $modelName)
     $construct           = templateConstruct($class_resource);
 
     $body                = 
-        templateCacheTag($cache_tag)    .      
+        templateCacheTag($cache_tag)    .
+        templateStatusEnabled()         .
         $construct                      .
         templateGetIdentities();
 
