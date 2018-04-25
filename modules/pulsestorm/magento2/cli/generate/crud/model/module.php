@@ -177,12 +177,13 @@ function templateRepositoryFunctions($modelName)
     return '
     protected $objectFactory;
     protected $collectionFactory;
+    protected $searchResultsFactory;
+    
     public function __construct(
         '.$modelNameFactory.' $objectFactory,
         CollectionFactory $collectionFactory,
         SearchResultsInterfaceFactory $searchResultsFactory       
-    )
-    {
+    ) {
         $this->objectFactory        = $objectFactory;
         $this->collectionFactory    = $collectionFactory;
         $this->searchResultsFactory = $searchResultsFactory;
@@ -190,12 +191,9 @@ function templateRepositoryFunctions($modelName)
     
     public function save('.$modelInterface.' $object)
     {
-        try
-        {
+        try {
             $object->save();
-        }
-        catch(\Exception $e)
-        {
+        } catch(\Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
         }
         return $object;
