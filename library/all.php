@@ -9199,7 +9199,17 @@ function generateColumnsNode($xml, $columnsName, $pulsestorm_commercebug_log_id,
 
 function generateListingToolbar($xml)
 {
-    $columns         = \Pulsestorm\Xml_Library\simpleXmlAddNodesXpath($xml, 'listingToolbar[@name=listing_top]/paging[@name=listing_paging');        
+    $listingToolbar = $xml->addChild('listingToolbar');
+    $listingToolbar->addAttribute('name', 'listing_top');
+
+    $settings = $xml->addChild('settings');
+    $settings->addChild('sticky', 'true');
+
+    $paging = $listingToolbar->addChild('paging');
+    $paging->addAttribute('name', 'listing_paging');
+
+    $filters = $listingToolbar->addChild('filters');
+    $filters->addAttribute('name', 'listing_filters');
 }
 
 function generateDataSourceNameFromGridId($grid_id)
