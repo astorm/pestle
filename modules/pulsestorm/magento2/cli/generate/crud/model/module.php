@@ -151,16 +151,16 @@ function getModelRepositoryName($modelName)
     return $modelName . 'Repository';    
 }
 
-function templateUseFunctions($repositoryInterface, $thingInterface, $classModel, $collectionModel)
+function templateUseFunctions($repositoryInterface, $thingInterface, $classModel, $collectionModel, $classResourceModel)
 {        
     $thingFactory   = $classModel . 'Factory';
     $resourceModel  = $collectionModel . 'Factory';
-    // $resourceModel       = 'Pulsestorm\HelloGenerate\Model\ResourceModel\Thing\CollectionFactory';
-    
+
     return "
 use {$repositoryInterface};
 use {$thingInterface};
 use {$thingFactory};
+use {$classResourceModel} as ObjectResourceModel;
 use {$resourceModel};
 
 use Magento\Framework\Api\SearchCriteriaInterface;
@@ -176,15 +176,18 @@ function templateRepositoryFunctions($modelName)
     $modelInterface   = getModelInterfaceShortName($modelName);
     return '
     protected $objectFactory;
+    protected $objectResourceModel;
     protected $collectionFactory;
     protected $searchResultsFactory;
     
     public function __construct(
         '.$modelNameFactory.' $objectFactory,
+        ObjectResourceModel $objectResourceModel,
         CollectionFactory $collectionFactory,
         SearchResultsInterfaceFactory $searchResultsFactory       
     ) {
         $this->objectFactory        = $objectFactory;
+        $this->objectResourceModel  = $objectResourceModel;
         $this->collectionFactory    = $collectionFactory;
         $this->searchResultsFactory = $searchResultsFactory;
     }
@@ -192,7 +195,7 @@ function templateRepositoryFunctions($modelName)
     public function save('.$modelInterface.' $object)
     {
         try {
-            $object->save();
+            $this->objectResourceModel->save($object);
         } catch(\Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
         }
@@ -202,7 +205,7 @@ function templateRepositoryFunctions($modelName)
     public function getById($id)
     {
         $object = $this->objectFactory->create();
-        $object->load($id);
+        $this->objectResourceModel->load($object, $id);
         if (!$object->getId()) {
             throw new NoSuchEntityException(__(\'Object with id "%1" does not exist.\', $id));
         }
@@ -212,7 +215,7 @@ function templateRepositoryFunctions($modelName)
     public function delete('.$modelInterface.' $object)
     {
         try {
-            $object->delete();
+            $this->objectResourceModel->delete($object);
         } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
@@ -266,6 +269,7 @@ function templateRepositoryFunctions($modelName)
 function createRepository($moduleInfo, $modelName)
 {
     $classCollection    = getCollectionClassNameFromModuleInfo($moduleInfo, $modelName);
+    $classResourceModel = getResourceModelClassNameFromModuleInfo($moduleInfo, $modelName);
     $classModel         = getModelClassNameFromModuleInfo($moduleInfo, $modelName);
     $modelInterface     = getModelInterfaceName($moduleInfo, $modelName);
     $repositoryName     = getModelRepositoryName($modelName);
@@ -274,7 +278,7 @@ function createRepository($moduleInfo, $modelName)
     $template           = createClassTemplate($repositoryFullName, false, '\\' . $interface, true);
     
     $body               = templateRepositoryFunctions($modelName);
-    $use                = templateUseFunctions($interface, $modelInterface, $classModel, $classCollection);
+    $use                = templateUseFunctions($interface, $modelInterface, $classModel, $classCollection, $classResourceModel);
     $contents           = $template;
     $contents           = str_replace('<$body$>', $body, $contents);
     $contents           = str_replace('<$use$>' , $use,  $contents);
