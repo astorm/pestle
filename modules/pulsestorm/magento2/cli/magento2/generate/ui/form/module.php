@@ -676,6 +676,7 @@ function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
             <item name="config" xsi:type="array">
                 <item name="label" xsi:type="string">Form Data</item>
                 <item name="collapsible" xsi:type="boolean">true</item>                
+                <item name="opened" xsi:type="boolean">true</item>                
             </item>
         </argument>
         <field name="'.$dbID.'">
