@@ -203,7 +203,6 @@ function createControllerFiles($module_info, $modelClass, $aclRule)
         {
             $useString = '
 use Magento\Backend\App\Action;
-use '.$prefix.'\Model\Page;
 use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Exception\LocalizedException;
             ';
