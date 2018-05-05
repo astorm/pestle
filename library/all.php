@@ -4788,17 +4788,17 @@ function getModelRepositoryName($modelName)
     return $modelName . 'Repository';    
 }
 
-function templateUseFunctions($repositoryInterface, $thingInterface, $classModel, $collectionModel)
+function templateUseFunctions($repositoryInterface, $thingInterface, $classModel, $collectionModel, $classResourceModel)
 {        
     $thingFactory   = $classModel . 'Factory';
-    $resourceModel  = $collectionModel . 'Factory';
-    // $resourceModel       = 'Pulsestorm\HelloGenerate\Model\ResourceModel\Thing\CollectionFactory';
-    
+    $collectionFactory  = $collectionModel . 'Factory';
+
     return "
 use {$repositoryInterface};
 use {$thingInterface};
 use {$thingFactory};
-use {$resourceModel};
+use {$classResourceModel} as ObjectResourceModel;
+use {$collectionFactory};
 
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
@@ -4813,15 +4813,18 @@ function templateRepositoryFunctions($modelName)
     $modelInterface   = getModelInterfaceShortName($modelName);
     return '
     protected $objectFactory;
+    protected $objectResourceModel;
     protected $collectionFactory;
     protected $searchResultsFactory;
     
     public function __construct(
         '.$modelNameFactory.' $objectFactory,
+        ObjectResourceModel $objectResourceModel,
         CollectionFactory $collectionFactory,
         SearchResultsInterfaceFactory $searchResultsFactory       
     ) {
         $this->objectFactory        = $objectFactory;
+        $this->objectResourceModel  = $objectResourceModel;
         $this->collectionFactory    = $collectionFactory;
         $this->searchResultsFactory = $searchResultsFactory;
     }
@@ -4829,7 +4832,7 @@ function templateRepositoryFunctions($modelName)
     public function save('.$modelInterface.' $object)
     {
         try {
-            $object->save();
+            $this->objectResourceModel->save($object);
         } catch(\Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
         }
@@ -4839,7 +4842,7 @@ function templateRepositoryFunctions($modelName)
     public function getById($id)
     {
         $object = $this->objectFactory->create();
-        $object->load($id);
+        $this->objectResourceModel->load($object, $id);
         if (!$object->getId()) {
             throw new NoSuchEntityException(__(\'Object with id "%1" does not exist.\', $id));
         }
@@ -4849,7 +4852,7 @@ function templateRepositoryFunctions($modelName)
     public function delete('.$modelInterface.' $object)
     {
         try {
-            $object->delete();
+            $this->objectResourceModel->delete($object);
         } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
@@ -4903,6 +4906,7 @@ function templateRepositoryFunctions($modelName)
 function createRepository($moduleInfo, $modelName)
 {
     $classCollection    = getCollectionClassNameFromModuleInfo($moduleInfo, $modelName);
+    $classResourceModel = getResourceModelClassNameFromModuleInfo($moduleInfo, $modelName);
     $classModel         = getModelClassNameFromModuleInfo($moduleInfo, $modelName);
     $modelInterface     = getModelInterfaceName($moduleInfo, $modelName);
     $repositoryName     = getModelRepositoryName($modelName);
@@ -4911,7 +4915,7 @@ function createRepository($moduleInfo, $modelName)
     $template           = \Pulsestorm\Cli\Code_Generation\createClassTemplate($repositoryFullName, false, '\\' . $interface, true);
     
     $body               = templateRepositoryFunctions($modelName);
-    $use                = templateUseFunctions($interface, $modelInterface, $classModel, $classCollection);
+    $use                = templateUseFunctions($interface, $modelInterface, $classModel, $classCollection, $classResourceModel);
     $contents           = $template;
     $contents           = str_replace('<$body$>', $body, $contents);
     $contents           = str_replace('<$use$>' , $use,  $contents);
@@ -8399,9 +8403,30 @@ function createControllerClassBodyForIndexRedirect($module_info, $modelClass, $a
 
 function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
 {    
-    $dbID       = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));    
+    $dbID       = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
+    $repositoryName     = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\getModelRepositoryName($modelClass);
+    $repositoryFullName = '\\' . \Pulsestorm\Magento2\Cli\Generate\Crud\Model\getModelClassNameFromModuleInfo($module_info, $repositoryName);
     return '  
-    const ADMIN_RESOURCE = \''.$aclRule.'\';   
+    const ADMIN_RESOURCE = \''.$aclRule.'\';
+    
+    /**
+     * @var ' . $repositoryFullName . '
+     */
+    protected $objectRepository;
+
+    /**
+     * Delete constructor.
+     * @param ' . $repositoryFullName . ' $objectRepository
+     * @param \Magento\Backend\App\Action\Context $context
+     */
+    public function __construct(
+        ' . $repositoryFullName . ' $objectRepository,
+        \Magento\Backend\App\Action\Context $context
+    ) {
+        $this->objectRepository = $objectRepository;
+
+        parent::__construct($context);
+    }
           
     public function execute()
     {
@@ -8410,12 +8435,9 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
         /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultRedirectFactory->create();
         if ($id) {
-            $title = "";
             try {
-                // init model and delete
-                $model = $this->_objectManager->create(\''.$modelClass.'\');
-                $model->load($id);
-                $model->delete();
+                // delete model
+                $this->objectRepository->deleteById($id);
                 // display success message
                 $this->messageManager->addSuccess(__(\'You have deleted the object.\'));
                 // go to grid
@@ -8431,16 +8453,16 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
         $this->messageManager->addError(__(\'We can not find an object to delete.\'));
         // go to grid
         return $resultRedirect->setPath(\'*/*/\');
-        
-    }    
-    
-';    
+    }
+';
 }
 
 function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
 {
     $dbID       = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
     $persistKey = getPersistKeyFromModelClassName($modelClass);
+    $repositoryName     = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\getModelRepositoryName($modelClass);
+    $repositoryFullName = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\getModelClassNameFromModuleInfo($module_info, $repositoryName);
     return '
     /**
      * Authorization level of a basic admin session
@@ -8453,16 +8475,25 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
      * @var DataPersistorInterface
      */
     protected $dataPersistor;
+    
+    /**
+     * @var ' . $repositoryFullName . '
+     */
+    protected $modelRepository;
 
     /**
      * @param Action\Context $context
      * @param DataPersistorInterface $dataPersistor
+     * @param ' . $repositoryFullName . ' $modelRepository
      */
     public function __construct(
         Action\Context $context,
-        DataPersistorInterface $dataPersistor
+        DataPersistorInterface $dataPersistor,
+        ' . $repositoryFullName . ' $modelRepository
     ) {
-        $this->dataPersistor = $dataPersistor;
+        $this->dataPersistor    = $dataPersistor;
+        $this->modelRepository  = $modelRepository;
+         
         parent::__construct($context);
     }
 
@@ -8471,6 +8502,7 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @return \Magento\Framework\Controller\ResultInterface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute()
     {
@@ -8485,18 +8517,18 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
                 $data[\''.$dbID.'\'] = null;
             }
 
-            /** @var '.$modelClass.' $model */
+            /** @var \\'.$modelClass.' $model */
             $model = $this->_objectManager->create(\''.$modelClass.'\');
 
             $id = $this->getRequest()->getParam(\''.$dbID.'\');
             if ($id) {
-                $model->load($id);
+                $model = $this->modelRepository->getById($id);
             }
 
             $model->setData($data);
 
             try {
-                $model->save();
+                $this->modelRepository->save($model);
                 $this->messageManager->addSuccess(__(\'You saved the thing.\'));
                 $this->dataPersistor->clear(\''.$persistKey.'\');
                 if ($this->getRequest()->getParam(\'back\')) {
@@ -8555,7 +8587,6 @@ function createControllerFiles($module_info, $modelClass, $aclRule)
         {
             $useString = '
 use Magento\Backend\App\Action;
-use '.$prefix.'\Model\Page;
 use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Exception\LocalizedException;
             ';
