@@ -14,12 +14,12 @@ class GenerateInstallSchemaTest extends PestleBaseTest
     public function testGenerateBlank()
     {
         $result = generateInstallSchemaTable(
-            'unit_test', [], 'A testing table'
+            'unit_test', 'ModelTest', [], 'A testing table'
         );
         $fixture = '        $table = $installer->getConnection()->newTable(
             $installer->getTable(\'unit_test\')
         )->addColumn(
-            \'unit_test_id\',
+            \'modeltest_id\',
             \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
             null,
             [ \'identity\' => true, \'nullable\' => false, \'primary\' => true, \'unsigned\' => true, ],

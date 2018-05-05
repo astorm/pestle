@@ -317,8 +317,7 @@ function createDbTableNameFromModuleInfoAndModelShortName($moduleInfo, $modelNam
 
 function createDbIdFromModuleInfoAndModelShortName($moduleInfo, $modelName)
 {
-    return createDbTableNameFromModuleInfoAndModelShortName(
-        $moduleInfo, $modelName) . '_id';
+    return strtolower($modelName) . '_id';
 }
 
 function createResourceModelClass($moduleInfo, $modelName)
@@ -459,7 +458,7 @@ function prependInstallerCodeBeforeEndSetup($moduleInfo, $modelName, $path)
 {
     $table_name = createTableNameFromModuleInfoAndModelName(
         $moduleInfo, $modelName);
-    $install_code = generateInstallSchemaTable($table_name);
+    $install_code = generateInstallSchemaTable($table_name, $modelName);
     $contents     = file_get_contents($path);
     $end_setup    = '$installer->endSetup();';
     $contents     = str_replace($end_setup, 
@@ -733,7 +732,7 @@ function invokeGenerateSchemaUpgrade($moduleInfo, $modelName, $options)
         $moduleInfo, $modelName);
     
     $contents = file_get_contents($setupPath);
-    $contents .= "\n" . '$installer = $setup;' . "\n" . generateInstallSchemaTable($table_name);
+    $contents .= "\n" . '$installer = $setup;' . "\n" . generateInstallSchemaTable($table_name, $modelName);
     
     writeStringToFile($setupPath, $contents);                
 }

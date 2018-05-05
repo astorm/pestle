@@ -121,10 +121,10 @@ function generateInstallSchemaAddComment($comment)
          )';
 }
 
-function generateInstallSchemaGetDefaultColumnId($table)
+function generateInstallSchemaGetDefaultColumnId($model_name)
 {
     $id = [
-        'name'          => $table . '_id',
+        'name'          => strtolower($model_name) . '_id',
         'type_constant' => '\Magento\Framework\DB\Ddl\Table::TYPE_INTEGER',
         'size'          => 'null',
         'attributes'    => ['identity' => true, 'nullable' => false, 'primary' => true, 'unsigned' => true],
@@ -180,9 +180,9 @@ function generateInstallSchemaGetDefaultColumnIsAction()
     ];
     return $is_active;
 }
-function generateInstallSchemaGetDefaultColumns($table)
+function generateInstallSchemaGetDefaultColumns($model_name)
 {
-    $id            = generateInstallSchemaGetDefaultColumnId($table);
+    $id            = generateInstallSchemaGetDefaultColumnId($model_name);
     $title         = generateInstallSchemaGetDefaultColumnTitle();
     $creation_time = generateInstallSchemaGetDefaultColumnCreationTime();
     $update_time   = generateInstallSchemaGetDefaultColumnUpdateTime();
@@ -190,11 +190,11 @@ function generateInstallSchemaGetDefaultColumns($table)
     return [$id, $title, $creation_time, $update_time, $is_active];
 }
 
-function generateInstallSchemaTable($table_name='', $columns=[], $comment='',$indent=false)
+function generateInstallSchemaTable($table_name='', $model_name='', $columns=[], $comment='',$indent=false)
 {
     $indent = $indent ? $indent : '        ';
     $block = $indent . '$table = ' . generateInstallSchemaNewTable($table_name);
-    $default_columns = generateInstallSchemaGetDefaultColumns($table_name);
+    $default_columns = generateInstallSchemaGetDefaultColumns($model_name);
     $columns = array_merge($default_columns, $columns);
     foreach($columns as $column)
     {
