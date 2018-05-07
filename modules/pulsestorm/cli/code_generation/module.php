@@ -215,7 +215,7 @@ function templateRegistrationPhp($module_name, $type='MODULE')
         \Magento\Framework\Component\ComponentRegistrar::'.$type.',
         \''.$module_name.'\',
         __DIR__
-    );';
+    );' . "\n";
 }
 
 function createBasicClassContents($full_model_name, $method_name, $extends=false)
@@ -224,7 +224,7 @@ function createBasicClassContents($full_model_name, $method_name, $extends=false
     $name = array_pop($parts);
     $namespace = implode('\\', $parts);
     $contents =  '<' . '?' . 'php' . "\n";
-    $contents .= 'namespace ' . $namespace . ";\n";
+    $contents .= 'namespace ' . $namespace . ";\n\n";
     $contents .= 'class ' . $name ;
     $contents .= "\n" . '{' . "\n";
     $contents .= '    public function ' . $method_name . '($parameters)' . "\n";
@@ -242,13 +242,13 @@ function templateInterface($interface, $functions=[])
     $name       = array_pop($parts);
     $template   = '<' . '?' . 'php' . "\n" .
     'namespace ' . implode('\\',$parts) . ";\n" .
-    "interface $name \n{\n";
+    "\ninterface $name\n{\n";
     foreach($functions as $function)
     {
         $template .=
 '    function '.$function.'();' . "\n";
     }
-    $template   .= "}";
+    $template   .= "}\n";
 
     return $template;
 }
@@ -277,7 +277,7 @@ function createClassTemplate($class, $extends=false, $implements=false, $include
     $name  = array_pop($parts);
 
     $template = '<' . '?' . 'php' . "\n" .
-    'namespace ' . implode('\\',$parts) . ";\n";
+    'namespace ' . implode('\\',$parts) . ";\n\n";
     if($includeUse)
     {
         $template .= '<$use$>' . "\n";
@@ -289,7 +289,7 @@ function createClassTemplate($class, $extends=false, $implements=false, $include
     }
     if($implements)
     {
-        $template .= " implements $implements";
+        $template .= " implements\n    $implements";
     }
     $template .= "\n" .
     '{' . '<$body$>' . '}' . "\n";
@@ -336,8 +336,8 @@ function createControllerClass($class, $area, $acl='ACL RULE HERE')
     protected $resultPageFactory;
     public function __construct(
         ' . $context_hint . ' $context,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory)
-    {
+        \Magento\Framework\View\Result\PageFactory $resultPageFactory
+    ) {
         $this->resultPageFactory = $resultPageFactory;
         parent::__construct($context);
     }
@@ -366,7 +366,7 @@ function createControllerClassTemplate($class, $extends=false, $implements=false
     $name  = array_pop($parts);
 
     $template = '<' . '?' . 'php' . "\n" .
-    'namespace ' . implode('\\',$parts) . ";\n" .
+    'namespace ' . implode('\\',$parts) . ";\n\n" .
     "class $name";
     if($extends)
     {

@@ -23,6 +23,7 @@ class LibraryTest extends PestleBaseTest
     {
         $fixture = '<' . '?php
 namespace ;
+
 class Foo
 {<$body$>}' . "\n";  
  

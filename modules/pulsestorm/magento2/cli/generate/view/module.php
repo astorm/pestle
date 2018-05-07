@@ -66,7 +66,7 @@ function createBlockClass($module_info, $block_name, $area='frontname')
         $baseClass = '\Magento\Backend\Block\Template';
     }
     $contents = createClassTemplate($class_name, $baseClass);
-    $contents = str_replace('<$body$>', "\n".'    function _prepareLayout(){}'."\n", $contents);
+    $contents = str_replace('<$body$>', "\n", $contents);
     createClassFile($class_name, $contents);
     return $class_name;
 }

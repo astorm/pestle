@@ -42,7 +42,7 @@ function getNewClassDeclaration($class, $extends, $include_start_bracket=true)
     $parts = [];
     $parts[] = 'namespace';
     $parts[] = $class['namespace'] . ';';
-    $parts[] = "\n";
+    $parts[] = "\n\n";
 
     if($extends['class'])
     {

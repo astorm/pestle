@@ -248,21 +248,18 @@ function generatePageActionClass($moduleInfo, $gridId, $idColumn, $collection)
             foreach ($dataSource["data"]["items"] as & $item) {
                 $name = $this->getData("name");
                 $id = "X";
-                if(isset($item["'.$idColumn.'"]))
-                {
+                if (isset($item["'.$idColumn.'"])) {
                     $id = $item["'.$idColumn.'"];
                 }
                 $item[$name]["view"] = [
-                    "href"=>$this->getContext()->getUrl(
-                        "'.$editUrl.'",["'.$idColumn.'"=>$id]),
+                    "href"=>$this->getContext()->getUrl("'.$editUrl.'", ["'.$idColumn.'"=>$id]),
                     "label"=>__("Edit")
                 ];
             }
         }
 
         return $dataSource;
-    }    
-    ' . "\n";            
+    }' . "\n";
     $contents = createClassTemplateWithUse($pageActionsClassName, '\Magento\Ui\Component\Listing\Columns\Column');            
     $contents = str_replace('<$use$>','',$contents);
     $contents = str_replace('<$body$>', $prepareDataSource, $contents);
@@ -276,8 +273,7 @@ function generateDataProviderClass($moduleInfo, $gridId, $collectionFactory)
 {
     $providerClass      = generateProdiverClassFromGridIdAndModuleInfo($gridId, $moduleInfo);    
     $collectionFactory  = '\\' . trim($collectionFactory, '\\');
-    $constructor = '    
-    public function __construct(
+    $constructor = "\n" . '    public function __construct(
         $name,
         $primaryFieldName,
         $requestFieldName,

@@ -36,13 +36,13 @@ function getPersistKeyFromModelClassName($modelClass)
 function createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule)
 {
     return '
-    const ADMIN_RESOURCE = \''.$aclRule.'\';  
+    const ADMIN_RESOURCE = \''.$aclRule.'\';
     public function execute()
     {
         $resultRedirect = $this->resultRedirectFactory->create();
         $resultRedirect->setPath(\'*/index/index\');
         return $resultRedirect;
-    }     
+    }
 ';
 }
 
@@ -50,8 +50,8 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
 {    
     $dbID           = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
     $repositoryName = '\\' . getModelRepositoryName($modelClass);
-    return '  
-    const ADMIN_RESOURCE = \''.$aclRule.'\';
+    return "\n" .
+    '    const ADMIN_RESOURCE = \''.$aclRule.'\';
     
     /**
      * @var ' . $repositoryName . '
@@ -97,9 +97,7 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
         $this->messageManager->addError(__(\'We can not find an object to delete.\'));
         // go to grid
         return $resultRedirect->setPath(\'*/*/\');
-        
-    }    
-    
+    }
 ';    
 }
 
@@ -189,27 +187,27 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
             return $resultRedirect->setPath(\'*/*/edit\', [\''.$dbID.'\' => $this->getRequest()->getParam(\''.$dbID.'\')]);
         }
         return $resultRedirect->setPath(\'*/*/\');
-    }    
+    }
 ';
 }
 
 function createControllerClassBody($module_info, $aclRule)
 {
     return '
-    const ADMIN_RESOURCE = \''.$aclRule.'\';       
+    const ADMIN_RESOURCE = \''.$aclRule.'\';
     protected $resultPageFactory;
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory)
-    {
-        $this->resultPageFactory = $resultPageFactory;        
+        \Magento\Framework\View\Result\PageFactory $resultPageFactory
+    ) {
+        $this->resultPageFactory = $resultPageFactory;
         parent::__construct($context);
     }
     
     public function execute()
     {
-        return $this->resultPageFactory->create();  
-    }    
+        return $this->resultPageFactory->create();
+    }
 ';
 }
 
@@ -499,28 +497,28 @@ function generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule)
     public function __construct(
         \Magento\Backend\Block\Widget\Context $context
     ) {
-        $this->context = $context;    
+        $this->context = $context;
     }
     
     public function getBackUrl()
     {
         return $this->getUrl(\'*/*/\');
-    }    
+    }
     
     public function getDeleteUrl()
     {
         return $this->getUrl(\'*/*/delete\', [\'object_id\' => $this->getObjectId()]);
-    }   
+    }
     
     public function getUrl($route = \'\', $params = [])
     {
         return $this->context->getUrlBuilder()->getUrl($route, $params);
-    }    
+    }
     
     public function getObjectId()
     {
         return $this->context->getRequest()->getParam(\''.$dbID.'\');
-    }     
+    }
 ';    
     $genericButtonClassContents = str_replace('<$body$>',$genericContents, $genericButtonClassContents);    
     createClassFile($genericButtonClassName,$genericButtonClassContents);                   
@@ -542,7 +540,7 @@ function getAllButtonDataStrings()
             \'label\' => __(\'Back\'),
             \'on_click\' => sprintf("location.href = \'%s\';", $this->getBackUrl()),
             \'class\' => \'back\',
-            \'sort_order\' => 10    
+            \'sort_order\' => 10
         ]',
         'delete'=> '[
                 \'label\' => __(\'Delete Object\'),
@@ -597,10 +595,11 @@ function createButtonClassContents($buttonName)
     $extra = '';
     if($buttonName === 'delete')
     {
-        $extra = 'if(!$this->getObjectId()) { return []; }';
+        $extra = 'if (!$this->getObjectId()) {
+            return [];
+        }';
     }
-    $contents = '     
-    public function getButtonData()
+    $contents = "\n". '    public function getButtonData()
     {
         '.$extra.'
         return '. $buttonData .';
@@ -616,7 +615,7 @@ function generateButtonClassAndReturnName($modelClass, $buttonName)
     
     $contents = createClassTemplateWithUse($buttonClassName, 'GenericButton', 
         'ButtonProviderInterface');
-    $contents   = str_replace('<$use$>','use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;',$contents);
+    $contents   = str_replace('<$use$>',"\n" . 'use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;',$contents);
     $contents   = str_replace('<$body$>',createButtonClassContents($buttonName),$contents);
     createClassFile($buttonClassName,$contents);            
     
