@@ -124,7 +124,7 @@ function generateListingToolbar($xml)
     $listingToolbar = $xml->addChild('listingToolbar');
     $listingToolbar->addAttribute('name', 'listing_top');
 
-    $settings = $xml->addChild('settings');
+    $settings = $listingToolbar->addChild('settings');
     $settings->addChild('sticky', 'true');
 
     $paging = $listingToolbar->addChild('paging');
