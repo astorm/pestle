@@ -111,7 +111,6 @@ function templateRepositoryInterfaceUse($longModelInterfaceName)
 {
     return "
 use {$longModelInterfaceName};
-use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Api\SearchCriteriaInterface;
 ";
 }
@@ -274,8 +273,9 @@ function createRepository($moduleInfo, $modelName)
     $modelInterface     = getModelInterfaceName($moduleInfo, $modelName);
     $repositoryName     = getModelRepositoryName($modelName);
     $repositoryFullName = getModelClassNameFromModuleInfo($moduleInfo, $repositoryName);
-    $interface          = getModuleInterfaceName($moduleInfo, $repositoryName, 'Api');    
-    $template           = createClassTemplate($repositoryFullName, false, '\\' . $interface, true);
+    $interface          = getModuleInterfaceName($moduleInfo, $repositoryName, 'Api');
+    $interfaceShortName = getModelInterfaceShortName($repositoryName);
+    $template           = createClassTemplate($repositoryFullName, false, $interfaceShortName, true);
     
     $body               = templateRepositoryFunctions($modelName);
     $use                = templateUseFunctions($interface, $modelInterface, $classModel, $classCollection, $classResourceModel);
