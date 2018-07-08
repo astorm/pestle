@@ -16,12 +16,12 @@ function getMenuXmlFiles()
     $base = getBaseMagentoDir();
     // $results = `find $base/vendor -name menu.xml`;
     // $results = explode("\n", $results);
-    $results = glob_recursive("$base/vendor/menu.xml");  
+    $results = glob_recursive("$base/vendor/menu.xml");
     if(file_exists("$base/app/code"))
     {
         $results = array_merge($results, glob_recursive("$base/app/code/menu.xml"));
-    }          
-    $results = array_filter($results);    
+    }
+    $results = array_filter($results);
     return $results;
 }
 
@@ -29,20 +29,20 @@ function inputFromArray($string='Please select the item:',$array)
 {
     $num = 0;
     $end = '] ';
-    $array = array_map(function($value) use (&$num,$end){        
+    $array = array_map(function($value) use (&$num,$end){
         $num++;
-        $value = '[' . $num . $end . $value;        
+        $value = '[' . $num . $end . $value;
         return $value;
     }, $array);
     array_unshift($array, $string);
-    
+
     $sentinal = true;
     while($sentinal)
-    {        
+    {
         $choice = input(implode("\n",$array) . "\n");
         $choice = (int) $choice;
         if(array_key_exists($choice, $array))
-        {            
+        {
             $value    = $array[$choice];
             $parts   = explode($end, $value);
             array_shift($parts);
@@ -60,6 +60,7 @@ function getMenusWithValue($raw, $value)
     $raw = array_filter($raw, function($item) use (&$parents, $value){
         if(trim($item->parent) === $value)
         {
+            // var_dump($item->title . "\t(" . $item->id . ')');
             $parents[] = $item->title . "\t(" . $item->id . ')';
             return false;
         }
@@ -70,14 +71,14 @@ function getMenusWithValue($raw, $value)
 
 function choseMenuFromTop()
 {
-    $files  = getMenuXmlFiles();    
-    $raw    = [];             
+    $files  = getMenuXmlFiles();
+    $raw    = [];
     foreach($files as $file)
     {
         libxml_use_internal_errors(true);
-        $xml = simplexml_load_file($file);    
+        $xml = simplexml_load_file($file);
         libxml_clear_errors();
-        libxml_use_internal_errors(false);                                               
+        libxml_use_internal_errors(false);
         if(!$xml) { continue; }
         foreach($xml->menu->children() as $add)
         {
@@ -88,9 +89,9 @@ function choseMenuFromTop()
             $raw[]       = $tmp;
         }
     }
-    
+
     $parents = getMenusWithValue($raw, '');
-        
+
     $value       = parseIdentifierFromLabel(
                     inputFromArray("Select Parent Menu: ", $parents, 1));
     $continue    = input("Use [$value] as parent? (Y/N)",'N');
@@ -98,9 +99,9 @@ function choseMenuFromTop()
     {
         return $value;
     }
-        
-    $sections    = getMenusWithValue($raw, $value); 
-    $value       = parseIdentifierFromLabel(inputFromArray("Select Parent Menu: ", $sections, 1));    
+
+    $sections    = getMenusWithValue($raw, $value);
+    $value       = parseIdentifierFromLabel(inputFromArray("Select Parent Menu: ", $sections, 1));
     return $value;
 }
 
@@ -117,7 +118,7 @@ function selectParentMenu($arguments, $index)
     {
         return $arguments[$index];
     }
-        
+
     $parent     = '';
     $continue   = input('Is this a new top level menu? (Y/N)','N');
     if(strToLower($continue) === 'n')
@@ -142,19 +143,19 @@ function addAttributesToXml($argv, $xml)
 {
     extract($argv);
 
-    $add    = $xml->menu->addChild('add');    
+    $add    = $xml->menu->addChild('add');
     $add->addAttribute('id'              , $id);
-    $add->addAttribute('resource'        , $resource);        
-    $add->addAttribute('title'           , $title); 
+    $add->addAttribute('resource'        , $resource);
+    $add->addAttribute('title'           , $title);
     $add->addAttribute('action'          , $action);
-    $add->addAttribute('module'          , $module_name);         
-    $add->addAttribute('sortOrder'       , $sortOrder);             
+    $add->addAttribute('module'          , $module_name);
+    $add->addAttribute('sortOrder'       , $sortOrder);
     if($parent)
     {
         $parts   = explode('::', $parent);
         $depends = array_shift($parts);
-        $add->addAttribute('parent'          , $parent); 
-        $add->addAttribute('dependsOnModule' , $depends); 
+        $add->addAttribute('parent'          , $parent);
+        $add->addAttribute('dependsOnModule' , $depends);
     }
     return $xml;
 }
@@ -175,12 +176,12 @@ function addAttributesToXml($argv, $xml)
 function pestle_cli($argv)
 {
     extract($argv);
-        
+
     $path = getModuleInformation($module_name)->folder . '/etc/adminhtml/menu.xml';
     $xml  = loadOrCreateMenuXml($path);
     $xml  = addAttributesToXml($argv, $xml);
-             
-    writeStringToFile($path, $xml->asXml());         
+
+    writeStringToFile($path, $xml->asXml());
     output("Writing: $path");
     output("Done.");
 }
