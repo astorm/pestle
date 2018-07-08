@@ -330,7 +330,7 @@ function createControllerClass($class, $area, $acl='ACL RULE HERE')
     {
         $body .= '
     const ADMIN_RESOURCE = \''.$acl.'\';
-        ';
+';
     }
     $body .= '
     protected $resultPageFactory;
@@ -346,15 +346,7 @@ function createControllerClass($class, $area, $acl='ACL RULE HERE')
     {
         return $this->resultPageFactory->create();
     }';
-//     if($area === 'adminhtml')
-//     {
-//         $body .= '
-//     protected function _isAllowed()
-//     {
-//         return $this->_authorization->isAllowed(\''.$acl.'\');
-//     }
-//         ';
-//     }
+
     $body .= "\n";
     return str_replace('<$body$>', $body, $template);
 }

@@ -36,9 +36,9 @@ function getRouterIdFromArea($area)
     if(!in_array($area, $areas))
     {
         throw new Exception("Could not find router id for area");
-    }    
+    }
 
-    return $legend[$area];    
+    return $legend[$area];
 }
 
 function createRoutesXmlFile($module_info, $area, $frontname, $router_id, $route_id)
@@ -50,16 +50,16 @@ function createRoutesXmlFile($module_info, $area, $frontname, $router_id, $route
         $xml = simplexml_load_string(getBlankXml('routes'));
         writeStringToFile($path, $xml->asXml());
     }
-    $xml = simplexml_load_file($path);   
+    $xml = simplexml_load_file($path);
 
     simpleXmlAddNodesXpath($xml,
         "router[@id=$router_id]/" .
         "route[@id=$route_id,@frontName=$frontname]/" .
         "module[@name=$module]");
-    
+
     writeStringToFile($path, formatXmlString($xml->asXml()));
     output($path);
-             
+
     return $xml;
 }
 
@@ -67,20 +67,19 @@ function createControllerClassForRoute($module, $area, $controller, $action, $ac
 {
     $class = createControllerClassName($module, $area, $controller, $action, $acl);
     $controllerClass = createControllerClass(
-        $class, 
+        $class,
         $area,
-        $controller,
-        $action
-    );    
-    $path_controller = getPathFromClass($class);    
+        $acl
+    );
+    $path_controller = getPathFromClass($class);
     writeStringToFile($path_controller, $controllerClass);
-    
+
     output($path_controller);
 }
 
 /**
 * Creates a Route XML
-* generate_route module area id 
+* generate_route module area id
 * @command generate-route
 * @argument module_name Which Module? [Pulsestorm_HelloWorld]
 * @argument area Which Area (frontend, adminhtml)? [frontend]
@@ -89,24 +88,24 @@ function createControllerClassForRoute($module, $area, $controller, $action, $ac
 * @argument action Action name? [Index]
 */
 function pestle_cli($argv)
-{    
+{
     $module      = $argv['module_name'];
-    $area        = $argv['area'];    
+    $area        = $argv['area'];
     $frontname   = $argv['frontname'];
     $controller  = $argv['controller'];
-    $action      = $argv['action'];    
-    
-    $module_info = getModuleInformation($module);        
+    $action      = $argv['action'];
+
+    $module_info = getModuleInformation($module);
     $router_id   = getRouterIdFromArea($area);
     $route_id    = $frontname;
 
     $xml = createRoutesXmlFile(
         $module_info, $area, $frontname, $router_id, $route_id
-    );        
-    
+    );
+
     $acl = $module . '::' . $frontname . '_menu';
     createControllerClassForRoute($module, $area, $controller, $action, $acl);
-    
+
     if($area === 'adminhtml')
     {
         output("    Don't forget your menu.xml and acl.xml");
