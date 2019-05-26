@@ -12,6 +12,14 @@ function getProcessFunctionFromFirstLine($line)
     {
         return __NAMESPACE__ . '\processPaypal';
     }
+
+    if((strpos($line[0],'id') !== false) && $line[1] === 'Description' && $line[7] === 'Converted Amount Refunded')
+    {
+        return __NAMESPACE__ . '\processStripe';
+    }
+        
+    var_dump($line);
+    exit;
     throw new Exception("Unknown Process Function");
 }
 
@@ -28,6 +36,67 @@ function joinHeadersAndValue($headers, $values)
         $new[($headers[$i])] = $values[$i];
     }
     return $new;
+}
+
+function processStripe($line)
+{
+    static $headers;
+    $to_skip = ['Name','Email','Payer ID','Report Date','Available Balance'];
+    foreach($to_skip as $key)
+    {
+        if((strpos($line[0],$key) !== false))
+        {
+            return;
+        }    
+    }
+    if(!$headers && $line[0] === 'Date')
+    {
+        $headers = $line;
+        return;
+    }
+    $row = joinHeadersAndValue($headers, $line);
+    if(strpos($row['Type'],'Transfer to Bank') !== false)
+    {
+        return null;
+    }
+    $iif      = getIifTemplate();
+    $iif      = str_replace('<$date$>',         $row['Date'],       $iif);
+    $iif      = str_replace('<$entity$>',       $row['Name'],       $iif);
+    $iif      = str_replace('<$amount$>',       trim($row['Net']),        $iif);
+    
+    $product_title = $row['Item Title'];
+    if(!$product_title)
+    {
+        $product_title = $row['Subject'];
+    }
+    
+    //dupe "no title" behavior
+    if($product_title)
+    {
+        $iif      = str_replace('<$product_name$>', $product_title, $iif);
+    }
+    else
+    {
+        $iif      = str_replace('"<$product_name$>"' . "\t", '', $iif);
+    }
+    
+    $iif      = str_replace('<$amount_full$>',  number_format(($row['Gross'] * -1),2), $iif);    
+    $iif      = str_replace('<$amount_fee$>',   number_format(($row['Fee'] * -1),2), $iif);        
+
+    if((int) $row['Fee'] === 0)
+    {
+        $parts = preg_split('%[\r\n]{1,2}%', $iif);
+        $parts = array_filter($parts, function($item){
+            return strpos($item, '"Bank Fee"') === false;
+        });
+        
+        $iif = implode("\n",$parts);
+        if(strpos($iif, '"Bank Fee"') === false)
+        {
+            $iif = str_replace('Express Checkout Payment Received', 'Payment Received', $iif);
+        }                 
+    }
+    return $iif;  
 }
 
 function processPaypal($line)

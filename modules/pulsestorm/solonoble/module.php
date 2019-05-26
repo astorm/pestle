@@ -53,6 +53,25 @@ function renderBoard($data)
     $data[6], $data[7], $data[8], $data[9], $data[10],
     $data[11], $data[12], $data[13], $data[14], $data[15]);
 }
+
+function moveFromAtoB(&$data, $from, $to)
+{
+    $map = getPositionAndMapLegend();
+
+    //is move valid for position
+    $jumpedAndDestination = $map[$from];
+
+
+    //is destination free
+
+    //is there a piece to jump
+
+    //perform move
+
+    return true;
+    var_dump();
+}
+
 /**
 * One Line Description
 *
@@ -61,5 +80,6 @@ function renderBoard($data)
 function pestle_cli($argv)
 {
     $data = getBoardData();
+    moveFromAtoB($data, 15, 13);
     echo renderBoard(getBoardData());
 }

@@ -19,28 +19,28 @@ function pestle_cli($argv)
     $file = inputOrIndex("Path to Markdown File?", null, $argv, 0);
 
     $contents = file_get_contents($file);
-    $html     = Markdown::defaultTransform($contents);            
+    $html     = Markdown::defaultTransform($contents);
     $html     = preg_replace(
-        '%<pre><code>.+?</code></pre>%six', 
-        '<p>[CODE SNIPPED].</p>', 
+        '%<pre><code>.+?</code></pre>%six',
+        '<p>[CODE SNIPPED].</p>',
         $html
     );
     $html = str_replace('</p>','</p><br>',$html);
-    
+
     $tmp = tempnam('/tmp', 'md_to_say') . '.html';
-    file_put_contents($tmp, $html);    
-    
+    file_put_contents($tmp, $html);
+
     $cmd = 'textutil -convert txt ' . $tmp;
     `$cmd`;
-    
+
     $tmp_txt    = swapExtension($tmp, 'html','txt');
     $tmp_aiff   = swapExtension($tmp, 'html','aiff');
-    
+
     $cmd = "say -f $tmp_txt -o $tmp_aiff";
     output($cmd);
-    `$cmd`;
+    // `$cmd`;
     // $tmp_txt = preg_replace('%\.html$%','.txt', $tmp);
-    
-    output($tmp_aiff);    
+
+    output($tmp_aiff);
     output("Done");
 }
