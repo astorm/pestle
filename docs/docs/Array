@@ -1,0 +1,175 @@
+0
+==================================================
+
+TODO: WRITE THE DOCS!
+    
+                      _   _      
+                     | | | |     
+      _ __   ___  ___| |_| | ___ 
+     | '_ \ / _ \/ __| __| |/ _ \
+     | |_) |  __/\__ \ |_| |  __/
+     | .__/ \___||___/\__|_|\___|
+     | |                         
+     |_|    
+    pestle by Pulse Storm LLC
+    
+    Usage:
+      pestle command_name [options] [arguments]
+    
+    Available commands:
+    
+    [33mAlanstormdotcom[0m
+      [32malanstormdotcom:rsync[0m                      One Line Description
+    
+    [33mCodecept[0m
+      [32mcodecept:convert-selenium-id-for-codecept[0m  Converts a selenium IDE html test for conception
+    
+    [33mFaker[0m
+      [32mfaker:names[0m                                Creates some Fake Name
+    
+    [33mGs[0m
+      [32mgs:combine[0m                                 One Line Description
+    
+    [33mLiip[0m
+      [32mliip:switch-php[0m                            Swaps /usr/local/php5 Symlink
+    
+    [33mMagento1 Convert[0m
+      [32mmagento1:convert:generate-maps[0m             ALPHA: Wrapper for Magento's code-migration tools
+      [32mmagento1:convert:magentoinc[0m                ALPHA: Wrapper for Magento Inc.'s code-migration tool
+      [32mmagento1:convert:unirgy[0m                    ALPHA: Wrapper for Unirgy Magento Module Conversion
+    
+    [33mMagento1 Generate[0m
+      [32mmagento1:generate:legacy[0m                   One Line Description
+    
+    [33mMagento2[0m
+      [32mmagento2:base-dir[0m                          Output the base magento2 directory
+      [32mmagento2:check-templates[0m                   Checks for incorrectly named template folder
+      [32mmagento2:class-from-path[0m                   Turns a Magento file path into a PHP class
+      [32mmagento2:class-list[0m                        Get a list of all of magento2's extensible classes
+      [32mmagento2:convert-class[0m                     ALPHA: Partially converts Magento 1 class to Magento 2
+      [32mmagento2:convert-observers-xml[0m             ALPHA: Partially converts Magento 1 config.xml to Magento 2
+      [32mmagento2:convert-system-xml[0m                ALPHA: Partially Converts Magento 1 system.xml into Magento 2 system.xml
+      [32mmagento2:extract-mage2-system-xml-paths[0m    Generates Mage2 config.xml
+      [32mmagento2:fix-direct-om[0m                     ALPHA: Fixes direct use of PHP Object Manager
+      [32mmagento2:fix-permissions-modphp[0m            ALPHA: "Fixes" permissions for development boxes
+      [32mmagento2:path-from-class[0m                   Turns a PHP class into a Magento 2 path
+      [32mmagento2:read-rest-schema[0m                  BETA: Magento command, reads the rest schema on a Magento system
+    
+    [33mMagento2 Code-migration[0m
+      [32mmagento2:code-migration:rename[0m             ALPHA: Rename .converted files
+    
+    [33mMagento2 Generate[0m
+      [32mmagento2:generate:acl[0m                      Generates a Magento 2 acl.xml file.
+      [32mmagento2:generate:acl:change-title[0m         Changes the title of a specific ACL rule in a Magento 2 acl.xml file
+      [32mmagento2:generate:class-child[0m              Generates a child class, pulling in __constructor for easier di
+      [32mmagento2:generate:command[0m                  Generates bin/magento command files
+      [32mmagento2:generate:config-helper[0m            Generates a help class for reading Magento's configuration
+      [32mmagento2:generate:controller-edit-acl[0m      Edits the const ADMIN_RESOURCE value of an admin controller
+      [32mmagento2:generate:crud-model[0m               Generates a Magento 2 CRUD/AbstractModel class and support files
+      [32mmagento2:generate:di[0m                       Injects a dependency into a class constructor
+      [32mmagento2:generate:full-module[0m              Creates shell script with all pestle commands needed for full module output
+      [32mmagento2:generate:install[0m                  BETA: Generates commands to install Magento via composer
+      [32mmagento2:generate:menu[0m                     Generates configuration for Magento Adminhtml menu.xml files
+      [32mmagento2:generate:module[0m                   Generates new module XML, adds to file system
+      [32mmagento2:generate:observer[0m                 Generates Magento 2 Observer
+      [32mmagento2:generate:plugin-xml[0m               Generates plugin XML
+      [32mmagento2:generate:preference[0m               Generates a Magento 2.1 ui grid listing and support classes.
+      [32mmagento2:generate:psr-log-level[0m            For conversion of Zend Log Level into PSR Log Level
+      [32mmagento2:generate:registration[0m             Generates registration.php
+      [32mmagento2:generate:remove-named-node[0m        Removes a named node from a generic XML configuration file
+      [32mmagento2:generate:route[0m                    Creates a Route XML
+      [32mmagento2:generate:schema-upgrade[0m           BETA: Generates a migration-based UpgradeSchema and UpgradeData classes
+      [32mmagento2:generate:service-contract[0m         ALPHA: Service Contract Generator
+      [32mmagento2:generate:theme[0m                    Generates Theme Configuration
+      [32mmagento2:generate:ui:add-column-text[0m       Adds a simple text column to a UI Component Grid
+      [32mmagento2:generate:ui:add-form-field[0m        Adds a Form Field
+      [32mmagento2:generate:ui:add-form-fieldset[0m     Add a Fieldset to a Form
+      [32mmagento2:generate:ui:add-schema-column[0m     Genreated a Magento 2 addColumn DDL definition and inserts into file
+      [32mmagento2:generate:ui:add-to-layout[0m         Adds a <uiComponent/> node to a named node in a layout update XML file
+      [32mmagento2:generate:ui:form[0m                  Generates a Magento 2 UI Component form configuration and PHP boilerplate
+      [32mmagento2:generate:ui:grid[0m                  Generates a Magento 2.1 ui grid listing and support classes.
+      [32mmagento2:generate:view[0m                     Generates view files (layout handle, phtml, Block, etc.)
+    
+    [33mMagento2 Scan[0m
+      [32mmagento2:scan:acl-used[0m                     Scans modules for ACL rule ids, makes sure they're all used/defined
+      [32mmagento2:scan:class-and-namespace[0m          BETA: Scans a Magento 2 module for misnamed PHP classes
+      [32mmagento2:scan:htaccess[0m                     ALPHA: Checks for missing Magento 2 HTACCESS files from a hard coded list
+      [32mmagento2:scan:registration[0m                 Scans Magento 2 directories for missing registration.php files
+    
+    [33mMagento2 Search[0m
+      [32mmagento2:search:search-controllers[0m         Searches controllers
+    
+    [33mMoney[0m
+      [32mmoney:forecast[0m                             @command money:forecast
+      [32mmoney:wells-fargo[0m                          Wells Fargo CSV parsing script
+    
+    [33mMysql[0m
+      [32mmysql:key-check[0m                            Looks for Invalid Keys in a MySQL Database
+    
+    [33mNewrelic[0m
+      [32mnewrelic:emitter[0m                           One Line Description
+    
+    [33mNexmo[0m
+      [32mnexmo:send-text[0m                            Sends a text message
+      [32mnexmo:store-credentials[0m                    Stores Nexmo API in temp file
+      [32mnexmo:verify-request[0m                       Sends initial request to verify user's phone number
+      [32mnexmo:verify-sendcode[0m                      Nexmo Verify API: Second Step
+    
+    [33mParsing[0m
+      [32mparsing:citicard[0m                           BETA: Parses Citicard's CSV files into yaml
+      [32mparsing:csv-to-iif[0m                         BETA: Converts a CSV file to .iif
+    
+    [33mPestle[0m
+      [32mpestle:baz-bar[0m                             Another Hello World we can probably discard
+      [32mpestle:build-command-list[0m                  Builds the command list
+      [32mpestle:clear-cache[0m                         BETA: Clears the pestle cache
+      [32mpestle:dev-import[0m                          Another Hello World we can probably discard
+      [32mpestle:dev-namespace[0m                       BETA: Used to move old pestle files to module.php -- still needed?
+      [32mpestle:export-as-symfony[0m                   Exports a Pestle Module as a Symfony Console Command
+      [32mpestle:export-module[0m                       ALPHA: Seems to be a start at exporting a pestle module as functions.
+      [32mpestle:foo-bar[0m                             ALPHA: Another Hello World we can probably discard
+      [32mpestle:generate-command[0m                    Generates pestle command boiler plate
+      [32mpestle:hello-argument[0m                      A demo of pestle argument and option configuration/parsing
+      [32mpestle:pestle-run-file[0m                     ALPHA: Stub for running a single PHP file in a pestle context
+    
+    [33mPhp[0m
+      [32mphp:extract-session[0m                        ALPHA: Extracts data from a saved PHP session file
+      [32mphp:format-php[0m                             ALPHA: Experiments with a PHP formatter.
+      [32mphp:test-namespace-integrity[0m               ALPHA: Tests the "namespace integrity?  Not sure what this is anymore.
+    
+    [33mPostscript[0m
+      [32mpostscript:check[0m                           Outputs the PostScript code needed to print a check
+    
+    [33mPulsestorm[0m
+      [32mpulsestorm:build-book[0m                      BETA: Command for building No Frills Magento 2 Layout
+      [32mpulsestorm:git-stats[0m                       One Line Description
+      [32mpulsestorm:md-to-say[0m                       Converts a markdown files to an aiff
+      [32mpulsestorm:monty-hall-problem[0m              Runs Simulation of "Monty Hall Problem"
+      [32mpulsestorm:orphan-content[0m                  BETA: Used to scan my old pre-Wordpress archives for missing pages.
+      [32mpulsestorm:pandoc-md[0m                       BETA: Uses pandoc to converts a markdown file to pdf, epub, epub3, html, txt
+      [32mpulsestorm:piff[0m                            Parses downloaded
+      [32mpulsestorm:solo-noble[0m                      One Line Description
+      [32mpulsestorm:tax-estimate[0m                    BETA: Does some back of the electronic napkin tax calculations
+      [32mpulsestorm:transform[0m                       BETA: Does some back of the electronic napkin tax calculations
+    
+    [33mTesting[0m
+      [32mtesting:the-dash[0m                           One Line Description
+    
+    [33mTwitter Api[0m
+      [32mtwitter:api:oauth[0m                          ALPHA: Experiments with the twitter oauth based REST API
+    
+    [33mUncategorized[0m
+      [32mhello-world[0m                                A Hello World command.  Hello World!
+      [32mhelp[0m                                       Alias for list
+      [32mlist-commands[0m                              Lists help
+      [32mselfupdate[0m                                 Updates the pestle.phar file to the latest version
+      [32mtest-output[0m                                A test command for the output function that should probably be pruned
+      [32mtestbed[0m                                    Test Command
+      [32mversion[0m                                    Displays Pestle Version
+    
+    [33mWordpress Export[0m
+      [32mwordpress:export:xml[0m                       ALPHA: WordPress export script
+    
+    [33mWordpress Parse[0m
+      [32mwordpress:parse:urls[0m                       ALPHA: WordPress file parser
+    
