@@ -1,4 +1,5 @@
 site_name: Pestle
+theme: readthedocs
 nav:
     - Home: index.md
     - M2 Code Generation:
