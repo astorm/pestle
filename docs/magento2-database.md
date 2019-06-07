@@ -1,17 +1,17 @@
-#magento2:generate:install
+## magento2:generate:install
 
 TODO: WRITE THE DOCS!
-    
-    Usage: 
+
+    Usage:
         $ pestle.phar magento2:generate:install
-    
+
     Arguments:
-    
+
     Options:
-    
+
     Help:
         BETA: Generates commands to install Magento via composer
-        
+
         @command magento2:generate:install
         @argument id_key Identity Key? [magento_2_new]
         @argument umask Default Umask? [000]
@@ -28,6 +28,26 @@ TODO: WRITE THE DOCS!
         @argument db_user Database User? [root]
         @argument db_pass Database Password? [password12345]
         @argument email Admin Email? [astorm@alanstorm.com]
-    
-    
-    
+
+
+## magento2:generate:schema-upgrade
+
+TODO: WRITE THE DOCS!
+
+    Usage:
+        $ pestle.phar magento2:generate:schema-upgrade
+
+    Arguments:
+
+    Options:
+
+    Help:
+        BETA: Generates a migration-based UpgradeSchema and UpgradeData
+        classes
+
+        @command magento2:generate:schema-upgrade
+        @argument module_name Module Name? [Pulsestorm_Helloworld]
+        @argument upgrade_version New Module Version? [0.0.2]
+        @option use-simple-upgrade Option to skip creating script helpers
+
+
