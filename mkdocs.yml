@@ -2,59 +2,38 @@ site_name: Pestle
 theme: readthedocs
 nav:
     - Home: index.md
-    - M2 Code Generation:
+    - Magento 2 Code Generation:
         - Introduction: magento2-introduction.md
-        - magento2:generate:acl: magento2-generate-acl.md
-        - magento2:generate:acl:change-title: magento2-generate-acl-change-title.md
-        - magento2:generate:class-child: magento2-generate-class-child.md
-        - magento2:generate:command: magento2-generate-command.md
-        - magento2:generate:config-helper: magento2-generate-config-helper.md
-        - magento2:generate:controller-edit-acl: magento2-generate-controller-edit-acl.md
-        - magento2:generate:crud-model: magento2-generate-crud-model.md
-        - magento2:generate:di: magento2-generate-di.md
-        - magento2:generate:full-module: magento2-generate-full-module.md
-        - magento2:generate:install: magento2-generate-install.md
-        - magento2:generate:menu: magento2-generate-menu.md
-        - magento2:generate:module: magento2-generate-module.md
-        - magento2:generate:observer: magento2-generate-observer.md
-        - magento2:generate:plugin-xml: magento2-generate-plugin-xml.md
-        - magento2:generate:preference: magento2-generate-preference.md
-        - magento2:generate:psr-log-level: magento2-generate-psr-log-level.md
-        - magento2:generate:registration: magento2-generate-registration.md
-        - magento2:generate:remove-named-node: magento2-generate-remove-named-node.md
-        - magento2:generate:route: magento2-generate-route.md
-        - magento2:generate:schema-upgrade: magento2-generate-schema-upgrade.md
-        - magento2:generate:service-contract: magento2-generate-service-contract.md
-        - magento2:generate:theme: magento2-generate-theme.md
-        - magento2:generate:ui:add-column-text: magento2-generate-ui-add-column-text.md
-        - magento2:generate:ui:add-form-field: magento2-generate-ui-add-form-field.md
-        - magento2:generate:ui:add-form-fieldset: magento2-generate-ui-add-form-fieldset.md
-        - magento2:generate:ui:add-schema-column: magento2-generate-ui-add-schema-column.md
-        - magento2:generate:ui:add-to-layout: magento2-generate-ui-add-to-layout.md
-        - magento2:generate:ui:form: magento2-generate-ui-form.md
-        - magento2:generate:ui:grid: magento2-generate-ui-grid.md
-        - magento2:generate:view: magento2-generate-view.md
-    - M2 Commands:
-        - magento2:base-dir: magento2-base-dir.md
-        - magento2:check-templates: magento2-check-templates.md
-        - magento2:class-from-path: magento2-class-from-path.md
-        - magento2:class-list: magento2-class-list.md
-        - magento2:convert-class: magento2-convert-class.md
-        - magento2:convert-observers-xml: magento2-convert-observers-xml.md
-        - magento2:convert-system-xml: magento2-convert-system-xml.md
-        - magento2:extract-mage2-system-xml-paths: magento2-extract-mage2-system-xml-paths.md
-        - magento2:fix-direct-om: magento2-fix-direct-om.md
-        - magento2:fix-permissions-modphp: magento2-fix-permissions-modphp.md
-        - magento2:path-from-class: magento2-path-from-class.md
-        - magento2:read-rest-schema: magento2-read-rest-schema.md
-        - magento2:code-migration:rename: magento2-code-migration-rename.md
-        - magento2:scan:acl-used: magento2-scan-acl-used.md
-        - magento2:scan:class-and-namespace: magento2-scan-class-and-namespace.md
-        - magento2:scan:htaccess: magento2-scan-htaccess.md
-        - magento2:scan:registration: magento2-scan-registration.md
-        - magento2:search:search-controllers: magento2-search-search-controllers.md
+        - Generate Full Module: magento2-generate-full-module.md
+        - Module Setup: module2-module-setup.md
+
+        # Model, View, Controller
+        - Model, View, Controller: magento2-mvc.md
+
+        # Database
+        - Database: magento2-database.md
+
+        - Admin ACL & Menus: magento2-generate-acl.md
+        - Admin UI Components: magento2-generate-ui.md
+
+        # DI and Observers
+        - DI and Observers: magento2-di-observers.md
+
+        # Other Commands
+        - Other Commands: magneto2-others.md
+
+    - Magento 2 Commands:
+        - Introduction: magento2-other-introduction.md
+
+        - Quick Conversions: magento2-quick-conversions.md
+
+        - Scans & Reports: magento2-scans-and-reports.md
+
+        - Other Commands: magento2-other-other.md
+
     - Pestle Modules:
         - Generate a Module: pestle-generate.md
+        - Third Party Modules: pestle-third-party.md
         - Helpful Library Functions: pestle-library.md
     - Development:
         - Introduction: dev-internals-introduction.md
