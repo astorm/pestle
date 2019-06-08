@@ -1,4 +1,4 @@
-## magento2:base-dir
+## base-dir
 
 TODO: WRITE THE DOCS!
 
@@ -15,7 +15,7 @@ TODO: WRITE THE DOCS!
         @command magento2:base-dir
 
 
-## magento2:check-templates
+## check-templates
 
 TODO: WRITE THE DOCS!
 
@@ -33,7 +33,7 @@ TODO: WRITE THE DOCS!
         @command magento2:check-templates
 
 
-## magento2:class-list
+## class-list
 
 TODO: WRITE THE DOCS!
 
@@ -50,7 +50,7 @@ TODO: WRITE THE DOCS!
         @command magento2:class-list
 
 
-## magento2:read-rest-schema
+## read-rest-schema
 
 TODO: WRITE THE DOCS!
 
@@ -68,7 +68,7 @@ TODO: WRITE THE DOCS!
         @argument url Base Url? [http://magento-2-with-keys.dev/]
 
 
-## magento2:scan:acl-used
+## scan:acl-used
 
 TODO: WRITE THE DOCS!
 
@@ -86,7 +86,7 @@ TODO: WRITE THE DOCS!
         @argument dir Which Directory?
 
 
-## magento2:scan:class-and-namespace
+## scan:class-and-namespace
 
 TODO: WRITE THE DOCS!
 
@@ -103,7 +103,7 @@ TODO: WRITE THE DOCS!
         @argument folder Which Folder?
 
 
-## magento2:scan:htaccess
+## scan:htaccess
 
 TODO: WRITE THE DOCS!
 
@@ -120,7 +120,7 @@ TODO: WRITE THE DOCS!
         @command magento2:scan:htaccess
 
 
-## magento2:scan:registration
+## scan:registration
 
 TODO: WRITE THE DOCS!
 
@@ -138,7 +138,7 @@ TODO: WRITE THE DOCS!
         @command magento2:scan:registration
 
 
-## magento2:search:search-controllers
+## search:search-controllers
 
 TODO: WRITE THE DOCS!
 

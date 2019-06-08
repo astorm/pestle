@@ -1,6 +1,6 @@
-## magento2:generate:route
+## generate:route
 
-TODO: WRITE THE DOCS!
+
 
     Usage:
         $ pestle.phar magento2:generate:route
@@ -19,10 +19,11 @@ TODO: WRITE THE DOCS!
         @argument controller Controller name? [Index]
         @argument action Action name? [Index]
 
-
-## magento2:generate:crud-model
+https://alanstorm.com/magento2_pestle_code_generation/
 
 TODO: WRITE THE DOCS!
+
+## generate:crud-model
 
     Usage:
         $ pestle.phar magento2:generate:crud-model
@@ -44,10 +45,11 @@ TODO: WRITE THE DOCS!
         @option use-install-schema-for-new-model Allows you to add another
         model definition to InstallSchema
 
-
-## magento2:generate:view
+https://alanstorm.com/magento_2_crud_models_for_database_access/
 
 TODO: WRITE THE DOCS!
+
+## generate:view
 
     Usage:
         $ pestle.phar magento2:generate:view
@@ -67,10 +69,11 @@ TODO: WRITE THE DOCS!
         @argument template Template File? [content.phtml]
         @argument layout Layout (ignored for adminhtml) ? [1column]
 
-
-## magento2:generate:theme
+https://alanstorm.com/magento_2_mvvm_mvc/
 
 TODO: WRITE THE DOCS!
+
+## generate:theme
 
     Usage:
         $ pestle.phar magento2:generate:theme
@@ -88,4 +91,26 @@ TODO: WRITE THE DOCS!
         @argument area Area? (frontend, adminhtml) [frontend]
         @argument parent Parent theme (enter 'null' for none) [Magento/blank]
 
+TODO: WRITE THE DOCS!
 
+## generate:schema-upgrade
+
+    Usage:
+        $ pestle.phar magento2:generate:schema-upgrade
+
+    Arguments:
+
+    Options:
+
+    Help:
+        BETA: Generates a migration-based UpgradeSchema and UpgradeData
+        classes
+
+        @command magento2:generate:schema-upgrade
+        @argument module_name Module Name? [Pulsestorm_Helloworld]
+        @argument upgrade_version New Module Version? [0.0.2]
+        @option use-simple-upgrade Option to skip creating script helpers
+
+https://alanstorm.com/magento-2-setup-migration-scripts/
+
+TODO: WRITE THE DOCS!

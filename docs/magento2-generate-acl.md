@@ -4,7 +4,7 @@ The `magento2:generate:acl` and `magento2:generate:acl:change-title` commands ge
 
 [Learn more about Magento 2 Access Control Rules](https://alanstorm.com/magento_2_understanding_access_control_list_rules/)
 
-## magento2:generate:acl
+## generate:acl
 
     Usage:
         $ pestle.phar magento2:generate:acl
@@ -29,7 +29,8 @@ The `magento2:generate:acl` command will generate an acl.xml file for your modul
     Created /path/to/magento/app/code/Pulsestorm/Pestle/etc/acl.xml
 
 The first argument is the full name of the module where you want to create an access control rule.
-## magento2:generate:acl:change-title
+
+## generate:acl:change-title
 
 TODO: WRITE THE DOCS!
 
@@ -48,7 +49,7 @@ TODO: WRITE THE DOCS!
         @argument acl_rule_id ACL Rule ID?
         @argument title New Title?
 
-## magento2:generate:controller-edit-acl
+## generate:controller-edit-acl
 
 TODO: WRITE THE DOCS!
 
@@ -66,7 +67,7 @@ TODO: WRITE THE DOCS!
         @argument path_controller Path to Admin Controller
         @argument acl_rule Path to Admin Controller
 
-## magento2:generate:menu
+## generate:menu
 
 TODO: WRITE THE DOCS!
 
