@@ -1,4 +1,4 @@
-## magento2:class-from-path
+## class-from-path
 
 TODO: WRITE THE DOCS!
 
@@ -16,7 +16,7 @@ TODO: WRITE THE DOCS!
         @command magento2:class-from-path
 
 
-## magento2:convert-class
+## convert-class
 
 TODO: WRITE THE DOCS!
 
@@ -34,7 +34,7 @@ TODO: WRITE THE DOCS!
         @command magento2:convert-class
 
 
-## magento2:convert-observers-xml
+## convert-observers-xml
 
 TODO: WRITE THE DOCS!
 
@@ -52,7 +52,7 @@ TODO: WRITE THE DOCS!
         @command magento2:convert-observers-xml
 
 
-## magento2:convert-system-xml
+## convert-system-xml
 
 TODO: WRITE THE DOCS!
 
@@ -69,7 +69,7 @@ TODO: WRITE THE DOCS!
         @command magento2:convert-system-xml
 
 
-## magento2:extract-mage2-system-xml-paths
+## extract-mage2-system-xml-paths
 
 TODO: WRITE THE DOCS!
 
@@ -89,7 +89,7 @@ TODO: WRITE THE DOCS!
         @command magento2:extract-mage2-system-xml-paths
 
 
-## magento2:fix-direct-om
+## fix-direct-om
 
 TODO: WRITE THE DOCS!
 
@@ -108,7 +108,7 @@ TODO: WRITE THE DOCS!
         @argument extensions File extensions? [php, phtml]
 
 
-## magento2:path-from-class
+## path-from-class
 
 TODO: WRITE THE DOCS!
 

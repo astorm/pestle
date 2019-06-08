@@ -1,4 +1,4 @@
-## magento2:fix-permissions-modphp
+## fix-permissions-modphp
 
 TODO: WRITE THE DOCS!
 
@@ -15,7 +15,7 @@ TODO: WRITE THE DOCS!
         @command magento2:fix-permissions-modphp
 
 
-## magento2:code-migration:rename
+## code-migration:rename
 
 TODO: WRITE THE DOCS!
 

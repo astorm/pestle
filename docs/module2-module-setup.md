@@ -1,6 +1,4 @@
-## magento2:generate:module
-
-TODO: WRITE THE DOCS!
+## generate:module
 
     Usage:
         $ pestle.phar magento2:generate:module
@@ -21,10 +19,11 @@ TODO: WRITE THE DOCS!
         @argument version Version? [0.0.1]
         @command magento2:generate:module
 
-
-## magento2:generate:registration
+https://alanstorm.com/magento_2_mvvm_mvc/
 
 TODO: WRITE THE DOCS!
+
+## generate:registration
 
     Usage:
         $ pestle.phar magento2:generate:registration
@@ -49,10 +48,9 @@ TODO: WRITE THE DOCS!
         @command magento2:generate:registration
         @argument module_name Which Module? [Vendor_Module]
 
-
-## magento2:generate:command
-
 TODO: WRITE THE DOCS!
+
+## generate:command
 
     Usage:
         $ pestle.phar magento2:generate:command
@@ -76,4 +74,4 @@ TODO: WRITE THE DOCS!
         @argument module_name In which module? [Pulsestorm_Helloworld]
         @argument command_name Command Name? [Testbed]
 
-
+TODO: WRITE THE DOCS!

@@ -1,4 +1,4 @@
-## magento2:generate:ui:add-column-text
+## generate:ui:add-column-text
 
 TODO: WRITE THE DOCS!
 
@@ -18,7 +18,7 @@ TODO: WRITE THE DOCS!
         @argument column_label New Column Label? [Title]
 
 
-## magento2:generate:ui:add-form-field
+## generate:ui:add-form-field
 
 TODO: WRITE THE DOCS!
 
@@ -40,7 +40,7 @@ TODO: WRITE THE DOCS!
         @option is-required Is field required?
 
 
-## magento2:generate:ui:add-form-fieldset
+## generate:ui:add-form-fieldset
 
 TODO: WRITE THE DOCS!
 
@@ -60,7 +60,7 @@ TODO: WRITE THE DOCS!
         @argument label Label? [NewFieldset]
 
 
-## magento2:generate:ui:add-schema-column
+## generate:ui:add-schema-column
 
 TODO: WRITE THE DOCS!
 
@@ -87,7 +87,7 @@ TODO: WRITE THE DOCS!
         @argument column_type @callback selectColumnType
 
 
-## magento2:generate:ui:add-to-layout
+## generate:ui:add-to-layout
 
 TODO: WRITE THE DOCS!
 
@@ -107,7 +107,7 @@ TODO: WRITE THE DOCS!
         @argument ui_component_name UI Component Name?
 
 
-## magento2:generate:ui:form
+## generate:ui:form
 
 TODO: WRITE THE DOCS!
 
@@ -129,7 +129,7 @@ TODO: WRITE THE DOCS!
         [Pulsestorm_Formexample::ruleName]
 
 
-## magento2:generate:ui:grid
+## generate:ui:grid
 
 TODO: WRITE THE DOCS!
 

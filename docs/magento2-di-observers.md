@@ -1,4 +1,4 @@
-## magento2:generate:di
+## generate:di
 
 TODO: WRITE THE DOCS!
 
@@ -24,7 +24,7 @@ TODO: WRITE THE DOCS!
         @argument class Which class to inject?
         [Magento\Catalog\Model\ProductFactory]
 
-## magento2:generate:plugin-xml
+## generate:plugin-xml
 
 TODO: WRITE THE DOCS!
 
@@ -53,7 +53,7 @@ TODO: WRITE THE DOCS!
         @command magento2:generate:plugin-xml
 
 
-## magento2:generate:preference
+## generate:preference
 
 TODO: WRITE THE DOCS!
 
@@ -75,7 +75,7 @@ TODO: WRITE THE DOCS!
         [Pulsestorm\Helloworld\Model\NewModel]
 
 
-## magento2:generate:observer
+## generate:observer
 
 TODO: WRITE THE DOCS!
 

@@ -10,9 +10,6 @@ nav:
         # Model, View, Controller
         - Model, View, Controller: magento2-mvc.md
 
-        # Database
-        - Database: magento2-database.md
-
         - Admin ACL & Menus: magento2-generate-acl.md
         - Admin UI Components: magento2-generate-ui.md
 
