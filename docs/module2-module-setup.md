@@ -19,9 +19,28 @@
         @argument version Version? [0.0.1]
         @command magento2:generate:module
 
-https://alanstorm.com/magento_2_mvvm_mvc/
+The `magento2:generate:module` command is the first you'll run when creating a new module from scratch.  It creates the basic folder structure and the `module.xml` and `registration.php` file needed to add a code module to Magento 2.
 
-TODO: WRITE THE DOCS!
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:module
+    Vendor Namespace? (Pulsestorm)] Pulsestorm
+    Module Name? (Testbed)] Pestle
+    Version? (0.0.1)] 0.0.1
+
+    Created: /path/to/m2/app/code/Pulsestorm/Pestle/etc/module.xml
+    Created: /path/to/m2/app/code/Pulsestorm/Pestle/registration.php
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:module Pulsestorm Pestle 0.0.1
+
+    Created: /path/to/m2/app/code/Pulsestorm/Pestle/etc/module.xml
+    Created: /path/to/m2/app/code/Pulsestorm/Pestle/registration.php
+
+The `magento2:generate:module` command asks for a package name, a short module name, and a version number.  It will create the long standing `Packagename/Modulename` folder structure in `app/code`, and also create an `etc/module.xml` and `regsitration.php` file.
+
+As of this writing, this command **does not** create a `composer.json` file for you, as this is not required to run your module from `app/code`.
 
 ## generate:registration
 
