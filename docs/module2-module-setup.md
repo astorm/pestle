@@ -42,6 +42,10 @@ The `magento2:generate:module` command asks for a package name, a short module n
 
 As of this writing, this command **does not** create a `composer.json` file for you, as this is not required to run your module from `app/code`.
 
+**Further Reading**
+
+-  [Introduction to Magento 2 — No More MVC](https://alanstorm.com/magento_2_mvvm_mvc/)
+
 ## generate:registration
 
     Usage:
