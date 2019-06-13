@@ -71,7 +71,30 @@ As of this writing, this command **does not** create a `composer.json` file for 
         @command magento2:generate:registration
         @argument module_name Which Module? [Vendor_Module]
 
-TODO: WRITE THE DOCS!
+The `magento2:generate:registration` command will geneate the contents of a Magento 2 Module registration.php file and send it to the standard output device (i.e. print it to your screen).
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:registration
+    Which Module? (Vendor_Module)] Pulsestorm_Pestle
+    <?php
+        \Magento\Framework\Component\ComponentRegistrar::register(
+            \Magento\Framework\Component\ComponentRegistrar::MODULE,
+            'Pulsestorm_Pestle',
+            __DIR__
+        );
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:registration Pulsestorm_Pestle
+    <?php
+        \Magento\Framework\Component\ComponentRegistrar::register(
+            \Magento\Framework\Component\ComponentRegistrar::MODULE,
+            'Pulsestorm_Pestle',
+            __DIR__
+        );
+
+The `magento2:generate:registration` command probably isn't releavnt to most modern Magento 2 workflows.  It exists because the `registration.php` files became a part of Magento relatively late, and I needed a way to add a bunch of registration.php files to modules quickly and accurately.
 
 ## generate:command
 
