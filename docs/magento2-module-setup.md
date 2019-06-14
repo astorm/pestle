@@ -120,4 +120,76 @@ The `magento2:generate:registration` command probably isn't releavnt to most mod
         @argument module_name In which module? [Pulsestorm_Helloworld]
         @argument command_name Command Name? [Testbed]
 
-TODO: WRITE THE DOCS!
+Magento 2 ships with an unnamed command line application that's usually referred to as either `console`, `bin/console`, or (in more modern versions of Magento 2), `bin/magento`.  The command line application is based on Symfony Console, and contains a number of commands related to developing and administering your Magento 2 system.
+
+The `magento2:generate:command` command will generate a PHP class file that adds a new command to this `console` application.
+
+**Interactive Invocation**
+
+```
+$ pestle.phar magento2:generate:command
+In which module? (Pulsestorm_Helloworld)] Pulsestorm_Pestle
+Command Name? (Testbed)] Yourcommand
+/path/to/m2/app/code/Pulsestorm/Pestle
+```
+
+**Argument Invocation**
+
+```
+pestle.phar magento2:generate:command Pulsestorm_Pestle Yourcommand
+/path/to/m2/app/code/Pulsestorm/Pestle
+```
+
+The first argument is the name of the module you want to to generate a command in.  The second argument is the short class name for your command class.
+
+The above invocations would generate the following class file.
+
+```
+    $ cat app/code/Pulsestorm/Pestle/Command/Yourcommand.php
+    <?php
+    namespace Pulsestorm\Pestle\Command;
+
+    use Symfony\Component\Console\Command\Command;
+    use Symfony\Component\Console\Input\InputInterface;
+    use Symfony\Component\Console\Output\OutputInterface;
+
+    class Yourcommand extends Command
+    {
+        protected function configure()
+        {
+            $this->setName("ps:yourcommand");
+            $this->setDescription("A command the programmer was too lazy to enter a description for.");
+            parent::configure();
+        }
+
+        protected function execute(InputInterface $input, OutputInterface $output)
+        {
+            $output->writeln("Hello World");
+        }
+    } $
+```
+
+And either generate or edit following `di.xml` configuration file in order to add the class as a `console` command.
+
+    $ cat app/code/Pulsestorm/Pestle/etc/di.xml
+    <?xml version="1.0"?>
+    <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+        <type name="Magento\Framework\Console\CommandList">
+            <arguments>
+                <argument name="commands" xsi:type="array">
+                    <item name="pulsestorm_pestle_command_yourcommand" xsi:type="object">Pulsestorm\Pestle\Command\Yourcommand</item>
+                </argument>
+            </arguments>
+        </type>
+    </config>
+
+By default, your command will be named `ps:yourcommand`.
+
+    $ php bin/magento ps:yourcommand
+    Hello World
+
+You'll probably want to change this by editing the following line of your class file.
+
+    $ cat app/code/Pulsestorm/Pestle/Command/Yourcommand.php
+    $this->setName("ps:yourcommand");   // remove ps:your command and
+                                        // add your own name
