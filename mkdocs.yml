@@ -5,7 +5,7 @@ nav:
     - Magento 2 Code Generation:
         - Introduction: magento2-introduction.md
         - Generate Full Module: magento2-generate-full-module.md
-        - Module Setup: module2-module-setup.md
+        - Module Setup: magento2-module-setup.md
 
         # Model, View, Controller
         - Model, View, Controller: magento2-mvc.md
