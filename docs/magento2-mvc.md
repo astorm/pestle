@@ -36,7 +36,7 @@ The `magento2:generate:route` command generates all the configuration and code y
 
     $ pestle.phar magento2:generate:route Pulsestorm_Pestle frontend pulsestorm_pestle Index Index
 
-The `magento2:generate:route` command will ask you which module you want your controller and route configuration created in (`Pulsestorm_Pestle`), whether this is a cart (`frontend`) or admin-area (`adminhtml`), and the short class name versions of the controller and action names (both `Index` above).  With that information in hand, pestle will create a route configuration file
+The `magento2:generate:route` command will ask you which module you want your controller and route configuration created in (`Pulsestorm_Pestle`), whether this is a cart (`frontend`) or admin-area (`adminhtml`) route, and the short class name versions of the controller and action names (both `Index` above).  With that information in hand, pestle will create a route configuration file.
 
     $ cat app/code/Pulsestorm/Pestle/etc/frontend/routes.xml
     <?xml version="1.0"?>
