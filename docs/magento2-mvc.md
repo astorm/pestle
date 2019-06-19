@@ -106,9 +106,43 @@ In the above example, your page would be available at the URLs
         @argument template Template File? [content.phtml]
         @argument layout Layout (ignored for adminhtml) ? [1column]
 
-https://alanstorm.com/magento_2_mvvm_mvc/
+The `magento2:generate:view` command allows you to generate the files needed to add a "Magento View" to your system.  View here is a sort of loose concept -- what this command actually does is allow you to generate-or-edit a Magento layout handle XML file, auto generate layout handle XML code that will add a block to the `content` container block, add a new class and `phtml` template for the block.
 
-TODO: WRITE THE DOCS!
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:view
+    Which Module? (Pulsestorm_HelloGenerate)] Pulsestorm_Pestle
+    Which Area? (frontend)] frontend
+    Which Handle? (pulsestorm_pestle_index_index)] pulsestorm_pestle_index_index
+    Block Name? (Main)] Main
+    Template File? (content.phtml)] content.phtml
+    Layout (ignored for adminhtml) ? (1column)] 1column
+    Creating  /path/to/m2/app/code/Pulsestorm/Pestle/view/frontend/templates/content.phtml
+    Creating: Pulsestorm\Pestle\Block\Main
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/view/frontend/layout/pulsestorm_pestle_index_index.xml
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:view Pulsestorm_Pestle frontend pulsestorm_pestle_index_index Main content.phtml 1column
+
+This command will ask you for
+
+1. The module you want to create your view inside of (`Pulsestorm_Pestle`)
+2. The area this view applies to (`frontend`, `adminhtml`)
+3. The full action name layout handle this view applies to. (`pulsestorm_pestle_index_index`)
+4. The short class name for your block (`Main`)
+5. The template file for your block (`content.phtml`)
+6. The magento layout keys for your handle file (`1column`)
+
+Magento's blocks and layout system is one of it's most complicated.  If you're not sure what any of the above means, be sure to checkout the further reading section below.
+
+**Further Reading**
+
+- [No Frills Magento 2 Layout](https://store.pulsestorm.net/products/no-frills-magento-2-layout)
+
+- [Introduction to Magento 2 — No More MVC](https://alanstorm.com/magento_2_mvvm_mvc/)
+
+- [Magneto 1 Layouts, Blocks and Templates](https://alanstorm.com/layouts_blocks_and_templates/)
 
 ## generate:theme
 
