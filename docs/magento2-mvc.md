@@ -106,7 +106,7 @@ In the above example, your page would be available at the URLs
         @argument template Template File? [content.phtml]
         @argument layout Layout (ignored for adminhtml) ? [1column]
 
-The `magento2:generate:view` command allows you to generate the files needed to add a "Magento View" to your system.  View here is a sort of loose concept -- what this command actually does is allow you to generate-or-edit a Magento layout handle XML file, auto generate layout handle XML code that will add a block to the `content` container block, add a new class and `phtml` template for the block.
+The `magento2:generate:view` command allows you to generate a "Magento View".  View here is a loose concept -- what this command actually does is allow you to generate-or-edit a Magento layout handle XML file, auto generate layout handle XML code that will add a block to the `content` container block, add a new class and `phtml` template for the block.
 
 **Interactive Invocation**
 
@@ -132,9 +132,9 @@ This command will ask you for
 3. The full action name layout handle this view applies to. (`pulsestorm_pestle_index_index`)
 4. The short class name for your block (`Main`)
 5. The template file for your block (`content.phtml`)
-6. The magento layout keys for your handle file (`1column`)
+6. The magento layout key for your handle file (`1column`)
 
-Magento's blocks and layout system is one of it's most complicated.  If you're not sure what any of the above means, be sure to checkout the further reading section below.
+Magento's blocks and layout system is complicated.  If you're not sure what any of the above means, be sure to checkout the further reading section below.
 
 **Further Reading**
 
