@@ -162,7 +162,40 @@ Magento's blocks and layout system is complicated.  If you're not sure what any 
         @argument area Area? (frontend, adminhtml) [frontend]
         @argument parent Parent theme (enter 'null' for none) [Magento/blank]
 
-TODO: WRITE THE DOCS!
+A Magento 2 theme is a collection of layout handles, templates, and frontend files that will change the look, feel, and (sometimes) behavior of a Magento system.  Themes are distributed as packages separate from modules, and the `magento2:generate:theme` command will create the basic skeleton of a theme.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:theme
+    Theme Package Name? (Pulsestorm)] Pulsestorm
+    Theme Name? (blank)] blank
+    Area? (frontend, adminhtml) (frontend)] frontend
+    Parent theme (enter 'null' for none) (Magento/blank)]
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/theme.xml
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/registration.php
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/etc/view.xml
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/web/css/source
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/fonts
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/images
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/js
+    /path/to/m2/app/design/frontend/Pulsestorm/blank
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:theme Pulsestorm blank frontend ''
+
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/theme.xml
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/registration.php
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/etc/view.xml
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/web/css/source
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/fonts
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/images
+    Creating: /path/to/m2/app/design/frontend/Pulsestorm/blank/js
+    /path/to/m2/app/design/frontend/Pulsestorm/blank
+
+**Further Reading**
+
+- [What is a Magento Theme, the 10,000 Foot View](https://alanstorm.com/what-is-a-magento-theme-the-10000-foot-view/)
 
 ## generate:crud-model
 
