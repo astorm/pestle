@@ -162,7 +162,7 @@ Magento's blocks and layout system is complicated.  If you're not sure what any 
         @argument area Area? (frontend, adminhtml) [frontend]
         @argument parent Parent theme (enter 'null' for none) [Magento/blank]
 
-A Magento 2 theme is a collection of layout handles, templates, and frontend files that will change the look, feel, and sometimes behavior, of a Magento system.  Themes are distributed as packages separate from modules, and the `magento2:generate:theme` command will create the basic skeleton of a theme.
+A Magento 2 theme is a collection of layout handles, templates, and frontend files that will change the look, feel, and (sometimes) behavior of a Magento system.  Themes are distributed as packages separate from modules, and the `magento2:generate:theme` command will create the basic skeleton of a theme.
 
 **Interactive Invocation**
 
