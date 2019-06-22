@@ -219,9 +219,46 @@ A Magento 2 theme is a collection of layout handles, templates, and frontend fil
         @option use-install-schema-for-new-model Allows you to add another
         model definition to InstallSchema
 
-https://alanstorm.com/magento_2_crud_models_for_database_access/
+The `magento2:generate:crud-model` command allows you create a model, resource model, and collection for a Magento active-record-style C.R.U.D. model, as well as a skeleton install schema for creating the model's base table.
 
-TODO: WRITE THE DOCS!
+In addition to these standard ORM files, this command will also create a base item repository and interface, as wells as a model API interface.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:crud-model
+    Which module? (Pulsestorm_HelloGenerate)] Pulsestorm_Pestle
+    What model name? (Thing)] Item
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Api/ItemRepositoryInterface.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Model/ItemRepository.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Api/Data/ItemInterface.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Model/ResourceModel/Item/Collection.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Model/ResourceModel/Item.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Model/Item.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Setup/InstallSchema.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Setup/InstallData.php
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:crud-model Pulsestorm_Pestle Item
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Api/ItemRepositoryInterface.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Model/ItemRepository.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Api/Data/ItemInterface.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Model/ResourceModel/Item/Collection.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Model/ResourceModel/Item.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Model/Item.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Setup/InstallSchema.php
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/Setup/InstallData.php
+
+After running this command you'll want to bump your module version (in `module.xml`) and run the
+
+    $ php bin/magento setup:upgrade
+
+script to pickup the changes in the new install schema.
+
+**Further Reading**
+
+- [Magento 2: CRUD Models for Database Access](https://alanstorm.com/magento_2_crud_models_for_database_access/)
+- [Magento 1: Models and ORM Basics](https://alanstorm.com/magento_models_orm/)
 
 ## generate:schema-upgrade
 
