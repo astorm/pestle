@@ -138,6 +138,10 @@ function pestle_cli($argv)
         // Magento's autoloaders are loaded here
         require getBaseMagentoDir() . '/app/bootstrap.php';
 
+        if (!in_array('phar', \stream_get_wrappers())) {
+            \stream_wrapper_restore('phar');
+        }
+
         registerAutoloaders($pestlesLoaders);
         /*
          * TODO: wrap this logic in an application container
