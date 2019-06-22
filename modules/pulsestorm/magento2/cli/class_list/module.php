@@ -1,7 +1,7 @@
 <?php
 namespace Pulsestorm\Magento2\Cli\ClassList;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-
+use function stream_get_wrappers;
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
@@ -138,6 +138,11 @@ function pestle_cli($argv)
         // Magento's autoloaders are loaded here
         require getBaseMagentoDir() . '/app/bootstrap.php';
 
+        // some versions of Magengto unregister this, but pestle
+        // needs it to run in `phar` mode.
+        if (!in_array('phar', stream_get_wrappers())) {
+            stream_wrapper_restore('phar');
+        }
         registerAutoloaders($pestlesLoaders);
         /*
          * TODO: wrap this logic in an application container
