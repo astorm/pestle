@@ -1,7 +1,5 @@
 ## generate:route
 
-
-
     Usage:
         $ pestle.phar magento2:generate:route
 
@@ -278,6 +276,40 @@ script to pickup the changes in the new install schema.
         @argument upgrade_version New Module Version? [0.0.2]
         @option use-simple-upgrade Option to skip creating script helpers
 
-https://alanstorm.com/magento-2-setup-migration-scripts/
+The `magento2:generate:schema-upgrade` command allows you to create **upgrade** classes and scripts for your crud models.  If you're looking to create **installer** classes, see the [`magento2:generate:crud-model`](https://pestle.readthedocs.io/en/latest/magento2-mvc/#generatecrud-model) command.
 
-TODO: WRITE THE DOCS!
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:schema-upgrade
+    Module Name? (Pulsestorm_Helloworld)] Pulsestorm_Pestle
+    New Module Version? (0.0.2)] 0.0.2
+    Creating Pulsestorm\Pestle\Setup\UpgradeSchema
+    Creating Pulsestorm\Pestle\Setup\UpgradeData
+    Incrementing module.xml to 0.0.2
+    Creating 0.0.2 Upgrade Scripts in /path/to/m2/app/code/Pulsestorm/Pestle/upgrade_scripts/schema
+    Creating 0.0.2 Upgrade Scripts in /path/to/m2/app/code/Pulsestorm/Pestle/upgrade_scripts/data
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:schema-upgrade Pulsestorm_Pestle 0.0.2
+
+This command will ask you for the module where the upgrade classes and scripts needs to go (`Pulsestorm_Pestle`), and what the new module version should be (`0.0.2`).  The command will then
+
+1. Create a `UpgradeSchema` and `UpgradeData` class
+2. Bump the module version in `etc/module.xml` (needed to trigger an upgrade when users run `php bin/magento setup:upgrade`)
+3. Create a `Package/Module/Setup/Script` helper class
+4. Create versioned upgrade scripts in `upgrade_scripts/data` and folder `upgrade_scripts/schema`
+
+Numbers three and four may be unfamiliar to you, even if you're familair with Magento's setup resource migration system.  The `magento2:generate:schema-upgrade` creates an opinionated system for handling module migration scripts that hews more closely to Magento 1's view of the world.  Rather than, per Magento 2 core, use a large `if/then` block in Magento's single `...Upgrade` classes, the upgrade classes invoke methods on the `Package/Module/Setup/Script` object, and this object runs a versioned script from the non-standard `upgrade_scripts` folder.
+
+You can skip creating these upgrade scripts by using the `use-simple-upgrade` option.
+
+    $ pestle.phar magento2:generate:schema-upgrade --use-simple-upgrade Pulsestorm_Pestle 0.0.4
+
+To learn more about this system, read the [Magento 2 Setup Migration Scripts](https://alanstorm.com/magento-2-setup-migration-scripts/) article.
+
+**Further Reading**
+
+- [Magento 2 Setup Migration Scripts](https://alanstorm.com/magento-2-setup-migration-scripts/)
+- [Magento 1 Setup Resources](https://alanstorm.com/magento_setup_resources/)
+- [Magento 1 Setup Resources, licensed-to and forked by Magento Inc.](https://devdocs.magento.com/guides/m1x/magefordev/mage-for-dev-6.html)
