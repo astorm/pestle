@@ -293,14 +293,14 @@ The `magento2:generate:schema-upgrade` command allows you to create **upgrade** 
 
     $ pestle.phar magento2:generate:schema-upgrade Pulsestorm_Pestle 0.0.2
 
-This command will ask you for the module where the upgrade classes and scripts needs to go (`Pulsestorm_Pestle`), and what the new module version should be (`0.0.2`).  The command will then
+This command will ask you for the module where the upgrade classes and scripts need to go (`Pulsestorm_Pestle`), and what the new module version should be (`0.0.2`).  The command will then
 
-1. Create a `UpgradeSchema` and `UpgradeData` class
-2. Bump the module version in `etc/module.xml` (needed to trigger an upgrade when users run `php bin/magento setup:upgrade`)
-3. Create a `Package/Module/Setup/Script` helper class
-4. Create versioned upgrade scripts in `upgrade_scripts/data` and folder `upgrade_scripts/schema`
+1. Create an `UpgradeSchema` and `UpgradeData` class.
+2. Bump the module version in `etc/module.xml`. (needed to trigger an upgrade when users run `php bin/magento setup:upgrade`)
+3. Create a `Package/Module/Setup/Script` helper class.
+4. Create versioned upgrade scripts in the `upgrade_scripts/data` and `upgrade_scripts/schema` folders.
 
-Numbers three and four may be unfamiliar to you, even if you're familair with Magento's setup resource migration system.  The `magento2:generate:schema-upgrade` creates an opinionated system for handling module migration scripts that hews more closely to Magento 1's view of the world.  Rather than, per Magento 2 core, use a large `if/then` block in Magento's single `...Upgrade` classes, the upgrade classes invoke methods on the `Package/Module/Setup/Script` object, and this object runs a versioned script from the non-standard `upgrade_scripts` folder.
+Numbers three and four may be unfamiliar to you, even if you're familiar with Magento's setup resource migration system.  The `magento2:generate:schema-upgrade` command creates an opinionated system for handling module migration scripts. This system hews more closely to Magento 1's system.  Rather than use a large `if/then` block in Magento's single `...Upgrade` classes, the upgrade classes invoke methods on the `Package/Module/Setup/Script` object, and this object runs a versioned script from the non-standard `upgrade_scripts` folder.
 
 You can skip creating these upgrade scripts by using the `use-simple-upgrade` option.
 
