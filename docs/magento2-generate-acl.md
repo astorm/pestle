@@ -1,9 +1,3 @@
-Magento's backend admin application has hierarchical Access Control List rules that determine a user's rights in the system.  Users are assigned a role, roles are assigned specific rules.
-
-The `magento2:generate:acl` and `magento2:generate:acl:change-title` commands generate the XML needed to add new rules to the system.
-
-[Learn more about Magento 2 Access Control Rules](https://alanstorm.com/magento_2_understanding_access_control_list_rules/)
-
 ## generate:acl
 
     Usage:
@@ -21,14 +15,45 @@ The `magento2:generate:acl` and `magento2:generate:acl:change-title` commands ge
         @argument rule_ids Rule IDs?
         [<$module_name$>::top,<$module_name$>::config,]
 
-The `magento2:generate:acl` command will generate an acl.xml file for your module. A typical run looks like this.
+The `magento2:generate:acl` command will generate a new *Access Control Rule* for your module.
+
+**Interactive Invocation**
 
     $ pestle.phar magento2:generate:acl
     Which Module? (Pulsestorm_HelloWorld)] Pulsestorm_Pestle
     Rule IDs? (Pulsestorm_Pestle::top,Pulsestorm_Pestle::config,)]
-    Created /path/to/magento/app/code/Pulsestorm/Pestle/etc/acl.xml
+    Created /path/to/m2/app/code/Pulsestorm/Pestle/etc/acl.xml
 
-The first argument is the full name of the module where you want to create an access control rule.
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:acl Pulsestorm_Pestle "Pulsestorm_Pestle::top,Pulsestorm_Pestle::config"
+    Created /path/to/m2/app/code/Pulsestorm/Pestle/etc/acl.xml
+
+The first argument is is module you want to create the access control rule for.  The second argument is a list of rules, each representing one of level of the access control tree.  Pestle will create any nodes needed to reach the bottom of the tree, starting from the `<resource id="Magento_Backend::admin">` node.
+
+For example, when you run the following command
+
+    pestle.phar magento2:generate:acl Pulsestorm_Pestle "Pulsestorm_Pestle::top,Pulsestorm_Pestle::config"
+
+pestle will create a tree that looks like this.
+
+    /path/to/m2/app/code/Pulsestorm/Pestle/etc/acl.xml
+    <?xml version="1.0"?>
+    <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+        <acl>
+            <resources>
+                <resource id="Magento_Backend::admin">
+                    <resource id="Pulsestorm_Pestle::top" title="TITLE HERE FOR">
+                        <resource id="Pulsestorm_Pestle::config" title="TITLE HERE FOR"/>
+                    </resource>
+                </resource>
+            </resources>
+        </acl>
+    </config>
+
+**Further Reading**
+
+- [Magento 2: Understanding Access Control List Rules](https://alanstorm.com/magento_2_understanding_access_control_list_rules/)
 
 ## generate:acl:change-title
 
