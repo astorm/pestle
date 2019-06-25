@@ -31,7 +31,7 @@ The `magento2:generate:acl` command will generate a new *Access Control Rule* fo
 
 The first argument is is module you want to create the access control rule for.  The second argument is a list of rules, each representing one of level of the access control tree.  Pestle will create any nodes needed to reach the bottom of the tree, starting from the `<resource id="Magento_Backend::admin">` node.
 
-For example, the first time you run the following command
+For example, when you run the following command
 
     pestle.phar magento2:generate:acl Pulsestorm_Pestle "Pulsestorm_Pestle::top,Pulsestorm_Pestle::config"
 
