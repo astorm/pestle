@@ -103,8 +103,6 @@ This command is most useful for changing the default titles after using the [`ma
 
 ## generate:controller-edit-acl
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:controller-edit-acl
 
@@ -118,6 +116,30 @@ TODO: WRITE THE DOCS!
         @command magento2:generate:controller-edit-acl
         @argument path_controller Path to Admin Controller
         @argument acl_rule Path to Admin Controller
+
+Many Magento 2 admin controller class files contain an `ADMIN_RESOURCE` constant.  This constant controls which logged in users can access the page provided by the controller.  The `magento2:generate:controller-edit-acl` command allows you to _edit_ the value for this constants in a controller file.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:controller-edit-acl
+    Path to Admin Controller ()] app/code/Pulsestorm/Pestle/Controller/Index/Index.php
+    ACL Rule ()] Pulsestorm_Pestle::config
+    ADMIN_RESOURCE constant value changed
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:controller-edit-acl app/code/Pulsestorm/Pestle/Controller/Index/Index.php Pulsestorm_Pestle::config
+    ADMIN_RESOURCE constant value changed
+
+If the class in question does not contain an `ADMIN_RESOURCE` constant, `magento2:generate:controller-edit-acl` will tell you.
+
+    $ pestle.phar magento2:generate:controller-edit-acl app/code/Pulsestorm/Pestle/Controller/Index/Index.php Pulsestorm_Pestle::config
+    No ADMIN_RESOURCE constant in class file
+
+**Further Reading**
+
+- [Magento 2: Understanding Access Control List Rules](https://alanstorm.com/magento_2_understanding_access_control_list_rules/)
+- [Magento 2: Admin MVC/MVVM Endpoints](https://alanstorm.com/magento_2_admin_mvcmvvm_endpoints/)
 
 ## generate:menu
 
