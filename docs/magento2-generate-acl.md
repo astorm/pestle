@@ -57,8 +57,6 @@ pestle will create a tree that looks like this.
 
 ## generate:acl:change-title
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:acl:change-title
 
@@ -73,6 +71,35 @@ TODO: WRITE THE DOCS!
         @argument path_acl Path to ACL file?
         @argument acl_rule_id ACL Rule ID?
         @argument title New Title?
+
+The  `generate:acl:change-title` will edit the value in an ACL rule's title attribute.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:acl:change-title
+    Path to ACL file? ()] app/code/Pulsestorm/Pestle/etc/acl.xml
+    ACL Rule ID? ()] Pulsestorm_Pestle::config
+    New Title? ()] Configuration Settings
+    Changed Title
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:acl:change-title app/code/Pulsestorm/Pestle/etc/acl.xml Pulsestorm_Pestle::config "Configuration Settings"
+    Changed Title
+
+In the above scenarios, running pestle would change the following access control node from
+
+    <resource id="Pulsestorm_Pestle::config" title="TITLE HERE FOR"/>
+
+to
+
+    <resource id="Pulsestorm_Pestle::config" title="Configuration Settings"/>
+
+This command is most useful for changing the default titles after using the [`magento2-generate-acl`](https://pestle.readthedocs.io/en/latest/magento2-generate-acl/#generateacl) command.
+
+**Further Reading**
+
+- [Magento 2: Understanding Access Control List Rules](https://alanstorm.com/magento_2_understanding_access_control_list_rules/)
 
 ## generate:controller-edit-acl
 
