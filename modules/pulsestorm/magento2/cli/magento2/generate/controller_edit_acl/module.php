@@ -9,27 +9,27 @@ class TokenParser
 {
     protected $position=0;
     protected $tokens;
-    
+
     protected function replaceCurrentToken($token)
     {
         $this->tokens[$this->position] = $token;
     }
-    
+
     public function setStringContents($contents)
     {
         $this->tokens   = pestle_token_get_all($contents);
     }
-    
+
     public function getCurrentToken()
     {
         return $this->tokens[$this->position];
     }
-    
+
     public function isAtEnd()
     {
         return count($this->tokens) === ($this->position + 1);
     }
-    
+
     public function goNext()
     {
         $this->position++;
@@ -40,7 +40,7 @@ class TokenParser
         $this->position--;
         return null;
     }
-    
+
     public function getClassString()
     {
         $values = array_map(function($token){
@@ -50,7 +50,7 @@ class TokenParser
             }
             return '';
         }, $this->tokens);
-        return implode('',  $values);            
+        return implode('',  $values);
     }
 }
 
@@ -61,13 +61,13 @@ class EditConstantTokenParser extends TokenParser
         while($token=$this->goNext())
         {
             if($token->token_value === $string)
-            {            
+            {
                 return;
             }
         }
-    
+
     }
-    
+
     private function isPositionAtClassConstant()
     {
         for($i=$this->position;$i--;$i>0)
@@ -78,7 +78,7 @@ class EditConstantTokenParser extends TokenParser
         }
         return null;
     }
-    
+
     private function scanToNamedConstant($constantName)
     {
         $this->scanToString($constantName);
@@ -86,14 +86,14 @@ class EditConstantTokenParser extends TokenParser
         {
             return true;
         }
-        
+
         if($this->isAtEnd())
         {
             return false;
         }
         return $this->scanToNamedConstant($constantName);
     }
-    
+
     private function getSingleQuotedPhpString($string)
     {
         $string = str_replace("'", "\\'", $string);
@@ -101,11 +101,11 @@ class EditConstantTokenParser extends TokenParser
         {
             $string .= '\\';
         }
-        
+
         return "'$string'";
-        
+
     }
-    
+
     public function replaceConstantStringValue($constantName, $value)
     {
         $this->scanToNamedConstant($constantName);
@@ -114,7 +114,7 @@ class EditConstantTokenParser extends TokenParser
         {
             return false;
         }
-        
+
         while($token = $this->goNext())
         {
             // if($token->token_name === 'T_WHITESPACE') { continue; }
@@ -123,24 +123,24 @@ class EditConstantTokenParser extends TokenParser
                 $this->replaceCurrentToken(null);
                 continue;
             }
-            
+
             //splice in new tokens
             $equalsToken = new \stdClass;
             $equalsToken->token_value = '=';
             $equalsToken->token_name  = 'T_SINGLE_CHAR';
-            
+
             $replacementToken = new \stdClass;
             $replacementToken->token_value = $this->getSingleQuotedPhpString($value);
             $replacementToken->token_name = 'T_CONSTANT_ENCAPSED_STRING';
-            
+
             array_splice($this->tokens, $this->position, 0, [
                 $equalsToken, $replacementToken
             ]);
             break; //hit the ;, break out
         }
-                
+
         return true;
-    }    
+    }
 }
 
 /**
@@ -148,11 +148,11 @@ class EditConstantTokenParser extends TokenParser
 *
 * @command magento2:generate:controller-edit-acl
 * @argument path_controller Path to Admin Controller
-* @argument acl_rule Path to Admin Controller
+* @argument acl_rule ACL Rule
 */
 function pestle_cli($argv)
 {
-    $contents = file_get_contents($argv['path_controller']);    
+    $contents = file_get_contents($argv['path_controller']);
     $parser = new EditConstantTokenParser;
     $parser->setStringContents($contents);
     if($parser->replaceConstantStringValue('ADMIN_RESOURCE', $argv['acl_rule']))
@@ -164,6 +164,6 @@ function pestle_cli($argv)
     {
         output("No ADMIN_RESOURCE constant in class file");
     }
-    
-    
+
+
 }
