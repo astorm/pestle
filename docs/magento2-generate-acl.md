@@ -117,7 +117,7 @@ This command is most useful for changing the default titles after using the [`ma
         @argument path_controller Path to Admin Controller
         @argument acl_rule Path to Admin Controller
 
-Many Magento 2 admin controller class files contain an `ADMIN_RESOURCE` constant.  This constant controls which logged in users can access the page provided by the controller.  The `magento2:generate:controller-edit-acl` command allows you to _edit_ the value for this constants in a controller file.
+Many Magento 2 admin controller class files contain an `ADMIN_RESOURCE` constant.  This constant controls which logged in users can access the page provided by the controller.  The `magento2:generate:controller-edit-acl` command allows you to _edit_ the string value for this constant **in the controller file**.
 
 **Interactive Invocation**
 
