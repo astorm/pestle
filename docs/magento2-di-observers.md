@@ -47,6 +47,8 @@ The `magento2:generate:di` command **will not** add any configuration to a Magen
 - [The Magento 2 Object System](https://alanstorm.com/category/magento-2/#magento-2-object-system)
 - [Magento 2's Automatic Dependency Injection](https://alanstorm.com/magento2_dependency_injection_2015/)
 
+In other words, the `magento2:generate:di` adds the PHP code to your class.  If your particular dependency requires additional configuration, you'll need to edit your `di.xml` file.
+
 ## generate:plugin-xml
 
 TODO: WRITE THE DOCS!
