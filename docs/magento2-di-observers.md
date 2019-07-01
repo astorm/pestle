@@ -1,7 +1,5 @@
 ## generate:di
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:di
 
@@ -23,6 +21,33 @@ TODO: WRITE THE DOCS!
         @argument file Which PHP class file are we injecting into?
         @argument class Which class to inject?
         [Magento\Catalog\Model\ProductFactory]
+
+The `magento2:generate:di` command will add a new Magento object manager dependency to the provided class file.
+
+**Interactive Invocation**
+
+    $ pestle_dev magento2:generate:di
+    Which PHP class file are we injecting into? ()] /path/to/class/File.php
+    Which class to inject? (Magento\Catalog\Model\ProductFactory)] Php\Class\To\Inject\Into
+    Injecting Php\Class\To\Inject into /path/to/class/File.php
+
+**Argument Invocation**
+
+    $ pestle_dev magento2:generate:di /path/to/class/File.php 'Php\Class\To\Inject\Into'
+    Injecting Php\Class\To\Inject into /path/to/Php/Class/To/Inject/Into.php
+
+The `magento2:generate:di` command **will not** add any configuration to a Magento system.  This command will
+
+1. Add a class argument arguments to the `__construct` method of another class
+2. Add a property assignment for that argument
+3. Add a definition for the aforementioned property
+
+**Further Reading**
+
+- [The Magento 2 Object System](https://alanstorm.com/category/magento-2/#magento-2-object-system)
+- [Magento 2's Automatic Dependency Injection](https://alanstorm.com/magento2_dependency_injection_2015/)
+
+In other words, the `magento2:generate:di` adds the PHP code to your class.  If your particular dependency requires additional configuration, you'll need to edit your `di.xml` file.
 
 ## generate:plugin-xml
 
