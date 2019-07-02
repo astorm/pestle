@@ -51,8 +51,6 @@ In other words, the `magento2:generate:di` adds the PHP code to your class.  If 
 
 ## generate:plugin-xml
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:plugin-xml
 
@@ -77,7 +75,67 @@ TODO: WRITE THE DOCS!
         @option use-type-hint Add type hint to subject?
         @command magento2:generate:plugin-xml
 
+The `generate:plugin-xml` command will generate the needed XML configuration to add a Magento 2 Plugin to a module, and generate the configured plugin class (if necessary)
 
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:plugin-xml
+    Create in which module? (Pulsestorm_Helloworld)] Pulsestorm_Pestle
+    Which class are you plugging into? (Magento\Framework\Logger\Monolog)] Magento\Catalog\Model\Product
+    What's your plugin class name? (Pulsestorm\Pestle\Plugin\Magento\Catalog\Model\Product)] Pulsestorm\Pestle\Plugin\Magento\Product
+    Added nodes to /path/to/m2/app/code/Pulsestorm/Pestle/etc/di.xml
+    Created file /path/to/m2/app/code/Pulsestorm/Pestle/Plugin/Magento/Product.php
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:plugin-xml Pulsestorm_Pestle \
+        'Magento\Catalog\Model\Product' \
+        'Pulsestorm\Pestle\Plugin\Magento\Product'
+    Added nodes to /path/to/m2/app/code/Pulsestorm/Pestle/etc/di.xml
+    Created file /path/to/m2/app/code/Pulsestorm/Pestle/Plugin/Magento/Product.php
+
+The `magento2:generate:plugin-xml` command needs to know which module you want to create your plugin in, the name of the class you're writing a plugin for, and the name of your plugin class.  The above configuration would add code like the following to your `di.xml` file
+
+    <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- ... -->
+        <type name="Magento\Catalog\Model\Product">
+            <plugin name="pulsestorm_pestle_magento_catalog_model_product" type="Pulsestorm\Pestle\Plugin\Magento\Product"/>
+        </type>
+    <!-- ... -->
+    </config>
+
+and a skeleton plugin class that looks like this.
+
+    $ cat app/code/Pulsestorm/Pestle/Plugin/Magento/Product.php
+    <?php
+    namespace Pulsestorm\Pestle\Plugin\Magento;
+    class Product
+    {
+        //function beforeMETHOD($subject, $arg1, $arg2){}
+        //function aroundMETHOD($subject, $proceed, $arg1, $arg2){return $proceed($arg1, $arg2);}
+        //function afterMETHOD($subject, $result){return $result;}
+    }
+
+The `use-type-hint` option will generate `$subjects` with a PHP type hint.
+
+    $ pestle.phar magento2:generate:plugin-xml --use-type-hint Pulsestorm_Pestle \
+        'Magento\Catalog\Model\Product' \
+        'Pulsestorm\Pestle\Plugin\Magento\Product'
+
+    $ cat app/code/Pulsestorm/Pestle/Plugin/Magento/Product.php
+    <?php
+    namespace Pulsestorm\Pestle\Plugin\Magento;
+    class Product
+    {
+        //function beforeMETHOD(\Magento\Catalog\Model\Product $subject, $arg1, $arg2){}
+        //function aroundMETHOD(\Magento\Catalog\Model\Product $subject, $proceed, $arg1, $arg2){return $proceed($arg1, $arg2);}
+        //function afterMETHOD(\Magento\Catalog\Model\Product $subject, $result){return $result;}
+    }
+
+**Further Reading**
+
+- [The Magento 2 Object System](https://alanstorm.com/series/magento-2-object-system/)
+- [Magento 2 Object Manager Plugin System](https://alanstorm.com/magento_2_object_manager_plugin_system/)
 ## generate:preference
 
 TODO: WRITE THE DOCS!
