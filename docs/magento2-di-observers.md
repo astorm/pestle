@@ -160,8 +160,6 @@ TODO: WRITE THE DOCS!
 
 ## generate:observer
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:observer
 
@@ -184,4 +182,48 @@ TODO: WRITE THE DOCS!
         @argument observer_name Observer Name? [<$module$>_listener]
         @argument model_name @callback getModelName
 
+The `magento2:generate:observer` command generates the configuration and class files needed to observe an event dispatched by Magento 2's event/observer system.
 
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:observer
+    Full Module Name? (Pulsestorm_Generate)] Pulsestorm_Pestle
+    Event Name? (controller_action_predispatch)] controller_action_predispatch
+    Observer Name? (pulsestorm_pestle_listener)] pulsestorm_pestle_listener_before_execute
+    Class Name? (Pulsestorm\Pestle\Observer\Listener\Before\Execute)] Pulsestorm\Pestle\Observer\Listener\Before\Execute
+    Creating: /path/to/m2/app/code/Pulsestorm/Pestle/etc/events.xml
+    Creating: Pulsestorm\Pestle\Observer\Listener\Before\Execute
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:observer Pulsestorm_Pestle \
+        controller_action_predispatch \
+        pulsestorm_pestle_listener_before_execute \
+        'Pulsestorm\Pestle\Observer\Listener\Before\Execute' \
+        /path/to/m2/app/code/Pulsestorm/Pestle/etc/events.xml \
+        'Pulsestorm\Pestle\Observer\Listener\Before\Execute'
+
+The `magento2:generate:observer` command needs to know the module you want to generate your event observer in (`Pulsestorm_Pestle`), the name of the the event you're listening for (`controller_action_predispatch`), a unique name for your observer (`pulsestorm_pestle_listener_before_execute`), and the name of your new observer class (`Pulsestorm\Pestle\Observer\Listener\Before\Execute`).
+
+The above invocations would generate an `events.xml` configuration that looked like the following
+
+    <?xml version="1.0"?>
+    <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+        <event name="controller_action_predispatch">
+            <observer name="pulsestorm_pestle_listener_before_execute"
+                      instance="Pulsestorm\Pestle\Observer\Listener\Before\Execute"/>
+        </event>
+    </config>
+
+and an observer class file that looks like this
+
+    <?php
+    namespace Pulsestorm\Pestle\Observer\Listener\Before;
+    class Execute implements \Magento\Framework\Event\ObserverInterface
+    {
+        public function execute(\Magento\Framework\Event\Observer $observer){
+            exit(__FILE__);
+        }
+    }
+
+**Further Reading**
