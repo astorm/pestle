@@ -136,9 +136,8 @@ The `use-type-hint` option will generate `$subjects` with a PHP type hint.
 
 - [The Magento 2 Object System](https://alanstorm.com/series/magento-2-object-system/)
 - [Magento 2 Object Manager Plugin System](https://alanstorm.com/magento_2_object_manager_plugin_system/)
-## generate:preference
 
-TODO: WRITE THE DOCS!
+## generate:preference
 
     Usage:
         $ pestle.phar magento2:generate:preference
@@ -157,6 +156,45 @@ TODO: WRITE THE DOCS!
         @argument type New Concrete Class?
         [Pulsestorm\Helloworld\Model\NewModel]
 
+The `magento2:generate:preference` command allows you to automatically add a class preference to Magento's Object Manager configuration.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:preference
+    Which Module? (Pulsestorm_Helloworld)] Pulsestorm_Pestle
+    For which Class/Interface/Type? (Pulsestorm\Helloworld\Model\FooInterface)] Pulsestorm\Helloworld\Model\FooInterface
+    New Concrete Class? (Pulsestorm\Helloworld\Model\NewModel)] Pulsestorm\Helloworld\Model\NewModel
+    Creating /path/to/m2/app/code/Pulsestorm/Helloworld/Model/NewModel.php
+
+**Argument Invocation**
+
+    pestle.phar magento2:generate:preference Pulsestorm_Pestle \
+        'Pulsestorm\Helloworld\Model\FooInterface'
+        'Pulsestorm\Helloworld\Model\NewModel'
+    Creating /path/to/m2/app/code/Pulsestorm/Helloworld/Model/NewModel.php
+
+The `magento2:generate:preference` command needs to know which module you want to configure your class preference in, the class or interface you're setting a preference for, and the "concrete" class you want Magento 2 to instantiate when someone asks for the original class or interface.
+
+After running the command pestle will add the following to your module's `di.xml`
+
+    <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+        <!-- ... -->
+        <preference for="Pulsestorm\Helloworld\Model\FooInterface" type="Pulsestorm\Helloworld\Model\NewModel"/>
+        <!-- ... -->
+    </config>
+
+Also, if necessary, pestle will create the new concrete class file with the correct interface.
+
+    $ cat app/code/Pulsestorm/Helloworld/Model/NewModel.php
+    <?php
+    namespace Pulsestorm\Helloworld\Model;
+    class NewModel implements \Pulsestorm\Helloworld\Model\FooInterface
+    {}
+
+**Further Reading**
+
+- [The Magento 2 Object System](https://alanstorm.com/series/magento-2-object-system/)
+- [Magento 2 Object Manager Preferences](https://alanstorm.com/magento_2_object_manager_preferences/)
 
 ## generate:observer
 
