@@ -263,5 +263,3 @@ and an observer class file that looks like this
             exit(__FILE__);
         }
     }
-
-**Further Reading**
