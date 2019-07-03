@@ -136,6 +136,7 @@ The `use-type-hint` option will generate `$subjects` with a PHP type hint.
 
 - [The Magento 2 Object System](https://alanstorm.com/series/magento-2-object-system/)
 - [Magento 2 Object Manager Plugin System](https://alanstorm.com/magento_2_object_manager_plugin_system/)
+
 ## generate:preference
 
     Usage:
@@ -155,7 +156,7 @@ The `use-type-hint` option will generate `$subjects` with a PHP type hint.
         @argument type New Concrete Class?
         [Pulsestorm\Helloworld\Model\NewModel]
 
-The `magento2:generate:preference` allows you to automatically add a class preference to Magento's Object Manager configuration.
+The `magento2:generate:preference` command allows you to automatically add a class preference to Magento's Object Manager configuration.
 
 **Interactive Invocation**
 
@@ -192,10 +193,8 @@ Also, if necessary, pestle will create the new concrete class file with the corr
 
 **Further Reading**
 
-
-
-- ...
-
+- [The Magento 2 Object System](https://alanstorm.com/series/magento-2-object-system/)
+- [Magento 2 Object Manager Preferences](https://alanstorm.com/magento_2_object_manager_preferences/)
 
 ## generate:observer
 
