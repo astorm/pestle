@@ -90,26 +90,6 @@ The `generate:psr-log-level` command prints out a hard coded list of `Zend_Log` 
 
 This command is most useful if you're converting some old PHP code to use newer PSR loggers, and you need a quick reminder on constant equivalents.
 
-## generate:config-helper
-
-TODO: WRITE THE DOCS!
-
-    Usage:
-        $ pestle.phar magento2:generate:config-helper
-
-    Arguments:
-
-    Options:
-
-    Help:
-        Generates a help class for reading Magento's configuration
-
-        This command will generate the necessary files and configuration
-        needed for reading Magento 2's configuration values.
-
-        @command magento2:generate:config-helper
-        @todo needs to be implemented
-
 ## generate:class-child
 
 TODO: WRITE THE DOCS!
