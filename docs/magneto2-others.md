@@ -56,23 +56,6 @@ Also, pestle will not proceed if your named node has child nodes.
     Bailing: Contains child nodes
 
 While this command exists in the `magento2:generate:` namespace, it will work on _any_ XML file where `name` is a de-facto unique identifier.
-## generate:service-contract
-
-TODO: WRITE THE DOCS!
-
-    Usage:
-        $ pestle.phar magento2:generate:service-contract
-
-    Arguments:
-
-    Options:
-
-    Help:
-        ALPHA: Service Contract Generator
-
-        @command magento2:generate:service-contract
-        @option skip-warning Allows user to skip experimental warning
-
 
 ## generate:psr-log-level
 
