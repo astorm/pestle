@@ -1,7 +1,5 @@
 ## generate:remove-named-node
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:remove-named-node
 
@@ -17,7 +15,47 @@ TODO: WRITE THE DOCS!
         @argument node_name The <node_name/>? [block]
         @argument name The {node_name}="" value? []
 
+The `magento2:generate:remove-named-node` command will _delete_ a named XML node from a configuration file.  This is most useful is scripts that automate more complex module generation.
 
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:remove-named-node
+    The XML file? ()] app/code/Pulsestorm/Pestle/etc/events.xml
+    The <node_name/>? (block)] observer
+    The {node_name}="" value? ()] pulsestorm_pestle_listener_before_execute
+    Node Removed
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:remove-named-node app/code/Pulsestorm/Pestle/etc/events.xml observer pulsestorm_pestle_listener_before_execute
+
+In the above examples, if `events.xml` looks like this
+
+    <?xml version="1.0"?>
+    <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+        <event name="controller_action_predispatch">
+            <observer name="pulsestorm_pestle_listener_before_execute" instance="Pulsestorm\Pestle\Observer\Listener\Before\Execute" />
+        </event>
+    </config>
+
+after invoking the command it will look like this
+
+    <?xml version="1.0"?>
+    <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+        <event name="controller_action_predispatch"/>
+    </config>
+
+In Magento's XML configuration, `name` often needs to be a unique ID.  If you attempt to remove a named node that isn't unique in the XML file, pestle will not remove the node.
+
+    $ pestle.phar magento2:generate:remove-named-node ... ... ...
+    Bailing: Found more than one node.
+
+Also, pestle will not proceed if your named node has child nodes.
+
+    $ pestle.phar magento2:generate:remove-named-node app/code/Pulsestorm/Pestle/etc/events.xml event controller_action_predispatch
+    Bailing: Contains child nodes
+
+While this command exists in the `magento2:generate:` namespace, it will work on _any_ XML file where `name` is a de-facto unique identifier.
 ## generate:service-contract
 
 TODO: WRITE THE DOCS!
