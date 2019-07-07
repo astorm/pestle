@@ -59,8 +59,6 @@ While this command exists in the `magento2:generate:` namespace, it will work on
 
 ## generate:psr-log-level
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:psr-log-level
 
@@ -76,6 +74,21 @@ TODO: WRITE THE DOCS!
 
         @command magento2:generate:psr-log-level
 
+The `generate:psr-log-level` command print out a hard coded list of `Zend_Log` constants and their `Psr\Log\LogLevel` equivalents.
+
+**Invocation**
+
+    $ pestle.phar magento2:generate:psr-log-level
+    Zend_Log::EMERG     Psr\Log\LogLevel::EMERGENCY
+    Zend_Log::ALERT     Psr\Log\LogLevel::ALERT
+    Zend_Log::CRIT      Psr\Log\LogLevel::CRITICAL
+    Zend_Log::ERR       Psr\Log\LogLevel::ERROR
+    Zend_Log::WARN      Psr\Log\LogLevel::WARNING
+    Zend_Log::NOTICE    Psr\Log\LogLevel::NOTICE
+    Zend_Log::INFO      Psr\Log\LogLevel::INFO
+    Zend_Log::DEBUG     Psr\Log\LogLevel::DEBUG
+
+This command is most useful if you're converting some old PHP code to use newer PSR loggers, and you need a quick reminder on constant equivalents.
 
 ## generate:config-helper
 
