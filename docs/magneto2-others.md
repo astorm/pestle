@@ -110,7 +110,6 @@ TODO: WRITE THE DOCS!
         @command magento2:generate:config-helper
         @todo needs to be implemented
 
-
 ## generate:class-child
 
 TODO: WRITE THE DOCS!
