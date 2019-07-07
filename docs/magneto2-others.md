@@ -74,7 +74,7 @@ While this command exists in the `magento2:generate:` namespace, it will work on
 
         @command magento2:generate:psr-log-level
 
-The `generate:psr-log-level` command print out a hard coded list of `Zend_Log` constants and their `Psr\Log\LogLevel` equivalents.
+The `generate:psr-log-level` command prints out a hard coded list of `Zend_Log` constants and their `Psr\Log\LogLevel` equivalents.
 
 **Invocation**
 
