@@ -108,7 +108,7 @@ This command is most useful if you're converting some old PHP code to use newer 
         @argument class_parent Parent Class?
         [Magento\Framework\Model\AbstractModel]
 
-The `generate:class-child` command will automatically generate a new child class of any class in your Magento 2 system. The child class will include a type-hint compatible constructor.
+The `generate:class-child` command will automatically generate a new child class for any parent class in your Magento 2 system. The child class will include a  constructor that is "type-hint compatible" with the provided parent class.
 
 **Interactive Invocation**
 
