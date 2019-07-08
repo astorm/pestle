@@ -92,8 +92,6 @@ This command is most useful if you're converting some old PHP code to use newer 
 
 ## generate:class-child
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:class-child
 
@@ -110,10 +108,42 @@ TODO: WRITE THE DOCS!
         @argument class_parent Parent Class?
         [Magento\Framework\Model\AbstractModel]
 
+The `generate:class-child` command will automatically generate a new child class for any parent class in your Magento 2 system. The child class will include a  constructor that is "type-hint compatible" with the provided parent class.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:class-child
+    New Class Name? (Pulsestorm\Helloworld\Model\Something)] Pulsestorm\Pestle\Model\Thing
+    Parent Class? (Magento\Framework\Model\AbstractModel)] Magento\Framework\Model\AbstractModel
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:class-child 'Pulsestorm\Pestle\Model\Thing' 'Magento\Framework\Model\AbstractModel'
+
+While a lot of Magento architects lobby for "no inheritance" being the right way to do object oriented programming, many of Magento's systems still rely heavily on class inheritance.  However, Magento's newer automatic constructor dependency injection system means classes often have a large number of constructor arguments. This makes class inheritance a tedious task. The architects say the solution is no inheritance and we go around in a circle.
+
+The `generate:class-child` command eases some of this tediousness for working Magento programmers.  If you had invoked the above commands you would have generated a `Pulsestorm\Pestle\Model\Thing` class and constructor that looked like the following.
+
+    $ cat app/code/Pulsestorm/Pestle/Model/Thing.php
+    <?php
+    namespace Pulsestorm\Pestle\Model;
+
+    class Thing extends \Magento\Framework\Model\AbstractModel
+    {
+        function __construct(
+            \Magento\Framework\Model\Context $context,
+            \Magento\Framework\Registry $registry,
+            \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+            \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+            array $data = []
+        ) {
+            parent::__construct($context,$registry,$resource,$resourceCollection,$data);
+        }
+    }
+
+i.e. the constructor arguments from `Magento\Framework\Model\AbstractModel` will be automatically copied over, and a `parent::__construct` call will be automatically generated.
 
 ## generate:install
-
-TODO: WRITE THE DOCS!
 
     Usage:
         $ pestle.phar magento2:generate:install
@@ -141,3 +171,47 @@ TODO: WRITE THE DOCS!
         @argument db_user Database User? [root]
         @argument db_pass Database Password? [password12345]
         @argument email Admin Email? [astorm@alanstorm.com]
+
+The `generate:install` command will generate a small script for installing Magento 2 via composer and the command line.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:install
+    Identity Key? (magento_2_new)] magento2_pestle
+    Default Umask? (000)] 000
+    Composer Repo (https://repo.magento.com/)] https://repo.magento.com/
+    Starting Package? (magento/project-community-edition)] magento/project-community-edition
+    Folder? (magento-2-source)] magento-2-source
+    Admin First Name? (Alan)] Alan
+    Admin Last Name? (Storm)] Storm
+    Admin Password? (password12345)] password12345
+    Admin Email? (astorm@alanstorm.com)] astorm@alanstorm.com
+    Admin Username? (astorm@alanstorm.com)] astorm@alanstorm.com
+    Database Host? (127.0.0.1)] 127.0.0.1
+    Database User? (root)] root
+    Database Password? (password12345)] password12345
+    Admin Email? (astorm@alanstorm.com)] astorm@alanstorm.com
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:install magento2_pestle '000' 'https://repo.magento.com/' magento/project-community-edition magento-2-source Alan Storm password12345 astorm@alanstorm.com astorm@alanstorm.com 127.0.0.1 root password12345 astorm@alanstorm.com
+
+Running the above command would result in output something like the following.
+
+    composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition magento-2-source
+    cd magento-2-source
+    echo '000' >> magento_umask
+    echo "We're about to ask for your MySQL password so we can create the database"
+    echo 'CREATE DATABASE magento2_pestle' | mysql -uroot -p
+    php bin/magento setup:install --admin-email astorm@alanstorm.com --admin-firstname Alan --admin-lastname Storm --admin-password password12345 --admin-user astorm@alanstorm.com --backend-frontname admin --base-url http://magento2-pestle.dev --db-host 127.0.0.1 --db-name magento2_pestle --db-password password12345 --db-user root --session-save files --use-rewrites 1 --use-secure 0 -vvv
+    php bin/magento sampledata:deploy
+    php bin/magento cache:enable
+
+Piping this output to a shell script (or copy/pasting the code to your terminal/shell window) and then running it will result in Magento 2 being installed on your local system.
+
+**IMPORTANT**: The commands generated include setting Magento's umask.  This was (and technically still is) a workaround for file permission issues in Magento 2 when running under the Apache `mod_php` module.  While Magento product management indicated that Magento 2 could run under `mod_php`, most folks have found that PHP-FPM (or another FastCGI method) is required to get decent performance from Magento 2.
+
+**Further Reading**
+
+- [Magento 2: Set a PHP umask](https://alanstorm.com/magento-2-set-a-php-umask/)
+- [Install Magento using Composer](https://devdocs.magento.com/guides/v2.3/install-gde/composer.html)
