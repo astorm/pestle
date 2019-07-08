@@ -120,9 +120,9 @@ The `generate:class-child` command will automatically generate a new child class
 
     $ pestle.phar magento2:generate:class-child 'Pulsestorm\Pestle\Model\Thing' 'Magento\Framework\Model\AbstractModel'
 
-While a lot of Magento architects lobby for "no inheritance" being the right way to do object oriented programming, Magento of Magento's system still rely heavily on class inheritance.  Magento's automatic constructor dependency injection system means classes often have a large number of constructor arguments, which makes class inheritance a tedious task.
+While a lot of Magento architects lobby for "no inheritance" being the right way to do object oriented programming, many of Magento's systems still rely heavily on class inheritance.  However, Magento's newer automatic constructor dependency injection system means classes often have a large number of constructor arguments. This makes class inheritance a tedious task. The architects say the solution is no inheritance and we go around in a circle.
 
-The `generate:class-child` command eases some of this tediousness.  Invoking the above commands would automatically give you a `Pulsestorm\Pestle\Model\Thing` class constructor that looked like the following.
+The `generate:class-child` command eases some of this tediousness for working Magento programmers.  If you had invoked the above commands you would have generated a `Pulsestorm\Pestle\Model\Thing` class and constructor that looked like the following.
 
     $ cat app/code/Pulsestorm/Pestle/Model/Thing.php
     <?php
@@ -207,7 +207,7 @@ Running the above command would result in output something like the following.
     php bin/magento sampledata:deploy
     php bin/magento cache:enable
 
-Piping this output to a shell script (or copy/pasting the code to your terminal/shell window) and then running it will results in Magento 2 being installed on your local system.
+Piping this output to a shell script (or copy/pasting the code to your terminal/shell window) and then running it will result in Magento 2 being installed on your local system.
 
 **IMPORTANT**: The commands generated include setting Magento's umask.  This was (and technically still is) a workaround for file permission issues in Magento 2 when running under the Apache `mod_php` module.  While Magento product management indicated that Magento 2 could run under `mod_php`, most folks have found that PHP-FPM (or another FastCGI method) is required to get decent performance from Magento 2.
 
