@@ -1,7 +1,5 @@
 ## generate:ui:add-to-layout
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:ui:add-to-layout
 
@@ -16,6 +14,37 @@ TODO: WRITE THE DOCS!
         @argument path_layout Layout XML File?
         @argument block_name Block or Reference Name?
         @argument ui_component_name UI Component Name?
+
+The `generate:ui:add-to-layout` command will add a `<uiComponent/>` node to a specific block in a layout handle XML file.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:ui:add-to-layout
+    Layout XML File? ()] app/code/Pulsestorm/Pestle/view/adminhtml/layout/pulsestorm_pestle_things_index_index.xml
+    Block or Reference Name? ()] content
+    UI Component Name? ()] my-grid
+    Added Component
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:ui:add-to-layout \
+        app/code/Pulsestorm/Pestle/view/adminhtml/layout/pulsestorm_pestle_things_index_index.xml \
+        content
+        my-grid
+
+Invoking the above commands will add the following node to the  `pulsestorm_pestle_things_index_index.xml` file (presuming `pulsestorm_pestle_things_index_index.xml` has a  block or reference named `content`)
+
+    <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+        <referenceContainer name="content">
+            <uiComponent name="my-grid"/>
+        </referenceContainer>
+    </page>
+
+**Further Reading**
+
+- [Pestle: Generate Full Modules](https://pestle.readthedocs.io/en/latest/magento2-generate-full-module/)
+
+- [Magento 2: UI Components](https://alanstorm.com/series/magento-2-ui/)
 
 ## generate:ui:grid
 
