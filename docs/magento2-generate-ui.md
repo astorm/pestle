@@ -48,8 +48,6 @@ Invoking the above commands will add the following node to the  `pulsestorm_pest
 
 ## generate:ui:grid
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:ui:grid
 
@@ -68,6 +66,141 @@ TODO: WRITE THE DOCS!
         your listing use? [Magento\Cms\Model\ResourceModel\Page\Collection]
         @argument db_id_column What's the ID field for you model?
         [pulsestorm_gridexample_log_id]
+
+The `generate:ui:grid` command will automatically generate the UI Component XML needed to add a grid interface element for a standard Magento CRUD collection.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:ui:grid
+    Which Module? (Pulsestorm_Gridexample)] Pulsestorm_Pestle
+    Create a unique ID for your Listing/Grid! (pulsestorm_gridexample_log)] pulsestorm_pestle_grid
+    What Resource Collection Model should your listing use? (Magento\Cms\Model\ResourceModel\Page\Collection)] Pulsestorm\Pestle\Model\ResourceModel\Thing\Collection
+    What's the ID field for you model? (pulsestorm_gridexample_log_id)] pulsestorm_pestle_thing_id
+    Creating New /path/to/m2/app/code/Pulsestorm/Pestle/view/adminhtml/ui_component/pulsestorm_pestle_grid.xml
+    Creating: Pulsestorm\Pestle\Ui\Component\Listing\DataProviders\Pulsestorm\Pestle\Grid
+    Creating: Pulsestorm\Pestle\Ui\Component\Listing\Column\Pulsestormpestlegrid\PageActions
+    Don't forget to add this to your layout XML with <uiComponent name="pulsestorm_pestle_grid"/>
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:ui:grid Pulsestorm_Pestle \
+        pulsestorm_pestle_grid \
+        Pulsestorm\Pestle\Model\ResourceModel\Thing\Collection \
+        pulsestorm_pestle_thing_id
+
+    Creating New /path/to/m2/app/code/Pulsestorm/Pestle/view/adminhtml/ui_component/pulsestorm_pestle_grid.xml
+    Creating: Pulsestorm\Pestle\Ui\Component\Listing\DataProviders\Pulsestorm\Pestle\Grid
+    Creating: Pulsestorm\Pestle\Ui\Component\Listing\Column\Pulsestormpestlegrid\PageActions
+    Don't forget to add this to your layout XML with <uiComponent name="pulsestorm_pestle_grid"/>
+
+This command needs to know the name of the Magento module where you want your new UI component XML file (`Pulsestorm_Pestle`), a unique identifier for the grid (`pulsestorm_pestle_grid`), the PHP class name of your collection (`Pulsestorm\Pestle\Model\ResourceModel\Thing\Collection`), and the primary key of your database table.
+
+After invoking the above commands, you'll end up with a UI component XML file that looks something like this
+
+    $ cat app/code/Pulsestorm/Pestle/view/adminhtml/ui_component/pulsestorm_pestle_things.xml
+    <?xml version="1.0"?>
+    <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="provider" xsi:type="string">pulsestorm_pestle_things.pulsestorm_pestle_things_data_source</item>
+                <item name="deps" xsi:type="string">pulsestorm_pestle_things.pulsestorm_pestle_things_data_source</item>
+            </item>
+            <item name="spinner" xsi:type="string">pulsestorm_pestle_things_columns</item>
+            <item name="buttons" xsi:type="array">
+                <item name="add" xsi:type="array">
+                    <item name="name" xsi:type="string">add</item>
+                    <item name="label" xsi:type="string">Add New</item>
+                    <item name="class" xsi:type="string">primary</item>
+                    <item name="url" xsi:type="string">*/Thing/new</item>
+                </item>
+            </item>
+        </argument>
+        <dataSource name="pulsestorm_pestle_things_data_source">
+            <argument name="dataProvider" xsi:type="configurableObject">
+                <argument name="class" xsi:type="string">Pulsestorm\Pestle\Ui\Component\Listing\DataProviders\Pulsestorm\Pestle\Things</argument>
+                <argument name="name" xsi:type="string">pulsestorm_pestle_things_data_source</argument>
+                <argument name="primaryFieldName" xsi:type="string">thing_id</argument>
+                <argument name="requestFieldName" xsi:type="string">id</argument>
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                        <item name="storageConfig" xsi:type="array">
+                            <item name="indexField" xsi:type="string">thing_id</item>
+                        </item>
+                    </item>
+                </argument>
+            </argument>
+            <argument name="data" xsi:type="array">
+                <item name="js_config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                </item>
+            </argument>
+        </dataSource>
+        <listingToolbar name="listing_top">
+            <settings>
+                <sticky>true</sticky>
+            </settings>
+            <paging name="listing_paging"/>
+            <filters name="listing_filters"/>
+        </listingToolbar>
+        <columns name="pulsestorm_pestle_things_columns">
+            <selectionsColumn name="ids">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="resizeEnabled" xsi:type="boolean">false</item>
+                        <item name="resizeDefaultWidth" xsi:type="string">55</item>
+                        <item name="indexField" xsi:type="string">thing_id</item>
+                        <item name="sortOrder" xsi:type="number">10</item>
+                    </item>
+                </argument>
+            </selectionsColumn>
+            <column name="thing_id">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="filter" xsi:type="string">textRange</item>
+                        <item name="sorting" xsi:type="string">asc</item>
+                        <item name="label" xsi:type="string" translate="true">ID</item>
+                    </item>
+                </argument>
+            </column>
+            <actionsColumn name="actions" class="Pulsestorm\Pestle\Ui\Component\Listing\Column\Pulsestormpestlethings\PageActions">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="resizeEnabled" xsi:type="boolean">false</item>
+                        <item name="resizeDefaultWidth" xsi:type="string">107</item>
+                        <item name="indexField" xsi:type="string">thing_id</item>
+                        <item name="sortOrder" xsi:type="number">200</item>
+                    </item>
+                </argument>
+            </actionsColumn>
+            <column name="title">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string">Title</item>
+                        <item name="sortOrder" xsi:type="number">105</item>
+                    </item>
+                </argument>
+            </column>
+        </columns>
+    </listing>
+
+This grid will have the standard add and edit buttons, as well as columns for an ID (using the ID field you provided) and a column for "title".  If your collection collects models that don't have a title, you'll want to remove or edit the title column
+
+    <column name="title">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string">Title</item>
+                <item name="sortOrder" xsi:type="number">105</item>
+            </item>
+        </argument>
+    </column>
+
+**Important**: This command will not automatically insert the `<uiComponent name="pulsestorm_pestle_grid"/>` node into a layout XML file for you.  You'll need to do that yourself
+
+**Further Reading**
+
+- [Magento 2: Introducing UI Components](https://alanstorm.com/magento_2_introducing_ui_components/)
+- [Pestle: `magento2:generate:ui:add-to-layout`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiadd-to-layout)
 
 ## generate:ui:add-column-text
 
