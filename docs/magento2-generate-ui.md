@@ -15,7 +15,7 @@
         @argument block_name Block or Reference Name?
         @argument ui_component_name UI Component Name?
 
-The `generate:ui:add-to-layout` command will add a `<uiComponent/>` node to a specific block in a layout handle XML file.
+The `magento2:generate:ui:add-to-layout` command will add a `<uiComponent/>` node to a specific block in a layout handle XML file.
 
 **Interactive Invocation**
 
@@ -67,7 +67,7 @@ Invoking the above commands will add the following node to the  `pulsestorm_pest
         @argument db_id_column What's the ID field for you model?
         [pulsestorm_gridexample_log_id]
 
-The `generate:ui:grid` command will automatically generate the UI Component XML needed to add a grid interface element for a standard Magento CRUD collection.
+The `magento2:generate:ui:grid` command will automatically generate the UI Component XML needed to add a grid interface element for a standard Magento CRUD collection.
 
 **Interactive Invocation**
 
@@ -93,7 +93,7 @@ The `generate:ui:grid` command will automatically generate the UI Component XML 
     Creating: Pulsestorm\Pestle\Ui\Component\Listing\Column\Pulsestormpestlegrid\PageActions
     Don't forget to add this to your layout XML with <uiComponent name="pulsestorm_pestle_grid"/>
 
-This command needs to know the name of the Magento module where you want your new UI component XML file (`Pulsestorm_Pestle`), a unique identifier for the grid (`pulsestorm_pestle_grid`), the PHP class name of your collection (`Pulsestorm\Pestle\Model\ResourceModel\Thing\Collection`), and the primary key of your database table.
+This command needs to know the name of the Magento module where you  new UI component XML file will live (`Pulsestorm_Pestle`), a unique identifier for the grid (`pulsestorm_pestle_grid`), the PHP class name of your collection (`Pulsestorm\Pestle\Model\ResourceModel\Thing\Collection`), and the primary key of the model's database table (`pulsestorm_pestle_thing_id`.
 
 After invoking the above commands, you'll end up with a UI component XML file that looks something like this
 
@@ -195,7 +195,7 @@ This grid will have the standard add and edit buttons, as well as columns for an
         </argument>
     </column>
 
-**Important**: This command will not automatically insert the `<uiComponent name="pulsestorm_pestle_grid"/>` node into a layout XML file for you.  You'll need to do that yourself
+**Important**: This command will not automatically insert the `<uiComponent name="pulsestorm_pestle_grid"/>` node into a layout XML file for you.  You'll need to do that yourself.
 
 **Further Reading**
 
