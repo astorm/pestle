@@ -75,7 +75,7 @@ In other words, the `magento2:generate:di` adds the PHP code to your class.  If 
         @option use-type-hint Add type hint to subject?
         @command magento2:generate:plugin-xml
 
-The `generate:plugin-xml` command will generate the needed XML configuration to add a Magento 2 Plugin to a module, and, (if necessary), generate the configured PHP class.
+The `magento2:generate:plugin-xml` command will generate the needed XML configuration to add a Magento 2 Plugin to a module, and, (if necessary), generate the configured PHP class.
 
 **Interactive Invocation**
 

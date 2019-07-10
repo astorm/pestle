@@ -72,7 +72,7 @@ pestle will create a tree that looks like this.
         @argument acl_rule_id ACL Rule ID?
         @argument title New Title?
 
-The  `generate:acl:change-title` will edit the value in an ACL rule's title attribute.
+The `magento2:generate:acl:change-title` will edit the value in an ACL rule's title attribute.
 
 **Interactive Invocation**
 

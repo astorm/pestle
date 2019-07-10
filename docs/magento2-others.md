@@ -74,7 +74,7 @@ While this command exists in the `magento2:generate:` namespace, it will work on
 
         @command magento2:generate:psr-log-level
 
-The `generate:psr-log-level` command prints out a hard coded list of `Zend_Log` constants and their `Psr\Log\LogLevel` equivalents.
+The `magento2:generate:psr-log-level` command prints out a hard coded list of `Zend_Log` constants and their `Psr\Log\LogLevel` equivalents.
 
 **Invocation**
 
@@ -108,7 +108,7 @@ This command is most useful if you're converting some old PHP code to use newer 
         @argument class_parent Parent Class?
         [Magento\Framework\Model\AbstractModel]
 
-The `generate:class-child` command will automatically generate a new child class for any parent class in your Magento 2 system. The child class will include a  constructor that is "type-hint compatible" with the provided parent class.
+The `magento2:generate:class-child` command will automatically generate a new child class for any parent class in your Magento 2 system. The child class will include a  constructor that is "type-hint compatible" with the provided parent class.
 
 **Interactive Invocation**
 
@@ -122,7 +122,7 @@ The `generate:class-child` command will automatically generate a new child class
 
 While a lot of Magento architects lobby for "no inheritance" being the right way to do object oriented programming, many of Magento's systems still rely heavily on class inheritance.  However, Magento's newer automatic constructor dependency injection system means classes often have a large number of constructor arguments. This makes class inheritance a tedious task. The architects say the solution is no inheritance and we go around in a circle.
 
-The `generate:class-child` command eases some of this tediousness for working Magento programmers.  If you had invoked the above commands you would have generated a `Pulsestorm\Pestle\Model\Thing` class and constructor that looked like the following.
+The `magento2:generate:class-child` command eases some of this tediousness for working Magento programmers.  If you had invoked the above commands you would have generated a `Pulsestorm\Pestle\Model\Thing` class and constructor that looked like the following.
 
     $ cat app/code/Pulsestorm/Pestle/Model/Thing.php
     <?php
@@ -172,7 +172,7 @@ i.e. the constructor arguments from `Magento\Framework\Model\AbstractModel` will
         @argument db_pass Database Password? [password12345]
         @argument email Admin Email? [astorm@alanstorm.com]
 
-The `generate:install` command will generate a small script for installing Magento 2 via composer and the command line.
+The `magento2:generate:install` command will generate a small script for installing Magento 2 via composer and the command line.
 
 **Interactive Invocation**
 
