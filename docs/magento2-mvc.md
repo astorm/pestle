@@ -313,3 +313,86 @@ To learn more about this system, read the [Magento 2 Setup Migration Scripts](ht
 - [Magento 2 Setup Migration Scripts](https://alanstorm.com/magento-2-setup-migration-scripts/)
 - [Magento 1 Setup Resources](https://alanstorm.com/magento_setup_resources/)
 - [Magento 1 Setup Resources, licensed-to and forked by Magento Inc.](https://devdocs.magento.com/guides/m1x/magefordev/mage-for-dev-6.html)
+
+## generate:ui:add-schema-column
+
+    Usage:
+        $ pestle.phar magento2:generate:ui:add-schema-column
+
+    Arguments:
+
+    Options:
+
+    Help:
+        Genreated a Magento 2 addColumn DDL definition and inserts into file
+
+        Command scans creates column definition code and, if provided
+        attempts to insert it into provided php_file.  Inserting means
+        looking for this pattern.
+        newTable($installer->getTable('table_name'))->addColumn
+        and if found, scanning to the ; and inserting the addColumn
+
+        @command magento2:generate:ui:add-schema-column
+        @argument php_file PHP file with newTable call? [skip]
+        @argument table Database Table? (packagename_modulename_modelnames)
+        @argument column Columns Name? (new_column)
+        @argument column_type @callback selectColumnType
+
+The `magento2:generate:ui:add-schema-column` command will generate the PHP needed to add a database column in a schema upgrade.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:ui:add-schema-column
+    PHP file with newTable call? (skip)]
+    Database Table? (packagename_modulename_modelnames) ()] pulsestorm_pestle_thing
+    Columns Name? (new_column) ()] sub_title
+    Column Type?
+    [1] bigint
+    [2] boolean
+    [3] date
+    [4] datetime
+    [5] decimal
+    [6] float
+    [7] integer
+    [8] smallint
+    [9] varchar
+    [10] varbinary
+    [11] text
+    [12] blob
+    [13] mediumtext
+    [14] mediumblob
+    [15] longblob
+
+    ->addColumn('sub_title',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                255,
+                ['nullable' => false, 'default' => ''],
+                "sub_title field"
+            )
+
+**Argument Invocation**
+
+    $ pestle_dev magento2:generate:ui:add-schema-column skip pulsestorm_pestle_thing sub_title varchar
+    ->addColumn('sub_title',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                255,
+                ['nullable' => false, 'default' => ''],
+                "sub_title field"
+            )
+
+After running the above command, you can copy and paste the `addColumn` method call into your schema upgrade file.
+
+When call with a `php_file` argument set to `skip`, the `magento2:generate:ui:add-schema-column` command will output the new column definition.  **However**, if this argument points to PHP file with a schema upgrade class, pestle will attempt to insert the `addColumn` command automatically into the first `newTable` call that includes your `table_name` argument.
+
+    $ pestle_dev magento2:generate:ui:add-schema-column \
+        app/code/Pulsestorm/Pestle/Setup/UpgradeSchema.php \
+        pulsestorm_pestle_thing sub_title varchar
+
+    $ pestle_dev magento2:generate:ui:add-schema-column \
+        app/code/Pulsestorm/Pestle/upgrade_scripts/schema/0.0.5.php \
+        pulsestorm_pestle_thing sub_title varchar
+
+**Further Reading**
+
+- [Magento 2 Setup Migration Scripts](https://alanstorm.com/magento-2-setup-migration-scripts/)
+- [Pestle: Generate Schema Upgrade](https://pestle.readthedocs.io/en/latest/magento2-mvc/#generateschema-upgrade)
