@@ -219,7 +219,7 @@ This grid will have the standard add and edit buttons, as well as columns for an
         @argument column_name New Column Field? [title]
         @argument column_label New Column Label? [Title]
 
-The `magento2:generate:ui:add-column-text` command will add the configuration for a new column to an already create grid list UI Component XML file.
+The `magento2:generate:ui:add-column-text` command will add the configuration for a new column to an already-created UI Component XML file.
 
 **Interactive Invocation**
 
@@ -238,14 +238,22 @@ The `magento2:generate:ui:add-column-text` command will add the configuration fo
 
 After invoking the above command, the following configuration would be added to the `pulsestorm_pestle_grid.xml` file.
 
-    <column name="new_field">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="label" xsi:type="string">New Field Label</item>
-                <item name="sortOrder" xsi:type="number">105</item>
-            </item>
-        </argument>
-    </column>
+    <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+        <!-- ... -->
+        <columns name="pulsestorm_pestle_grid_columns">
+            <!-- ... -->
+            <column name="new_field">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string">New Field Label</item>
+                        <item name="sortOrder" xsi:type="number">105</item>
+                    </item>
+                </argument>
+            </column>
+            <!-- ... -->
+        </columns>
+        <!-- ... -->
+    </listing>
 
 **Further Reading**
 
