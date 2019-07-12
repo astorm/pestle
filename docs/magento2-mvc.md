@@ -338,7 +338,7 @@ To learn more about this system, read the [Magento 2 Setup Migration Scripts](ht
         @argument column Columns Name? (new_column)
         @argument column_type @callback selectColumnType
 
-The `magento2:generate:schema-add-column` command will generate the PHP needed to add a database column in a schema upgrade.
+The `magento2:generate:schema-add-column` command will generate the PHP code that's needed to add a database column in a schema upgrade class or script.
 
 **Interactive Invocation**
 
@@ -382,7 +382,7 @@ The `magento2:generate:schema-add-column` command will generate the PHP needed t
 
 After running the above command, you can copy and paste the `addColumn` method call into your schema upgrade file.
 
-When call with a `php_file` argument set to `skip`, the `magento2:generate:schema-add-column` command will output the new column definition.  **However**, if this argument points to PHP file with a schema upgrade class, pestle will attempt to insert the `addColumn` command automatically into the first `newTable` call that includes your `table_name` argument.
+When invoke the command with the `php_file` argument set to `skip`, the `magento2:generate:schema-add-column` command will output the new column definition.  **However**, if this argument points to PHP file with a schema upgrade class-or-script, pestle will attempt to insert the `addColumn` command automatically into the first `newTable` call that includes your `table_name` argument.
 
     $ pestle.phar magento2:generate:schema-add-column \
         app/code/Pulsestorm/Pestle/Setup/UpgradeSchema.php \
