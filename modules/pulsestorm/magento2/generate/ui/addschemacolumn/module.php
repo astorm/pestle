@@ -304,7 +304,7 @@ function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
 * @argument column Columns Name? (new_column)
 * @argument column_type @callback selectColumnType
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options=[])
 {
     validateColumnType($argv['column_type']);
     $columnCode = generateAddColumn($argv['column'], $argv['column_type']);
@@ -333,3 +333,8 @@ function pestle_cli($argv)
 
     writeStringToFile($argv['php_file'], $string);
 }
+
+function exported_pestle_cli($argv, $options=[]) {
+    return pestle_cli($argv, $options);
+}
+

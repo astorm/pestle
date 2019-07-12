@@ -11,14 +11,14 @@ pestle_import('Pulsestorm\Pestle\Runner\commandNameToDocBlockParts');
 * Lists help
 * Read the doc blocks for all commands, and then
 * outputs a list of commands along with thier doc
-* blocks.  
+* blocks.
 * @option is-machine-readable pipable/processable output?
 * @command list-commands
 */
 function pestle_cli($argv, $options)
 {
     includeAllModuleFiles();
-    
+
     $user = get_defined_functions()['user'];
     $executes = array_filter($user, function($function){
         $parts = explode('\\', $function);
@@ -26,8 +26,8 @@ function pestle_cli($argv, $options)
         return strpos($function, 'pestle_cli') === 0 &&
                strpos($function, 'pestle_cli_export') === false;
     });
-    
-        
+
+
     $commands = array_map(function($function){
         $r       = new ReflectionFunction($function);
         $command = getAtCommandFromDocComment($r);
@@ -38,12 +38,12 @@ function pestle_cli($argv, $options)
     }, $executes);
 
     // var_dump($commands);
-    $command_to_check = array_shift($argv);        
+    $command_to_check = array_shift($argv);
 
     if($command_to_check)
     {
         $commands = array_filter($commands, function($s) use ($command_to_check){
-            return $s['command'] === $command_to_check || 
+            return $s['command'] === $command_to_check ||
                 $s['command'] === str_replace('_','-',$command_to_check);
         });
     }
@@ -57,7 +57,7 @@ function pestle_cli($argv, $options)
     }
 
     output('');
-    
+
     if(count($commands) > 1)
     {
         outputTitle();
@@ -65,9 +65,9 @@ function pestle_cli($argv, $options)
         outputUsage();
         output('');
         outputAvaiableCommands($commands);
-        return;    
+        return;
     }
-    
+
     //only single commands left
     foreach($commands as $command)
     {
@@ -75,10 +75,10 @@ function pestle_cli($argv, $options)
         output("    $ pestle.phar ", $command['command']);
         output('');
         output('Arguments:');
-        output('');        
+        output('');
         output('Options:');
         output('');
-        
+
         output("Help:");
         output(preg_replace('%^%m','    $0',wordwrap($command['help'],70)));
         output('');
@@ -114,7 +114,7 @@ function getWhitespaceForCommandList($commands, $command_name)
             }
         }
     }
-    
+
     $numberOfSpaces = ($longest - strlen($command_name)) + 2;
     return str_repeat(' ', $numberOfSpaces);
 }
@@ -125,9 +125,9 @@ function getWhitespaceForCommandList($commands, $command_name)
  * eventually replaced them with magento2:generate:module style
  * commands by having the magento2:generate:module command
  * call into the original generate_module module's pestle_cli
- * function.  The generate_module style commands still exist, 
+ * function.  The generate_module style commands still exist,
  * for backwards compatability with code and docs, but we hide
- * them from the list.  
+ * them from the list.
  */
 function getCommandsToHide()
 {
@@ -147,8 +147,8 @@ function getCommandsToHide()
         'generate_registration',
         'generate_route',
         'generate_theme',
-        'generate_view',     
-        'wp_export_xml',         
+        'generate_view',
+        'wp_export_xml',
         'wp_urls',
         'generate_pestle_command',
         'pestle_clear_cache',
@@ -167,24 +167,25 @@ function getCommandsToHide()
         'generate-registration',
         'generate-route',
         'generate-theme',
-        'generate-view',     
-        'wp-export-xml',         
+        'generate-view',
+        'wp-export-xml',
         'wp-urls',
         'generate-pestle-command',
-        'pestle-clear-cache',        
+        'pestle-clear-cache',
+        'magento2:generate:ui:add-schema-column'
     ];
 }
 
 function sortCommandsIntoSection($commands)
 {
     $toHide = getCommandsToHide();
-    $commandSections = [];    
+    $commandSections = [];
     foreach($commands as $command)
-    {                
+    {
         if(in_array($command['command'], $toHide))
         {
             continue;
-        }    
+        }
         $section = 'Uncategorized';
         if(strpos($command['command'], ':') !== false)
         {
@@ -194,7 +195,7 @@ function sortCommandsIntoSection($commands)
             {
                 $section .= ' ' . ucWords(array_shift($parts));
             }
-        }        
+        }
         $commandSections[$section][] = $command;
     }
     ksort($commandSections);
@@ -204,7 +205,7 @@ function sortCommandsIntoSection($commands)
             if ($a['command'] == $b['command']) {
                 return 0;
             }
-            return ($a['command'] < $b['command']) ? -1 : 1;        
+            return ($a['command'] < $b['command']) ? -1 : 1;
         });
         $commandSections[$section] = $commands;
     }
@@ -236,10 +237,10 @@ function outputCommandListing($command, $commands)
     if(!$firstLine)
     {
         $firstLine = 'NULL Command?  Fix this pls.';
-    }    
-    output( '  ', 
+    }
+    output( '  ',
             getStringWrappedWithShellColor($command['command'], 32),
-            getWhitespaceForCommandList($commands, $command['command']), 
+            getWhitespaceForCommandList($commands, $command['command']),
             $firstLine);
 }
 
@@ -254,14 +255,14 @@ function shouldSkipShowingCommand($command)
     if(in_array($command['command'], $toHide))
     {
         return true;
-    }    
-    
+    }
+
     return false;
 }
 
 function outputAvaiableCommandsBySection($commandSections, $commands)
 {
-   
+
     foreach($commandSections as $section=>$commandsSorted)
     {
         $commandsSorted = $commandSections[$section];
@@ -271,14 +272,14 @@ function outputAvaiableCommandsBySection($commandSections, $commands)
             if(shouldSkipShowingCommand($command))
             {
                 continue;
-            }        
+            }
             outputCommandListing($command, $commands);
         }
     }
 }
 
 function outputAvaiableCommands($commands)
-{    
+{
     output('Available commands:');
     $commandSections = [
         'Uncategorized'=>$commands
@@ -302,14 +303,14 @@ function outputCredits()
 function outputTitle()
 {
     $logo = <<<LOGO
-                  _   _      
-                 | | | |     
-  _ __   ___  ___| |_| | ___ 
+                  _   _
+                 | | | |
+  _ __   ___  ___| |_| | ___
  | '_ \ / _ \/ __| __| |/ _ \
  | |_) |  __/\__ \ |_| |  __/
  | .__/ \___||___/\__|_|\___|
- | |                         
- |_|    
+ | |
+ |_|
 LOGO;
     output($logo);
 }
