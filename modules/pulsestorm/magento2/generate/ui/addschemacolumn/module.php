@@ -19,21 +19,21 @@ function getColumnTypes()
         'TYPE_FLOAT'   =>'float',
         'TYPE_INTEGER' =>'integer',
         'TYPE_SMALLINT'=>'smallint',
-        
+
         'PS_TYPE_VARCHAR'   =>'varchar',
-        'PS_TYPE_VARBINARY' =>'varbinary',     
-                
+        'PS_TYPE_VARBINARY' =>'varbinary',
+
         'PS_TYPE_TEXT' =>'text',
-        'PS_TYPE_BLOB' =>'blob',        
-        
+        'PS_TYPE_BLOB' =>'blob',
+
         'PS_TYPE_MEDIUM_TEXT' =>'mediumtext',
-        'PS_TYPE_MEDIUM_BLOB' =>'mediumblob',        
+        'PS_TYPE_MEDIUM_BLOB' =>'mediumblob',
 
         'PS_TYPE_LONG_TEXT' =>'longtext',
-        'PS_TYPE_LONG_BLOB' =>'longblob',   
-                
+        'PS_TYPE_LONG_BLOB' =>'longblob',
+
         'PS_TYPE_TEXT' =>'text',
-        'PS_TYPE_BLOB' =>'blob',                        
+        'PS_TYPE_BLOB' =>'blob',
         // 'TYPE_TIMESTAMP'=>'timestamp',
     ];
 }
@@ -73,7 +73,7 @@ function getClassConstantFromType($type)
     {
         $constant = 'TYPE_TEXT';
     }
-            
+
     return '\Magento\Framework\DB\Ddl\Table::' . $constant;
 }
 
@@ -87,46 +87,46 @@ function getLengthFromType($type)
         'decimal'=>'[12,4]',
         'float'=>'null',
         'integer'=>'null',
-        'smallint'=>'null',        
+        'smallint'=>'null',
         'varchar'=>'255',
-        'varbinary'=>'255',                     
+        'varbinary'=>'255',
         'text'=>'"64K"',
-        'blob'=>'"64K"',                
+        'blob'=>'"64K"',
         'mediumtext'=>'"2M"',
-        'mediumblob'=>'"2M"',        
+        'mediumblob'=>'"2M"',
         'longtext'=>'"4G"',
-        'longblob'=>'"4G"',   
-    ]; 
-    return $legend[$type];   
+        'longblob'=>'"4G"',
+    ];
+    return $legend[$type];
 }
 
 function getPropertyArrayFromType($type)
 {
     $legend = [
         'bigint'        =>"['nullable' => false, 'default' => 0]",
-        'boolean'       =>"['nullable' => false, 'default' => 0]",        
+        'boolean'       =>"['nullable' => false, 'default' => 0]",
         'date'          =>"[]",
         'datetime'      =>"[]",
         'decimal'       =>"['nullable' => false, 'default' => '0.0000']",
-        'float'         =>"['nullable' => false, 'default' => '0.0000']",        
+        'float'         =>"['nullable' => false, 'default' => '0.0000']",
         'integer'       =>"['nullable' => false, 'default' => 0]",
-        'smallint'      =>"['nullable' => false, 'default' => 0]",        
+        'smallint'      =>"['nullable' => false, 'default' => 0]",
         'varchar'       =>"['nullable' => false, 'default' => '']",
-        'varbinary'     =>"['nullable' => true, 'default' => null]",                     
+        'varbinary'     =>"['nullable' => true, 'default' => null]",
         'text'          =>"['nullable' => true, 'default' => null]",
-        'blob'          =>"['nullable' => true, 'default' => null]",                
+        'blob'          =>"['nullable' => true, 'default' => null]",
         'mediumtext'    =>"['nullable' => true, 'default' => null]",
-        'mediumblob'    =>"['nullable' => true, 'default' => null]",        
+        'mediumblob'    =>"['nullable' => true, 'default' => null]",
         'longtext'      =>"['nullable' => true, 'default' => null]",
-        'longblob'      =>"['nullable' => true, 'default' => null]",   
-    ]; 
-    
+        'longblob'      =>"['nullable' => true, 'default' => null]",
+    ];
+
     return $legend[$type];
 }
 
 function getColumnProps($type)
 {
-    
+
     return [
         'typeConstant'   => getClassConstantFromType($type),    //'\Magento\Framework\DB\Ddl\Table::TYPE_TEXT',
         'length'         => getLengthFromType($type),           //'255',
@@ -147,8 +147,8 @@ function generateAddColumn($name, $type)
             $propertyArray,
             $comment
         )";
-        
-    return $string;        
+
+    return $string;
 }
 
 function getNextNonWhitespaceToken(&$tokens, $i, $count, $flag=false)
@@ -159,13 +159,13 @@ function getNextNonWhitespaceToken(&$tokens, $i, $count, $flag=false)
         $token = $tokens[$i];
         //skip whitespace
         if($token->token_name === 'T_WHITESPACE') { continue; }
-        
+
         //if we're at the end, return false
         if(!isset($tokens[$i+1]))
-        {        
+        {
             return false;
-        }         
-        return $token;        
+        }
+        return $token;
     }
     return false;
 }
@@ -173,8 +173,8 @@ function getNextNonWhitespaceToken(&$tokens, $i, $count, $flag=false)
 //scan until we find a newTable T_STRING followed by a ( T_SINGLE_CHAR
 function scanFoundNewTable($state, $token, $nextToken)
 {
-    return $state === 'start' && 
-            ($token->token_name     === 'T_STRING' && $token->token_value === 'newTable') && 
+    return $state === 'start' &&
+            ($token->token_name     === 'T_STRING' && $token->token_value === 'newTable') &&
             ($nextToken->token_name === 'T_SINGLE_CHAR' && $nextToken->token_value === '(');
 }
 
@@ -183,7 +183,7 @@ function scanIsOurTableAndReturnIndex($tokens, $i, $count, $tableName)
     $result           = fetchTokensUntilAddColumn($tokens, $i, $count);
 
     //if we reached the end of the file, bail
-    if(!$result){ return 'end-of-file'; } 
+    if(!$result){ return 'end-of-file'; }
 
     $newTableTokens   = $result['newTableTokens'];
     $i                = $result['i'];
@@ -193,7 +193,7 @@ function scanIsOurTableAndReturnIndex($tokens, $i, $count, $tableName)
         return $item->token_value;
     }, $newTableTokens));
 
-    //check if tokens contain our table            
+    //check if tokens contain our table
     if(strpos($string, $tableName) === false)
     {
         //if not, start over
@@ -208,7 +208,7 @@ function fetchTokensUntilAddColumn(&$tokens, $i, $count)
 {
     $newTableTokens = [];
     for($i=$i;$i<$count;$i++)
-    {   
+    {
         $token = $tokens[$i];
         $newTableTokens[] = $token;
         if(($token->token_name === 'T_STRING' && $token->token_value === 'addColumn'))
@@ -218,51 +218,51 @@ function fetchTokensUntilAddColumn(&$tokens, $i, $count)
                 'i'=>$i];
         }
     }
-    
+
     return false;
 }
 
 function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
-{    
+{
     $tokens                 = pestle_token_get_all(file_get_contents($file));
     $count                  = count($tokens);
     $state                  = 'start'; //scanningNewtable, scanningToStatementEnd
     $newTableTokens         = [];
     $tokensWithNewAddColumn = [];
     for($i=0;$i<$count;$i++)
-    {        
+    {
         //get current token and next token, breaking
-        //out if there's no new token  
+        //out if there's no new token
         $token      = $tokens[$i];
         $nextToken  = getNextNonWhitespaceToken($tokens, $i, $count);
-        
+
         //skip whitespace
         if($token->token_name === 'T_WHITESPACE') { continue; }
-        
+
         //scan until we find a newTable T_STRING followed by a ( T_SINGLE_CHAR
         if(scanFoundNewTable($state, $token, $nextToken))
         {
             $state = 'scanningNewTable';
             continue;
         }
-        
+
         //pull out everything until we hit an addColumn
         //does the pulled out string contain our table name?
         if($state === 'scanningNewTable')
         {
             $index = scanIsOurTableAndReturnIndex($tokens, $i, $count, $table);
-            if($index === 'end-of-file') { 
-                break; 
+            if($index === 'end-of-file') {
+                break;
             }
             if($index === 'start-over') {
                 $state = 'start';
-                continue;            
+                continue;
             }
             $i     = $index;
             $state = 'scanningToStatementEnd';
             continue;
-        }    
-        
+        }
+
         //if so, scan until ending ;
         if($state === 'scanningToStatementEnd')
         {
@@ -271,23 +271,23 @@ function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
                 //then insert our code block into tokens and break
                 $beforeTokens = array_slice($tokens, 0, $i);
                 $afterTokens  = array_slice($tokens, $i);
-                
+
                 $token = new \stdClass;
                 $token->token_name  = 'T_FAKE_INSERT_HACK';
                 $token->token_value = trim($columnCode);
                 $middleTokens = [$token];
-                
+
                 $tokensWithNewAddColumn = array_merge(
                     $beforeTokens, $middleTokens, $afterTokens
                 );
                 //return our new tokens
                 return $tokensWithNewAddColumn;
             }
-        }                           
-    }    
-    
+        }
+    }
+
     //return empty array, indicating error
-    return $tokensWithNewAddColumn;   
+    return $tokensWithNewAddColumn;
 }
 /**
 * Genreated a Magento 2 addColumn DDL definition and inserts into file
@@ -296,7 +296,7 @@ function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
 * attempts to insert it into provided php_file.  Inserting means
 * looking for this pattern.
 *   newTable($installer->getTable('table_name'))->addColumn
-* and if found, scanning to the ; and inserting the addColumn         
+* and if found, scanning to the ; and inserting the addColumn
 *
 * @command magento2:generate:ui:add-schema-column
 * @argument php_file PHP file with newTable call? [skip]
@@ -304,31 +304,37 @@ function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
 * @argument column Columns Name? (new_column)
 * @argument column_type @callback selectColumnType
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options=[])
 {
     validateColumnType($argv['column_type']);
     $columnCode = generateAddColumn($argv['column'], $argv['column_type']);
     if($argv['php_file'] === 'skip')
     {
         output($columnCode);
+        return;
     }
-    
+
     $tokens     = getTokensWithInsertedCodeFromSourceFile(
-        $columnCode, $argv['php_file'], $argv['table']); 
+        $columnCode, $argv['php_file'], $argv['table']);
 
     if(!$tokens)
     {
         exitWithErrorMessage(
-            "We couldn't find a newTable call with {$argv['table']}" . "\n" . 
-            "Exiting with an error, but here's the code." . "\n" . 
+            "We couldn't find a newTable call with {$argv['table']}" . "\n" .
+            "Exiting with an error, but here's the code." . "\n" .
             $columnCode
         );
-    }        
-    
+    }
+
     output("Adding addColumn Call to file");
     $string = implode('', array_map(function($item){
         return $item->token_value;
     }, $tokens));
 
-    writeStringToFile($argv['php_file'], $string);   
+    writeStringToFile($argv['php_file'], $string);
 }
+
+function exported_pestle_cli($argv, $options=[]) {
+    return pestle_cli($argv, $options);
+}
+
