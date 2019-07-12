@@ -261,8 +261,6 @@ After invoking the above command, the following configuration would be added to 
 
 ## generate:ui:form
 
-TODO: WRITE THE DOCS!
-
     Usage:
         $ pestle.phar magento2:generate:ui:form
 
@@ -279,6 +277,119 @@ TODO: WRITE THE DOCS!
         @argument model Model Class? [Pulsestorm\Formexample\Model\Thing]
         @argument aclRule ACL Rule for Controllers?
         [Pulsestorm_Formexample::ruleName]
+
+The `magento2:generate:ui:form` command allows you generate the XML configuration _and_ PHP controllers needed to add a CRUD model editing form to Magento's backend.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:ui:form
+    Which Module? (Pulsestorm_Formexample)] Pulsestorm_Pestle
+    Model Class? (Pulsestorm\Formexample\Model\Thing)] Pulsestorm\Pestle\Model\Thing
+    ACL Rule for Controllers? (Pulsestorm_Formexample::ruleName)] Pulsestorm_Pestle::thing_edit
+
+    Creating: Pulsestorm\Pestle\Controller\Adminhtml\Thing\Edit
+    Creating: Pulsestorm\Pestle\Controller\Adminhtml\Thing\NewAction
+    Creating: Pulsestorm\Pestle\Controller\Adminhtml\Thing\Save
+    Creating: Pulsestorm\Pestle\Controller\Adminhtml\Thing\Delete
+    Creating: Pulsestorm\Pestle\Controller\Adminhtml\Thing\Delete
+    Creating: Pulsestorm\Pestle\Model\Thing\DataProvider
+    Creating /path/to/app/code/Pulsestorm/Pestle/view/adminhtml/layout/pulsestorm_pestle_things_thing_edit.xml
+    Creating /path/to/app/code/Pulsestorm/Pestle/view/adminhtml/layout/pulsestorm_pestle_things_thing_new.xml
+    Creating /path/to/app/code/Pulsestorm/Pestle/view/adminhtml/layout/pulsestorm_pestle_things_thing_save.xml
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:ui:form Pulsestorm_Pestle \
+        'Pulsestorm\Pestle\Model\Thing' \
+        Pulsestorm_Pestle::thing_edit
+
+    //...
+
+In addition to the needed controller files, layout files, data provider, and UI Component Configuration, the above invocation would create a UI Component configuration file that looks like this
+
+    $ cat app/code/Pulsestorm/Pestle/view/adminhtml/ui_component/pulsestorm_pestle_things_form.xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="provider" xsi:type="string">pulsestorm_pestle_things_form.pulsestorm_pestle_things_form_data_source</item>
+                <item name="deps" xsi:type="string">pulsestorm_pestle_things_form.pulsestorm_pestle_things_form_data_source</item>
+            </item>
+            <item name="label" xsi:type="string" translate="true">Object Information</item>
+            <item name="config" xsi:type="array">
+                <item name="dataScope" xsi:type="string">data</item>
+                <item name="namespace" xsi:type="string">pulsestorm_pestle_things_form</item>
+            </item>
+            <item name="template" xsi:type="string">templates/form/collapsible</item>
+            <item name="buttons" xsi:type="array">
+                <item name="back" xsi:type="string">Pulsestorm\Pestle\Block\Adminhtml\Thing\Edit\BackButton</item>
+                <item name="delete" xsi:type="string">Pulsestorm\Pestle\Block\Adminhtml\Thing\Edit\DeleteButton</item>
+                <item name="reset" xsi:type="string">Pulsestorm\Pestle\Block\Adminhtml\Thing\Edit\ResetButton</item>
+                <item name="save" xsi:type="string">Pulsestorm\Pestle\Block\Adminhtml\Thing\Edit\SaveButton</item>
+                <item name="save_and_continue" xsi:type="string">Pulsestorm\Pestle\Block\Adminhtml\Thing\Edit\SaveAndContinueButton</item>
+            </item>
+        </argument>
+        <dataSource name="pulsestorm_pestle_things_form_data_source">
+            <argument name="dataProvider" xsi:type="configurableObject">
+                <argument name="class" xsi:type="string">Pulsestorm\Pestle\Model\Thing\DataProvider</argument>
+                <argument name="name" xsi:type="string">pulsestorm_pestle_things_form_data_source</argument>
+                <argument name="primaryFieldName" xsi:type="string">thing_id</argument>
+                <argument name="requestFieldName" xsi:type="string">thing_id</argument>
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="submit_url" xsi:type="url" path="*/*/save"/>
+                    </item>
+                </argument>
+            </argument>
+            <argument name="data" xsi:type="array">
+                <item name="js_config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+                </item>
+            </argument>
+        </dataSource>
+        <fieldset name="general">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string">Form Data</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <field name="thing_id">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="visible" xsi:type="boolean">false</item>
+                        <item name="dataType" xsi:type="string">text</item>
+                        <item name="formElement" xsi:type="string">input</item>
+                        <item name="dataScope" xsi:type="string">thing_id</item>
+                    </item>
+                </argument>
+            </field>
+            <field name="title">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="dataType" xsi:type="string">text</item>
+                        <item name="label" xsi:type="string" translate="true">Title</item>
+                        <item name="formElement" xsi:type="string">input</item>
+                        <item name="sortOrder" xsi:type="number">20</item>
+                        <item name="dataScope" xsi:type="string">title</item>
+                        <item name="validation" xsi:type="array">
+                            <item name="required-entry" xsi:type="boolean">true</item>
+                        </item>
+                    </item>
+                </argument>
+            </field>
+        </fieldset>
+    </form>
+
+If you're looking to create a _full_ module, be sure to checkout the [`magento2:generate:full-module
+`](https://pestle.readthedocs.io/en/latest/magento2-generate-full-module/) command
+
+**Further Reading**
+
+- [Magento 2: Introducing UI Components](https://alanstorm.com/magento_2_introducing_ui_components/)
+
+- [Pestle: Generate Full Module](https://pestle.readthedocs.io/en/latest/magento2-generate-full-module/)
 
 ## generate:ui:add-form-field
 
