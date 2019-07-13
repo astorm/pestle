@@ -741,7 +741,7 @@ function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
 * @command magento2:generate:ui:form
 * @argument module Which Module? [Pulsestorm_Formexample]
 * @argument model Model Class? [Pulsestorm\Formexample\Model\Thing]
-* @argument acl Rule ACL Rule for Controllers? [Pulsestorm_Formexample::ruleName]
+* @argument aclRule ACL Rule for Controllers? [Pulsestorm_Formexample::ruleName]
 */
 function pestle_cli($argv)
 {
