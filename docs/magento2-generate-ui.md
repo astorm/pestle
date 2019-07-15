@@ -278,7 +278,7 @@ After invoking the above command, the following configuration would be added to 
         @argument aclRule ACL Rule for Controllers?
         [Pulsestorm_Formexample::ruleName]
 
-The `magento2:generate:ui:form` command allows you generate the XML configuration _and_ PHP controllers needed to add a CRUD model editing form to Magento's backend.
+The `magento2:generate:ui:form` command allows you to generate the XML configuration _and_ PHP controllers needed to add a CRUD model editing form to Magento's backend.
 
 **Interactive Invocation**
 
