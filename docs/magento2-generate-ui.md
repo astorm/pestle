@@ -312,13 +312,12 @@ The `generate:ui:add-form-field` command will add a new field to a UI Component 
 **Argument Invocation**
 
     $ pestle.phar magento2:generate:ui:add-form-field \
-        --is-required \
         app/code/Pulsestorm/Pestle/view/adminhtml/ui_component/pulsestorm_pestle_things_form.xml \
         new_field \
         "My New Field" \
         general
 
-The `magento2:generate:ui:add-form-field` needs to know the full path to the `<form/>` XML file you want to insert your field in (`pulsestorm_pestle_things_form.xml`), your field's `name` property (`new_field`, for computers), your field's Label (`My New Field`, for humans), and the name of the fieldset the field should be inserted into.
+The `magento2:generate:ui:add-form-field` command needs to know the full path to the `<form/>` XML file you want to insert your field in (`pulsestorm_pestle_things_form.xml`), your field's `name` property (`new_field`, for computers), your field's Label (`My New Field`, for humans), and the name of the fieldset the field should be inserted into.
 
 After invoking the above command, the following nodes would be added to the `pulsestorm_pestle_things_form.xml` file.
 
@@ -346,7 +345,12 @@ After invoking the above command, the following nodes would be added to the `pul
 
 The `magento2:generate:ui:form` command also supports a `is-required` option, which will set the `<item name="required-entry" xsi:type="boolean"/>` node to `true`.
 
-TODO: fieldset warning, Link to fieldset docs
+    $ pestle.phar magento2:generate:ui:add-form-field \
+        --is-required \
+        app/code/Pulsestorm/Pestle/view/adminhtml/ui_component/pulsestorm_pestle_things_form.xml \
+        new_field \
+        "My New Field" \
+        general
 
 **Further Reading**
 
@@ -371,3 +375,5 @@ TODO: WRITE THE DOCS!
         @argument path_xml Path to Form XML File?
         @argument fieldset Fieldset Name? [newfieldset]
         @argument label Label? [NewFieldset]
+
+Once written add fieldset warning to field entry
