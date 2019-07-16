@@ -299,7 +299,7 @@ TODO: WRITE THE DOCS!
         @argument fieldset Fieldset Name? [general]
         @option is-required Is field required?
 
-The `generate:ui:add-form-field` command will add a new field to a UI Component `<form/>` element.
+The `generate:ui:add-form-field` command will add a new field to a UI Component `<form/>` XML file.
 
 **Interactive Invocation**
 
@@ -317,9 +317,9 @@ The `generate:ui:add-form-field` command will add a new field to a UI Component 
         "My New Field" \
         general
 
-The `magento2:generate:ui:add-form-field` command needs to know the full path to the `<form/>` XML file you want to insert your field in (`pulsestorm_pestle_things_form.xml`), your field's `name` property (`new_field`, for computers), your field's Label (`My New Field`, for humans), and the name of the fieldset the field should be inserted into.
+The `magento2:generate:ui:add-form-field` command needs to know the full path to the `<form/>` XML file where you want the new field (`pulsestorm_pestle_things_form.xml`), your field's `name` property (`new_field`, for computers), your field's Label (`My New Field`, for humans), and the name of the fieldset the field should be inserted into (`general`).
 
-After invoking the above command, the following nodes would be added to the `pulsestorm_pestle_things_form.xml` file.
+After invoking the above command, the following nodes will be added to the `pulsestorm_pestle_things_form.xml` file.
 
     <?xml version="1.0" encoding="UTF-8"?>
     <form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
@@ -343,7 +343,7 @@ After invoking the above command, the following nodes would be added to the `pul
         </fieldset>
     </form>
 
-The `magento2:generate:ui:form` command also supports a `is-required` option, which will set the `<item name="required-entry" xsi:type="boolean"/>` node to `true`.
+The `magento2:generate:ui:form` command also supports an `is-required` option. The `is-required` option will generate configuration with the `<item name="required-entry" xsi:type="boolean"/>` node to `true`.
 
     $ pestle.phar magento2:generate:ui:add-form-field \
         --is-required \
