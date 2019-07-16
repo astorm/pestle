@@ -463,7 +463,7 @@ The `magento2:generate:ui:form` command also supports an `is-required` option. T
         "My New Field" \
         general
 
-The `magento2:generate:ui:form` command will only add fields to fieldsets that already exist.  If you want to add a new fieldset to your UI Component, use the [`generate:ui:add-form-fieldset`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiadd-form-fieldset) command.
+The `magento2:generate:ui:form` command will only add fields to fieldsets that already exist.  If you want to add a new fieldset to your UI Component, use the [`magento2:generate:ui:add-form-fieldset`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiadd-form-fieldset) command.
 
 **Further Reading**
 
