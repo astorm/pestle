@@ -26,33 +26,33 @@ function getModuleNameFromClassName($modelClass)
 
 function getPersistKeyFromModelClassName($modelClass)
 {
-    $key = strToLower(getModuleNameFromClassName($modelClass) 
-        . '_' 
+    $key = strToLower(getModuleNameFromClassName($modelClass)
+        . '_'
         . getModelShortName($modelClass));
-    
-    return $key;        
+
+    return $key;
 }
 
 function createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule)
 {
     return '
-    const ADMIN_RESOURCE = \''.$aclRule.'\';  
+    const ADMIN_RESOURCE = \''.$aclRule.'\';
     public function execute()
     {
         $resultRedirect = $this->resultRedirectFactory->create();
         $resultRedirect->setPath(\'*/index/index\');
         return $resultRedirect;
-    }     
+    }
 ';
 }
 
 function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
-{    
+{
     $dbID           = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
     $repositoryName = '\\' . getModelRepositoryName($modelClass);
-    return '  
+    return '
     const ADMIN_RESOURCE = \''.$aclRule.'\';
-    
+
     /**
      * @var ' . $repositoryName . '
      */
@@ -71,7 +71,7 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
 
         parent::__construct($context);
     }
-          
+
     public function execute()
     {
         // check if we know what should be deleted
@@ -97,10 +97,10 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
         $this->messageManager->addError(__(\'We can not find an object to delete.\'));
         // go to grid
         return $resultRedirect->setPath(\'*/*/\');
-        
-    }    
-    
-';    
+
+    }
+
+';
 }
 
 function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
@@ -120,7 +120,7 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
      * @var DataPersistorInterface
      */
     protected $dataPersistor;
-    
+
     /**
      * @var ' . $repositoryName . '
      */
@@ -138,7 +138,7 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
     ) {
         $this->dataPersistor    = $dataPersistor;
         $this->objectRepository  = $objectRepository;
-        
+
         parent::__construct($context);
     }
 
@@ -189,27 +189,27 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
             return $resultRedirect->setPath(\'*/*/edit\', [\''.$dbID.'\' => $this->getRequest()->getParam(\''.$dbID.'\')]);
         }
         return $resultRedirect->setPath(\'*/*/\');
-    }    
+    }
 ';
 }
 
 function createControllerClassBody($module_info, $aclRule)
 {
     return '
-    const ADMIN_RESOURCE = \''.$aclRule.'\';       
+    const ADMIN_RESOURCE = \''.$aclRule.'\';
     protected $resultPageFactory;
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory)
     {
-        $this->resultPageFactory = $resultPageFactory;        
+        $this->resultPageFactory = $resultPageFactory;
         parent::__construct($context);
     }
-    
+
     public function execute()
     {
-        return $this->resultPageFactory->create();  
-    }    
+        return $this->resultPageFactory->create();
+    }
 ';
 }
 
@@ -224,8 +224,8 @@ function createControllerFiles($module_info, $modelClass, $aclRule)
         'controllerSaveClassName' => $prefix . '\Controller\Adminhtml\\'.$shortName.'\Save'
     ];
     foreach($classes as $desc=>$className)
-    {        
-        $contents = createClassWithUse($className, '\Magento\Backend\App\Action', '', 
+    {
+        $contents = createClassWithUse($className, '\Magento\Backend\App\Action', '',
             createControllerClassBody($module_info, $aclRule));
         if($desc === 'controllerSaveClassName')
         {
@@ -235,27 +235,27 @@ use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Exception\LocalizedException;
             ';
             $contents = createClassWithUse($className, '\Magento\Backend\App\Action', $useString,
-                createControllerClassBodyForSave($module_info, $modelClass, $aclRule));   
-        }       
+                createControllerClassBodyForSave($module_info, $modelClass, $aclRule));
+        }
         output("Creating: $className");
-        createClassFile($className,$contents);        
+        createClassFile($className,$contents);
     }
-    
+
     $deleteClassName = $prefix . '\Controller\Adminhtml\\'.$shortName.'\Delete';
     $useString       = '';
     $contents = createClassWithUse(
         $deleteClassName, '\Magento\Backend\App\Action', $useString,
         createControllerClassBodyForDelete($module_info, $modelClass, $aclRule));
     output("Creating: $deleteClassName");
-    createClassFile($deleteClassName,$contents); 
-        
+    createClassFile($deleteClassName,$contents);
+
     $indexRedirectClassName = $prefix . '\Controller\Adminhtml\\'.$shortName.'\Index';
     $useString       = '';
     $contents = createClassWithUse(
         $indexRedirectClassName, '\Magento\Backend\App\Action', $useString,
         createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule));
     output("Creating: $deleteClassName");
-    createClassFile($indexRedirectClassName,$contents);             
+    createClassFile($indexRedirectClassName,$contents);
 
 
 }
@@ -269,7 +269,7 @@ function createCollectionClassNameFromModelName($modelClass)
     }
     $first      = array_slice($parts, 0, 3);
     $first[]    = 'ResourceModel';
-    
+
     $second     = array_slice($parts, 3);
     $second[]   = 'CollectionFactory';
     $new        = array_merge($first, $second);
@@ -279,7 +279,7 @@ function createCollectionClassNameFromModelName($modelClass)
 function createDataProviderUseString($module_info, $modelClass)
 {
     $collectionClassName = createCollectionClassNameFromModelName($modelClass);
-        
+
     return 'use '.$collectionClassName.';
 use Magento\Framework\App\Request\DataPersistorInterface;';
 }
@@ -362,7 +362,7 @@ function createDataProviderClassBodyString($module_info, $modelClass)
 
         return $this->loadedData;
     }
-';        
+';
 }
 
 function createClassWithUse($className, $parentClass, $useString, $bodyString)
@@ -383,14 +383,14 @@ function createDataProvider($module_info, $modelClass)
     // $moduleBasePath = getModuleBasePath();
     $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);
     $contents           = createClassWithUse(
-        $dataProviderClassName, 
+        $dataProviderClassName,
         '\Magento\Ui\DataProvider\AbstractDataProvider',
         createDataProviderUseString($module_info, $modelClass),
-        createDataProviderClassBodyString($module_info, $modelClass)        
-    );        
+        createDataProviderClassBodyString($module_info, $modelClass)
+    );
     output("Creating: $dataProviderClassName");
-    $return             = createClassFile($dataProviderClassName,$contents);        
-    
+    $return             = createClassFile($dataProviderClassName,$contents);
+
 }
 
 function createShortPluralModelName($modelClass)
@@ -398,7 +398,7 @@ function createShortPluralModelName($modelClass)
     $parts = [];
     $flag  = false;
     foreach(explode('\\', $modelClass) as $part)
-    { 
+    {
         if($part === 'Model')
         {
             $flag = true;
@@ -406,11 +406,11 @@ function createShortPluralModelName($modelClass)
         }
         if(!$flag) { continue;}
         $parts[] = $part;
-    }          
-          
+    }
+
     $parts = array_map('strToLower', $parts);
     $name  = implode('_', $parts);
-    
+
     if(preg_match('%ly$%',$name))
     {
         $name = preg_replace('%ly$%', 'lies',$name);
@@ -425,7 +425,7 @@ function createShortPluralModelName($modelClass)
 function createEmptyXmlTree()
 {
     $xml = simplexml_load_string(
-        '<page  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        '<page  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                 xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"></page>');
     return $xml;
 }
@@ -446,34 +446,34 @@ function addUiComponentToXml($xml, $uiComponentName)
 function createLayoutXmlFiles($module_info, $modelClass)
 {
     $moduleBasePath     = $module_info->folder;
-    $layoutBasePath     = $moduleBasePath . '/view/adminhtml/layout'; 
-    
+    $layoutBasePath     = $moduleBasePath . '/view/adminhtml/layout';
+
     $uiComponentName    = createUiComponentNameFromModuleInfoAndModelClass(
         $module_info, $modelClass);
-    
+
     $prefixFilename = implode('_', [
         strToLower($module_info->name),
         createShortPluralModelName($modelClass),
         strToLower(getModelShortName($modelClass))
         // 'index'
     ]);;
-    
+
     $names = ['edit', 'new', 'save' ];
-    
+
     foreach($names as $name)
     {
         $fileName = $layoutBasePath . '/' . $prefixFilename . '_' . $name . '.xml';
-        
+
         $xml = createEmptyXmlTree();
         if(file_exists($fileName))
         {
             $xml = simplexml_load_file($fileName);
         }
         $xml = addUiComponentToXml($xml, $uiComponentName);
-        
+
         output("Creating $fileName");
         writeStringToFile($fileName, formatXmlString($xml->asXml()));
-    }        
+    }
 }
 
 function createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelClass)
@@ -492,38 +492,38 @@ function generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule)
     $genericButtonClassName     = $prefix . '\\GenericButton';
     $genericButtonClassContents = createClassTemplateWithUse($genericButtonClassName);
     $genericButtonClassContents = str_replace('<$use$>' ,'', $genericButtonClassContents);
-    
+
     $genericContents = '
     //putting all the button methods in here.  No "right", but the whole
     //button/GenericButton thing seems -- not that great -- to begin with
     public function __construct(
         \Magento\Backend\Block\Widget\Context $context
     ) {
-        $this->context = $context;    
+        $this->context = $context;
     }
-    
+
     public function getBackUrl()
     {
         return $this->getUrl(\'*/*/\');
-    }    
-    
+    }
+
     public function getDeleteUrl()
     {
         return $this->getUrl(\'*/*/delete\', [\'object_id\' => $this->getObjectId()]);
-    }   
-    
+    }
+
     public function getUrl($route = \'\', $params = [])
     {
         return $this->context->getUrlBuilder()->getUrl($route, $params);
-    }    
-    
+    }
+
     public function getObjectId()
     {
         return $this->context->getRequest()->getParam(\''.$dbID.'\');
-    }     
-';    
-    $genericButtonClassContents = str_replace('<$body$>',$genericContents, $genericButtonClassContents);    
-    createClassFile($genericButtonClassName,$genericButtonClassContents);                   
+    }
+';
+    $genericButtonClassContents = str_replace('<$body$>',$genericContents, $genericButtonClassContents);
+    createClassFile($genericButtonClassName,$genericButtonClassContents);
     return $genericButtonClassName;
 }
 
@@ -535,14 +535,14 @@ function generateButtonClassPrefix($modelClass)
 }
 
 function getAllButtonDataStrings()
-{        
+{
     $singleQuoteForJs = "\\''";
     return [
         'back'=> '[
             \'label\' => __(\'Back\'),
             \'on_click\' => sprintf("location.href = \'%s\';", $this->getBackUrl()),
             \'class\' => \'back\',
-            \'sort_order\' => 10    
+            \'sort_order\' => 10
         ]',
         'delete'=> '[
                 \'label\' => __(\'Delete Object\'),
@@ -557,7 +557,7 @@ function getAllButtonDataStrings()
             \'class\' => \'reset\',
             \'on_click\' => \'location.reload();\',
             \'sort_order\' => 30
-        ]',        
+        ]',
         'save'=> '[
             \'label\' => __(\'Save Object\'),
             \'class\' => \'save primary\',
@@ -566,7 +566,7 @@ function getAllButtonDataStrings()
                 \'form-role\' => \'save\',
             ],
             \'sort_order\' => 90,
-        ]',                
+        ]',
         'save_and_continue'=> '[
             \'label\' => __(\'Save and Continue Edit\'),
             \'class\' => \'save\',
@@ -576,8 +576,8 @@ function getAllButtonDataStrings()
                 ],
             ],
             \'sort_order\' => 80,
-        ]',                        
-    ];    
+        ]',
+    ];
 }
 
 function getButtonDataStringForButton($buttonName)
@@ -599,7 +599,7 @@ function createButtonClassContents($buttonName)
     {
         $extra = 'if(!$this->getObjectId()) { return []; }';
     }
-    $contents = '     
+    $contents = '
     public function getButtonData()
     {
         '.$extra.'
@@ -609,17 +609,17 @@ function createButtonClassContents($buttonName)
     // return '//implement me for ' . $buttonName;
 }
 function generateButtonClassAndReturnName($modelClass, $buttonName)
-{            
+{
     $prefix = generateButtonClassPrefix($modelClass);
-    $buttonClassName = $prefix .= '\\' . str_replace(' ', '', 
-        ucWords(str_replace('_', ' ', $buttonName))) . 'Button';        
-    
-    $contents = createClassTemplateWithUse($buttonClassName, 'GenericButton', 
+    $buttonClassName = $prefix .= '\\' . str_replace(' ', '',
+        ucWords(str_replace('_', ' ', $buttonName))) . 'Button';
+
+    $contents = createClassTemplateWithUse($buttonClassName, 'GenericButton',
         'ButtonProviderInterface');
     $contents   = str_replace('<$use$>','use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;',$contents);
     $contents   = str_replace('<$body$>',createButtonClassContents($buttonName),$contents);
-    createClassFile($buttonClassName,$contents);            
-    
+    createClassFile($buttonClassName,$contents);
+
     return $buttonClassName;
 }
 
@@ -627,41 +627,41 @@ function createButtonXml($module_info, $modelClass, $aclRule)
 {
     //handle generic button
     $prefix = generateButtonClassPrefix($modelClass);
-    $dbID   = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));    
-    generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule);    
-    
-    $buttons = [        
+    $dbID   = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
+    generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule);
+
+    $buttons = [
         'back'              => generateButtonClassAndReturnName($modelClass,'back'),
         'delete'            => generateButtonClassAndReturnName($modelClass,'delete'),
         'reset'             => generateButtonClassAndReturnName($modelClass,'reset'),
         'save'              => generateButtonClassAndReturnName($modelClass,'save'),
-        'save_and_continue' => generateButtonClassAndReturnName($modelClass,'save_and_continue')                                        
+        'save_and_continue' => generateButtonClassAndReturnName($modelClass,'save_and_continue')
 //         'back'              => $prefix . '\BackButton',
 //         'delete'            => $prefix . '\DeleteButton',
 //         'reset'             => $prefix . '\ResetButton',
 //         'save'              => $prefix . '\SaveButton',
-//         'save_and_continue' => $prefix . '\SaveAndContinueButton',                                
+//         'save_and_continue' => $prefix . '\SaveAndContinueButton',
     ];
     $buttonXml = "\n";
     foreach($buttons as $name=>$class)
     {
         $buttonXml .= '<item name="'.$name.'" xsi:type="string">'.$class.'</item>' . "\n";
     }
-    
+
     return $buttonXml;
 }
 
 function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
-{    
+{
     $moduleBasePath      = $module_info->folder;
-    $uiComponentBasePath = $moduleBasePath . '/view/adminhtml/ui_component';     
+    $uiComponentBasePath = $moduleBasePath . '/view/adminhtml/ui_component';
     $uiComponentName     = createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelClass);
-    $uiComponentFilePath = $uiComponentBasePath . '/' . $uiComponentName . '.xml';        
+    $uiComponentFilePath = $uiComponentBasePath . '/' . $uiComponentName . '.xml';
     $dbID       = createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
-    $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);          
-    
+    $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);
+
     $buttonXml = createButtonXml($module_info, $modelClass, $aclRule);
-         
+
     $xml = simplexml_load_string(
 '<?xml version="1.0" encoding="UTF-8"?>
 <form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
@@ -702,8 +702,8 @@ function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
         <argument name="data" xsi:type="array">
             <item name="config" xsi:type="array">
                 <item name="label" xsi:type="string">Form Data</item>
-                <item name="collapsible" xsi:type="boolean">true</item>                
-                <item name="opened" xsi:type="boolean">true</item>                
+                <item name="collapsible" xsi:type="boolean">true</item>
+                <item name="opened" xsi:type="boolean">true</item>
             </item>
         </argument>
         <field name="'.$dbID.'">
@@ -711,7 +711,7 @@ function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
                 <item name="config" xsi:type="array">
                     <item name="visible" xsi:type="boolean">false</item>
                     <item name="dataType" xsi:type="string">text</item>
-                    <item name="formElement" xsi:type="string">input</item>                    
+                    <item name="formElement" xsi:type="string">input</item>
                     <item name="dataScope" xsi:type="string">'.$dbID.'</item>
                 </item>
             </argument>
@@ -731,8 +731,8 @@ function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
             </argument>
         </field>
     </fieldset>
-</form>'    
-    );        
+</form>'
+    );
     writeStringToFile($uiComponentFilePath, formatXmlString($xml->asXml()));
 }
 /**
