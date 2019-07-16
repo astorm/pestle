@@ -410,7 +410,7 @@ If you're looking to create a _full_ module, be sure to checkout the [`magento2:
         @argument fieldset Fieldset Name? [general]
         @option is-required Is field required?
 
-The `generate:ui:add-form-field` command will add a new field to a UI Component `<form/>` XML file.
+The `magento2:generate:ui:add-form-field` command will add a new field to a UI Component `<form/>` XML file.
 
 **Interactive Invocation**
 
@@ -463,14 +463,14 @@ The `magento2:generate:ui:form` command also supports an `is-required` option. T
         "My New Field" \
         general
 
+The `magento2:generate:ui:form` command will only add fields to fieldsets that already exist.  If you want to add a new fieldset to your UI Component, use the [`magento2:generate:ui:add-form-fieldset`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiadd-form-fieldset) command.
+
 **Further Reading**
 
 - [Magento 2: Introducing UI Components](https://alanstorm.com/magento_2_introducing_ui_components/)
 - [Pestle: `magento2:generate:ui:form`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiform)
 
 ## generate:ui:add-form-fieldset
-
-TODO: WRITE THE DOCS!
 
     Usage:
         $ pestle.phar magento2:generate:ui:add-form-fieldset
@@ -487,4 +487,42 @@ TODO: WRITE THE DOCS!
         @argument fieldset Fieldset Name? [newfieldset]
         @argument label Label? [NewFieldset]
 
-Once written add fieldset warning to field entry
+The `magento2:generate:ui:add-form-fieldset` command will add a new fieldset to a UI Component `<form/>` XML file, allowing you to group a new set of form fields in the user interface.
+
+**Interactive Invocation**
+
+    $ pestle.phar magento2:generate:ui:add-form-fieldset
+    Path to Form XML File? ()] ./app/code/Pulsestorm/Pestle/view/adminhtml/ui_component/pulsestorm_pestle_things_form.xml
+    Fieldset Name? (newfieldset)] optional
+    Label? (NewFieldset)] Option Field
+
+**Argument Invocation**
+
+    $ pestle.phar magento2:generate:ui:add-form-fieldset \
+        ./app/code/Pulsestorm/Pestle/view/adminhtml/ui_component/pulsestorm_pestle_things_form.xml \
+        optional
+        "Option Field"
+
+If you invoked the above commands, the following nodes would be added to the `pulsestorm_pestle_things_form.xml` UI Component XML file.
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+        <!-- ... -->
+        <fieldset name="optional">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string">Option Field</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+        </fieldset>
+    </form>
+
+By default, the counterpart `magento2:generate:ui:form` command adds a single fieldset named `general`.  With the `magento2:generate:ui:add-form-fieldset` command you can add new fieldsets to your form, and then use the [`magento2:generate:ui:add-form-field`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiadd-form-field) command to add new individual fields to your fieldset.
+
+**Further Reading**
+
+
+- [Magento 2: Introducing UI Components](https://alanstorm.com/magento_2_introducing_ui_components/)
+- [Pestle: `magento2:generate:ui:form`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiform)
+- [Pestle: `magento2:generate:ui:add-form-field`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiadd-form-field)
