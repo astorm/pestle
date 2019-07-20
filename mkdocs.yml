@@ -1,5 +1,7 @@
 site_name: Pestle
 theme: readthedocs
+highlightjs: false
+extra_css: [extra.css]
 nav:
     - Home: index.md
     - Magento 2 Code Generation:
@@ -19,14 +21,14 @@ nav:
         # Other Commands
         - Other Commands: magento2-others.md
 
-    - Magento 2 Commands:
-        - Introduction: magento2-other-introduction.md
-
-        - Quick Conversions: magento2-quick-conversions.md
-
-        - Scans & Reports: magento2-scans-and-reports.md
-
-        - Other Commands: magento2-other-other.md
+#    - Magento 2 Commands:
+#        - Introduction: magento2-other-introduction.md
+#
+#        - Quick Conversions: magento2-quick-conversions.md
+#
+#        - Scans & Reports: magento2-scans-and-reports.md
+#
+#        - Other Commands: magento2-other-other.md
 
     - Pestle Modules:
         - Generate a Module: pestle-generate.md
