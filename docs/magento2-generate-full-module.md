@@ -1,5 +1,6 @@
 ## generate:full-module
 
+``` plaintext
     Usage:
         $ pestle.phar magento2:generate:full-module
 
@@ -17,8 +18,9 @@
         @argument model_name One Word Model Name? [Thing]
         @option with-phar-name Change pestle.phar to something like pestle_dev
         @option with-setup-upgrade Add Setup Upgrade Call?
+```
 
-The `magento:generate:full-module` command works _slightly_ differently than other generation commands.  Instead of directly creating PHP and XML module files, this command will generate a _unix shell script_, and that shell script will call _other pestle commands_ to generate the module.
+The `magento:generate:full-module` command works *slightly* differently than other generation commands.  Instead of directly creating PHP and XML module files, this command will generate a *unix shell script*, and that shell script will call *other pestle commands* to generate the module.
 
 **Interactive Invocation**
 

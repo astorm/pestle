@@ -15,7 +15,7 @@
         @argument node_name The <node_name/>? [block]
         @argument name The {node_name}="" value? []
 
-The `magento2:generate:remove-named-node` command will _delete_ a named XML node from a configuration file.  This is most useful is scripts that automate more complex module generation.
+The `magento2:generate:remove-named-node` command will *delete* a named XML node from a configuration file.  This is most useful is scripts that automate more complex module generation.
 
 **Interactive Invocation**
 
@@ -55,7 +55,7 @@ Also, pestle will not proceed if your named node has child nodes.
     $ pestle.phar magento2:generate:remove-named-node app/code/Pulsestorm/Pestle/etc/events.xml event controller_action_predispatch
     Bailing: Contains child nodes
 
-While this command exists in the `magento2:generate:` namespace, it will work on _any_ XML file where `name` is a de-facto unique identifier.
+While this command exists in the `magento2:generate:` namespace, it will work on *any* XML file where `name` is a de-facto unique identifier.
 
 ## generate:psr-log-level
 

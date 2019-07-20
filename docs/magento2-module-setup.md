@@ -44,7 +44,7 @@ As of this writing, this command **does not** create a `composer.json` file for 
 
 **Further Reading**
 
--  [Introduction to Magento 2 — No More MVC](https://alanstorm.com/magento_2_mvvm_mvc/)
+- [Introduction to Magento 2 — No More MVC](https://alanstorm.com/magento_2_mvvm_mvc/)
 
 ## generate:registration
 

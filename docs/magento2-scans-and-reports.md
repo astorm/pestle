@@ -14,7 +14,6 @@ TODO: WRITE THE DOCS!
 
         @command magento2:base-dir
 
-
 ## check-templates
 
 TODO: WRITE THE DOCS!
@@ -32,7 +31,6 @@ TODO: WRITE THE DOCS!
         Description
         @command magento2:check-templates
 
-
 ## class-list
 
 TODO: WRITE THE DOCS!
@@ -48,7 +46,6 @@ TODO: WRITE THE DOCS!
         Get a list of all of magento2's extensible classes
 
         @command magento2:class-list
-
 
 ## read-rest-schema
 
@@ -67,7 +64,6 @@ TODO: WRITE THE DOCS!
         @command magento2:read-rest-schema
         @argument url Base Url? [http://magento-2-with-keys.dev/]
 
-
 ## scan:acl-used
 
 TODO: WRITE THE DOCS!
@@ -85,7 +81,6 @@ TODO: WRITE THE DOCS!
         @command magento2:scan:acl-used
         @argument dir Which Directory?
 
-
 ## scan:class-and-namespace
 
 TODO: WRITE THE DOCS!
@@ -101,7 +96,6 @@ TODO: WRITE THE DOCS!
         BETA: Scans a Magento 2 module for misnamed PHP classes
         @command magento2:scan:class-and-namespace
         @argument folder Which Folder?
-
 
 ## scan:htaccess
 
@@ -119,7 +113,6 @@ TODO: WRITE THE DOCS!
         list
         @command magento2:scan:htaccess
 
-
 ## scan:registration
 
 TODO: WRITE THE DOCS!
@@ -136,7 +129,6 @@ TODO: WRITE THE DOCS!
         Long
         Description
         @command magento2:scan:registration
-
 
 ## search:search-controllers
 

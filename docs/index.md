@@ -14,7 +14,7 @@ First, we'll cover [Pestle's code and configuration generation ability w/r/t Mag
 
 Second, we'll cover some of the [one-off Magento 2 scripts](https://pestle.readthedocs.io/en/latest/magento2-other-introduction/) that ship with pestle.  Many of these aren't as robust as they might be, but still offer useful functionality or a good start **towards** a more robust solution.
 
-Finally, we'll close with some information about developing the core pestle code base itself -- both how to _use_ pestle for your own command line programs, as well as work with the internals of pestle's framework code.
+Finally, we'll close with some information about developing the core pestle code base itself -- both how to *use* pestle for your own command line programs, as well as work with the internals of pestle's framework code.
 
 ## Getting Started
 
@@ -22,7 +22,7 @@ The easiest way to get started is to grab the latest build using curl
 
     $ curl -LO http://pestle.pulsestorm.net/pestle.phar
 
-Pestle is distributed as a PHP `phar` file -- [that's short for PHP archive](https://www.php.net/manual/en/book.phar.php).  A `phar` file allows you to bundle up a bunch of PHP and distribute it as a single program.  You should be able to run a `phar` with a specific version of PHP, _or_ execute the `phar` file itself.
+Pestle is distributed as a PHP `phar` file -- [that's short for PHP archive](https://www.php.net/manual/en/book.phar.php).  A `phar` file allows you to bundle up a bunch of PHP and distribute it as a single program.  You should be able to run a `phar` with a specific version of PHP, *or* execute the `phar` file itself.
 
     $ php pestle.phar
     $ chmod +x pestle.phar

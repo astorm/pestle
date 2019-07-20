@@ -2,7 +2,7 @@
 
 The open-source version of Magento 2 (variously called Magento Community Edition or Magento Open Source) and the "on-premises" version (variously called Enterprise Edition or Magento Commerce) is written using the PHP programming language.  It's an evolution of the Magento 1 codebase, which was also written using PHP, and incorporated components of Zend Framework -- a third party framework for developing web applications in PHP.
 
-The original core Magento 1 developers built _their own_ MVC framework.  The various teams that have worked on Magento since evolved that framework slightly, but in Magento 2 the core concepts remained the same -- they just became more verbose.
+The original core Magento 1 developers built *their own* MVC framework.  The various teams that have worked on Magento since evolved that framework slightly, but in Magento 2 the core concepts remained the same -- they just became more verbose.
 
 Magento code is organized into modules.  These modules share a set of global configuration objects -- each module can read/write to these global configuration objects by adding XML configuration files to its own `etc` folder. These files are merged to create the global configuration.  Magento provides core modules for doing web application-y things like MVC, HTML Layout rendering, monkey-patching PHP class files, etc. They also provide core modules that implement a web-based online retail store.
 

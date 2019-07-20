@@ -15,7 +15,6 @@ TODO: WRITE THE DOCS!
         Description
         @command magento2:class-from-path
 
-
 ## convert-class
 
 TODO: WRITE THE DOCS!
@@ -32,7 +31,6 @@ TODO: WRITE THE DOCS!
         Long
         Description
         @command magento2:convert-class
-
 
 ## convert-observers-xml
 
@@ -51,7 +49,6 @@ TODO: WRITE THE DOCS!
         Description
         @command magento2:convert-observers-xml
 
-
 ## convert-system-xml
 
 TODO: WRITE THE DOCS!
@@ -67,7 +64,6 @@ TODO: WRITE THE DOCS!
         ALPHA: Partially Converts Magento 1 system.xml into Magento 2
         system.xml
         @command magento2:convert-system-xml
-
 
 ## extract-mage2-system-xml-paths
 
@@ -88,7 +84,6 @@ TODO: WRITE THE DOCS!
 
         @command magento2:extract-mage2-system-xml-paths
 
-
 ## fix-direct-om
 
 TODO: WRITE THE DOCS!
@@ -106,7 +101,6 @@ TODO: WRITE THE DOCS!
         @command magento2:fix-direct-om
         @argument folder Folder to scan
         @argument extensions File extensions? [php, phtml]
-
 
 ## path-from-class
 

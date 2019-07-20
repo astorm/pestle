@@ -278,7 +278,7 @@ After invoking the above command, the following configuration would be added to 
         @argument aclRule ACL Rule for Controllers?
         [Pulsestorm_Formexample::ruleName]
 
-The `magento2:generate:ui:form` command allows you to generate the XML configuration _and_ PHP controllers needed to add a CRUD model editing form to Magento's backend.
+The `magento2:generate:ui:form` command allows you to generate the XML configuration *and* PHP controllers needed to add a CRUD model editing form to Magento's backend.
 
 **Interactive Invocation**
 
@@ -382,8 +382,7 @@ In addition to the needed controller files, layout files, data provider, and UI 
         </fieldset>
     </form>
 
-If you're looking to create a _full_ module, be sure to checkout the [`magento2:generate:full-module
-`](https://pestle.readthedocs.io/en/latest/magento2-generate-full-module/) command
+If you're looking to create a *full* module, be sure to checkout the [`magento2:generate:full-module`](https://pestle.readthedocs.io/en/latest/magento2-generate-full-module/) command
 
 **Further Reading**
 
@@ -521,7 +520,6 @@ If you invoked the above commands, the following nodes would be added to the `pu
 By default, the counterpart `magento2:generate:ui:form` command adds a single fieldset named `general`.  With the `magento2:generate:ui:add-form-fieldset` command you can add new fieldsets to your form, and then use the [`magento2:generate:ui:add-form-field`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiadd-form-field) command to add new individual fields to your fieldset.
 
 **Further Reading**
-
 
 - [Magento 2: Introducing UI Components](https://alanstorm.com/magento_2_introducing_ui_components/)
 - [Pestle: `magento2:generate:ui:form`](https://pestle.readthedocs.io/en/latest/magento2-generate-ui/#generateuiform)

@@ -14,7 +14,6 @@ TODO: WRITE THE DOCS!
         running mod_php by setting things to 777.
         @command magento2:fix-permissions-modphp
 
-
 ## code-migration:rename
 
 TODO: WRITE THE DOCS!
