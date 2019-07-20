@@ -20,22 +20,30 @@ Finally, we'll close with some information about developing the core pestle code
 
 The easiest way to get started is to grab the latest build using curl
 
-    $ curl -LO http://pestle.pulsestorm.net/pestle.phar
+```plaintext
+$ curl -LO http://pestle.pulsestorm.net/pestle.phar
+```
 
 Pestle is distributed as a PHP `phar` file -- [that's short for PHP archive](https://www.php.net/manual/en/book.phar.php).  A `phar` file allows you to bundle up a bunch of PHP and distribute it as a single program.  You should be able to run a `phar` with a specific version of PHP, *or* execute the `phar` file itself.
 
-    $ php pestle.phar
-    $ chmod +x pestle.phar
-    $ ./pestle.phar
-    $ mv pestle.phar /usr/local/bin
-    $ pestle.phar                   # assumes /usr/local/bin is in your $PATH
+```plaintext
+$ php pestle.phar
+$ chmod +x pestle.phar
+$ ./pestle.phar
+$ mv pestle.phar /usr/local/bin
+$ pestle.phar                   # assumes /usr/local/bin is in your $PATH
+```
 
 Most of these docs will presume you're executing `pestle.phar` directly via a directory that's in your shell's path.
 
 You can see a list of available commands with the following
 
-    $ pestle.phar list-commands
+```plaintext
+$ pestle.phar list-commands
+```
 
 and get help for a specific command (`magento2:generate:module` below) with
 
-    $ pestle.phar help magento2:generate:module
+```plaintext
+$ pestle.phar help magento2:generate:module
+```

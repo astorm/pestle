@@ -2,147 +2,163 @@
 
 TODO: WRITE THE DOCS!
 
-    Usage:
-        $ pestle.phar magento2:base-dir
+```plaintext
+Usage:
+    $ pestle.phar magento2:base-dir
 
-    Arguments:
+Arguments:
 
-    Options:
+Options:
 
-    Help:
-        Output the base magento2 directory
+Help:
+    Output the base magento2 directory
 
-        @command magento2:base-dir
+    @command magento2:base-dir
+```
 
 ## check-templates
 
 TODO: WRITE THE DOCS!
 
-    Usage:
-        $ pestle.phar magento2:check-templates
+```plaintext
+Usage:
+    $ pestle.phar magento2:check-templates
 
-    Arguments:
+Arguments:
 
-    Options:
+Options:
 
-    Help:
-        Checks for incorrectly named template folder
-        Long
-        Description
-        @command magento2:check-templates
+Help:
+    Checks for incorrectly named template folder
+    Long
+    Description
+    @command magento2:check-templates
+```
 
 ## class-list
 
 TODO: WRITE THE DOCS!
 
-    Usage:
-        $ pestle.phar magento2:class-list
+```plaintext
+Usage:
+    $ pestle.phar magento2:class-list
 
-    Arguments:
+Arguments:
 
-    Options:
+Options:
 
-    Help:
-        Get a list of all of magento2's extensible classes
+Help:
+    Get a list of all of magento2's extensible classes
 
-        @command magento2:class-list
+    @command magento2:class-list
+```
 
 ## read-rest-schema
 
 TODO: WRITE THE DOCS!
 
-    Usage:
-        $ pestle.phar magento2:read-rest-schema
+```plaintext
+Usage:
+    $ pestle.phar magento2:read-rest-schema
 
-    Arguments:
+Arguments:
 
-    Options:
+Options:
 
-    Help:
-        BETA: Magento command, reads the rest schema on a Magento system
+Help:
+    BETA: Magento command, reads the rest schema on a Magento system
 
-        @command magento2:read-rest-schema
-        @argument url Base Url? [http://magento-2-with-keys.dev/]
+    @command magento2:read-rest-schema
+    @argument url Base Url? [http://magento-2-with-keys.dev/]
+```
 
 ## scan:acl-used
 
 TODO: WRITE THE DOCS!
 
-    Usage:
-        $ pestle.phar magento2:scan:acl-used
+```plaintext
+Usage:
+    $ pestle.phar magento2:scan:acl-used
 
-    Arguments:
+Arguments:
 
-    Options:
+Options:
 
-    Help:
-        Scans modules for ACL rule ids, makes sure they're all used/defined
+Help:
+    Scans modules for ACL rule ids, makes sure they're all used/defined
 
-        @command magento2:scan:acl-used
-        @argument dir Which Directory?
+    @command magento2:scan:acl-used
+    @argument dir Which Directory?
+```
 
 ## scan:class-and-namespace
 
 TODO: WRITE THE DOCS!
 
-    Usage:
-        $ pestle.phar magento2:scan:class-and-namespace
+```plaintext
+Usage:
+    $ pestle.phar magento2:scan:class-and-namespace
 
-    Arguments:
+Arguments:
 
-    Options:
+Options:
 
-    Help:
-        BETA: Scans a Magento 2 module for misnamed PHP classes
-        @command magento2:scan:class-and-namespace
-        @argument folder Which Folder?
+Help:
+    BETA: Scans a Magento 2 module for misnamed PHP classes
+    @command magento2:scan:class-and-namespace
+    @argument folder Which Folder?
+```
 
 ## scan:htaccess
 
 TODO: WRITE THE DOCS!
 
-    Usage:
-        $ pestle.phar magento2:scan:htaccess
+```plaintext
+Usage:
+    $ pestle.phar magento2:scan:htaccess
 
-    Arguments:
+Arguments:
 
-    Options:
+Options:
 
-    Help:
-        ALPHA: Checks for missing Magento 2 HTACCESS files from a hard coded
-        list
-        @command magento2:scan:htaccess
+Help:
+    ALPHA: Checks for missing Magento 2 HTACCESS files from a hard coded
+    list
+    @command magento2:scan:htaccess
+```
 
 ## scan:registration
 
 TODO: WRITE THE DOCS!
 
-    Usage:
-        $ pestle.phar magento2:scan:registration
+```plaintext
+Usage:
+    $ pestle.phar magento2:scan:registration
 
-    Arguments:
+Arguments:
 
-    Options:
+Options:
 
-    Help:
-        Scans Magento 2 directories for missing registration.php files
-        Long
-        Description
-        @command magento2:scan:registration
+Help:
+    Scans Magento 2 directories for missing registration.php files
+    Long
+    Description
+    @command magento2:scan:registration
+```
 
 ## search:search-controllers
 
 TODO: WRITE THE DOCS!
 
-    Usage:
-        $ pestle.phar magento2:search:search-controllers
+```plaintext
+Usage:
+    $ pestle.phar magento2:search:search-controllers
 
-    Arguments:
+Arguments:
 
-    Options:
+Options:
 
-    Help:
-        Searches controllers
-        @command magento2:search:search-controllers
-
-
+Help:
+    Searches controllers
+    @command magento2:search:search-controllers
+```

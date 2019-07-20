@@ -1,3 +1,7 @@
-code.plaintext span.hljs-keyword {
+code.plaintext span.hljs-keyword,
+code.plaintext span.hljs-symbol,
+code.plaintext span.hljs-string
+{
     font-weight:normal;
+    color:black;
 }
