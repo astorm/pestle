@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/astorm/pestle.svg?branch=master)](https://travis-ci.org/astorm/pestle)
+[![Documentation Status](https://readthedocs.org/projects/pestle/badge/?version=latest)](https://pestle.readthedocs.io/en/latest/?badge=latest)
 
 What is Pestle?
 --------------------------------------------------
