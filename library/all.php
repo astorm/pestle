@@ -3,51 +3,118 @@ namespace Pulsestorm\Nofrills\Build_Book{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
 
+function buildSourceFilesReport($lines)
+{
+    $report  = [];
+    $code    = [];
+    $chapter = false;
+    $parsingCode = false;
+    foreach($lines as $line)
+    {
+        if($line[0] == '#' && $line[1] != '#')
+        {
+            $chapter = trim($line); 
+            $report[$chapter] = [];
+        }        
+        if(!$chapter){ continue; }
+        
+        if(preg_match('%^(    )|(\t)%', $line)){
+            $parsingCode = true;
+            $code[] = $line;            
+        }
+        
+        if($parsingCode && !preg_match('%^(    )|(\t)%', $line)) {
+            $report[$chapter][] = implode('', $code);
+            $parsingCode = false;
+            $code = [];
+        }        
+    }
+    return $report;    
+}
+
+function buildSourceFiles($lines)
+{
+    $pathCode =  'output/code';
+    @mkdir($pathCode);
+    $report = buildSourceFilesReport($lines);
+    $i=0;
+    foreach($report as $chapter=>$samples)
+    {
+        $i++;
+        $path = $pathCode . '/chapter-' . $i;
+        if($chapter == '# Appendix')
+        {
+            $path = $pathCode . '/appdendix';
+        }
+        @mkdir($path);
+        $j=0;
+        foreach($samples as $sample)
+        {
+            $j++;
+            $pathCodeFile = $path . '/' . $j . '.txt';            
+            file_put_contents($pathCodeFile, $sample);
+            \Pulsestorm\Pestle\Library\output("Creating $pathCodeFile");
+        }                
+    }    
+}
+
 /**
 * BETA: Command for building No Frills Magento 2 Layout
 *
 * @command pulsestorm:build-book
+* @options --sample-book should I build a sample book instead of a full book?
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options)
 {
-    $files = glob('src/*.md');
+    if(isset($options['sample-book']))
+    {
+        define('SRC','src.sample');
+    }
+    else
+    {
+        define('SRC','src');
+    }
+    
+    
+    echo `mkdir -p output`;
+    $files = glob(SRC . '/*.md');
     if(count($files) === 0)
     {
-        \Pulsestorm\Pestle\Library\output("No src/, bailing");
+        \Pulsestorm\Pestle\Library\output("No " . SRC . "/, bailing");
         exit;
     }
     
-    $using = [
-        'src/toc.md',    
-        'src/chapter-0-introduction.md',
-        'src/chapter-1-blocks-template-php.md',
-        'src/chapter-2-layout-xml.md',
-        'src/chapter-3-layouthandles.md',
-        'src/chapter-4-page-layout.md',
-        'src/chapter-5-themes.md',
-        'src/chapter-6-advanced-xml-loading.md',
-        'src/chapter-7-frontend-overview.md',
-        'src/chapter-8-adding-frontend-files-to-module.md',
-        'src/chapter-9-serving-frontend-file.md',
-        'src/chapter-10-adding-frontend-layout-xml.md',
-        'src/chapter-11-knockout-scopes.md',
-        'src/appendix-areas.md',
-        'src/appendix-autoload.md',
-        'src/appendix-cache.md',        
-        'src/appendix-cli.md',
-        'src/appendix-components.md',
-        'src/appendix-curl.md',
-        'src/appendix-di.md',
-        'src/appendix-frontend-build.md',
-        'src/appendix-interfaces.md',
-        'src/appendix-magento-modes.md',
-        'src/appendix-unix-find.md',
-        'src/appendix-view-source.md',
-        'src/appendix-cache.md',                                           
+    $chapters = [   
+        SRC . '/chapter-0-introduction.md',
+        SRC . '/chapter-1-blocks-template-php.md',
+        SRC . '/chapter-2-layout-xml.md',
+        SRC . '/chapter-3-layouthandles.md',
+        SRC . '/chapter-4-page-layout.md',
+        SRC . '/chapter-5-themes.md',
+        SRC . '/chapter-6-advanced-xml-loading.md',
+        SRC . '/chapter-7-frontend-css.md',
+        SRC . '/chapter-8-frontend-javascript.md',
+        SRC . '/chapter-9-frontend-advanced-topics.md',
+        SRC . '/chapter-10-knockout-scopes.md'
+    ];
+    $appendices = [
+        SRC . '/appendix-areas.md',
+        SRC . '/appendix-autoload.md',
+        SRC . '/appendix-cache.md',        
+        SRC . '/appendix-cli.md',
+        SRC . '/appendix-components.md',
+        SRC . '/appendix-curl.md',
+        SRC . '/appendix-di.md',
+        SRC . '/appendix-frontend-build.md',
+        SRC . '/appendix-install-module.md',
+        SRC . '/appendix-interfaces.md',
+        SRC . '/appendix-magento-modes.md',
+        SRC . '/appendix-unix-find.md',
+        SRC . '/appendix-view-source.md',                                         
     ];
     
     $raw = [];
-    foreach($using as $file)
+    foreach($chapters as $file)
     {
         if(!in_array($file, $files))
         {
@@ -58,19 +125,36 @@ function pestle_cli($argv)
         $raw[] = file_get_contents($file);
     }
     
+    $chapterAppendix = ["# Appendix\n\n"];
+    foreach($appendices as $appendix)
+    {
+        if(!in_array($file, $files))
+        {
+            \Pulsestorm\Pestle\Library\output($file . ' does not exist in src/, bailing');
+            exit;
+        }    
+        $chapterAppendix[] = file_get_contents($appendix);
+    }
+    $raw[] = implode("\n\n", $chapterAppendix);
     $raw = implode("\n\n", $raw);
     
     
+    $raw = preg_replace('/(^#[^#])/sim', ('\pagebreak' . "\n" . '$1'), $raw);
     file_put_contents('/tmp/working.md', $raw);
     
-    echo `mkdir -p output`;
-    echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.tex`;
-    echo `pandoc output/in-progress-no-frills.tex -s -o output/in-progress-no-frills.pdf `;
-    echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.html `;
-    echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.epub`;
-    echo `pandoc /tmp/working.md -s -o output/in-progress-no-frills.epub3`;                
+    $lines   = file('/tmp/working.md');    
+    buildSourceFiles($lines);
     
-    echo `tar -cvf output/Pulsestorm_Nofrillslayout.tar -C /Users/alanstorm/Sites/magento-2-1-0.dev/project-community-edition app/code/Pulsestorm/Nofrillslayout`;
+    echo `pandoc /tmp/working.md --toc -s -o output/No-Frills-Magento-2-Layout.tex`;
+    // echo `pandoc /tmp/working.md -V documentclass=book -V classoption=oneside --template nofrills --toc -s --listings -o output/No-Frills-Magento-2-Layout.tex`;    
+    // echo `pandoc /tmp/working.md -o new.pdf --from markdown --template eisvogel --listings --toc -s -o output/No-Frills-Magento-2-Layout.tex`;            
+    //     echo `pandoc output/No-Frills-Magento-2-Layout.tex -V documentclass=book -V classoption=oneside --template nofrills --toc -s --listings --latex-engine=xelatex -o output/No-Frills-Magento-2-Layout.pdf `;
+    echo `pandoc output/No-Frills-Magento-2-Layout.tex -V documentclass=book -V classoption=oneside --template nofrills --toc -s --listings --pdf-engine=xelatex -o output/No-Frills-Magento-2-Layout.pdf `;
+    echo `pandoc /tmp/working.md --toc -s -o output/No-Frills-Magento-2-Layout.html `;
+    echo `pandoc /tmp/working.md --toc -s -o output/No-Frills-Magento-2-Layout.epub`;
+    echo `pandoc /tmp/working.md --toc -s -o output/No-Frills-Magento-2-Layout.epub3`;                
+    
+    //echo `tar -cvf output/Pulsestorm_Nofrillslayout.tar -C /Users/alanstorm/Sites/magento-2-1-0.dev/project-community-edition app/code/Pulsestorm/Nofrillslayout`;
     $date = date('Y-m-d-H-i-s',time());
     $zip = $date . '.zip';
     echo `zip -r $zip output`;
@@ -87,6 +171,58 @@ function pestle_cli($argv)
     `$cmd`;
     readfile('wordcount.txt');
     // echo `cat wordcount.txt`;
+}
+}
+namespace Pulsestorm\Gs\Combine{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+
+
+function getPathToGhostScript()
+{
+    return '/usr/local/bin/gs';
+}
+
+function generateGhostscriptCombine($pdfs, $outputFile)
+{
+    $pdfs = array_map(function($pdf){
+        return realpath($pdf);
+    }, $pdfs);
+    $cmd = getPathToGhostScript() . ' -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite ' .
+        '-dPDFSETTINGS=/prepress -sOutputFile=' . $outputFile . ' ' . 
+        implode(' ', $pdfs);    
+        
+    return $cmd;        
+}
+
+function runCommand($cmd)
+{
+    echo "Running $cmd","\n";
+    $results = `$cmd`;
+    echo $results,"\n";    
+    return $results;
+}
+
+function combinePdfs($pdfs, $outputFile)
+{
+    $cmd = generateGhostscriptCombine($pdfs, $outputFile);
+    runCommand($cmd);
+}
+
+/**
+* One Line Description
+*
+* @command gs:combine
+* @argument pdfs Comma seperated list [one.pdf,two.pdf]
+* @option output-file Output file [out.pdf]
+*/
+function pestle_cli($argv, $options)
+{
+    $outputFile = isset($options['output-file']) ? $options['output-file'] : '/tmp/output.pdf';
+    $pdfs       = explode(',', $argv['pdfs']);    
+    $results    = combinePdfs($pdfs, $outputFile);
 }
 }
 namespace Pulsestorm\Magento2\Cli\Format_Xml_String{
@@ -122,14 +258,14 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 * Lists help
 * Read the doc blocks for all commands, and then
 * outputs a list of commands along with thier doc
-* blocks.  
+* blocks.
 * @option is-machine-readable pipable/processable output?
 * @command list-commands
 */
 function pestle_cli($argv, $options)
 {
     \Pulsestorm\Cli\Build_Command_List\includeAllModuleFiles();
-    
+
     $user = get_defined_functions()['user'];
     $executes = array_filter($user, function($function){
         $parts = explode('\\', $function);
@@ -137,8 +273,8 @@ function pestle_cli($argv, $options)
         return strpos($function, 'pestle_cli') === 0 &&
                strpos($function, 'pestle_cli_export') === false;
     });
-    
-        
+
+
     $commands = array_map(function($function){
         $r       = new ReflectionFunction($function);
         $command = \Pulsestorm\Pestle\Library\getAtCommandFromDocComment($r);
@@ -149,12 +285,12 @@ function pestle_cli($argv, $options)
     }, $executes);
 
     // var_dump($commands);
-    $command_to_check = array_shift($argv);        
+    $command_to_check = array_shift($argv);
 
     if($command_to_check)
     {
         $commands = array_filter($commands, function($s) use ($command_to_check){
-            return $s['command'] === $command_to_check || 
+            return $s['command'] === $command_to_check ||
                 $s['command'] === str_replace('_','-',$command_to_check);
         });
     }
@@ -168,7 +304,7 @@ function pestle_cli($argv, $options)
     }
 
     \Pulsestorm\Pestle\Library\output('');
-    
+
     if(count($commands) > 1)
     {
         outputTitle();
@@ -176,9 +312,9 @@ function pestle_cli($argv, $options)
         outputUsage();
         \Pulsestorm\Pestle\Library\output('');
         outputAvaiableCommands($commands);
-        return;    
+        return;
     }
-    
+
     //only single commands left
     foreach($commands as $command)
     {
@@ -186,10 +322,10 @@ function pestle_cli($argv, $options)
         \Pulsestorm\Pestle\Library\output("    $ pestle.phar ", $command['command']);
         \Pulsestorm\Pestle\Library\output('');
         \Pulsestorm\Pestle\Library\output('Arguments:');
-        \Pulsestorm\Pestle\Library\output('');        
+        \Pulsestorm\Pestle\Library\output('');
         \Pulsestorm\Pestle\Library\output('Options:');
         \Pulsestorm\Pestle\Library\output('');
-        
+
         \Pulsestorm\Pestle\Library\output("Help:");
         \Pulsestorm\Pestle\Library\output(preg_replace('%^%m','    $0',wordwrap($command['help'],70)));
         \Pulsestorm\Pestle\Library\output('');
@@ -225,7 +361,7 @@ function getWhitespaceForCommandList($commands, $command_name)
             }
         }
     }
-    
+
     $numberOfSpaces = ($longest - strlen($command_name)) + 2;
     return str_repeat(' ', $numberOfSpaces);
 }
@@ -236,9 +372,9 @@ function getWhitespaceForCommandList($commands, $command_name)
  * eventually replaced them with magento2:generate:module style
  * commands by having the magento2:generate:module command
  * call into the original generate_module module's pestle_cli
- * function.  The generate_module style commands still exist, 
+ * function.  The generate_module style commands still exist,
  * for backwards compatability with code and docs, but we hide
- * them from the list.  
+ * them from the list.
  */
 function getCommandsToHide()
 {
@@ -258,8 +394,8 @@ function getCommandsToHide()
         'generate_registration',
         'generate_route',
         'generate_theme',
-        'generate_view',     
-        'wp_export_xml',         
+        'generate_view',
+        'wp_export_xml',
         'wp_urls',
         'generate_pestle_command',
         'pestle_clear_cache',
@@ -278,24 +414,25 @@ function getCommandsToHide()
         'generate-registration',
         'generate-route',
         'generate-theme',
-        'generate-view',     
-        'wp-export-xml',         
+        'generate-view',
+        'wp-export-xml',
         'wp-urls',
         'generate-pestle-command',
-        'pestle-clear-cache',        
+        'pestle-clear-cache',
+        'magento2:generate:ui:add-schema-column'
     ];
 }
 
 function sortCommandsIntoSection($commands)
 {
     $toHide = getCommandsToHide();
-    $commandSections = [];    
+    $commandSections = [];
     foreach($commands as $command)
-    {                
+    {
         if(in_array($command['command'], $toHide))
         {
             continue;
-        }    
+        }
         $section = 'Uncategorized';
         if(strpos($command['command'], ':') !== false)
         {
@@ -305,7 +442,7 @@ function sortCommandsIntoSection($commands)
             {
                 $section .= ' ' . ucWords(array_shift($parts));
             }
-        }        
+        }
         $commandSections[$section][] = $command;
     }
     ksort($commandSections);
@@ -315,7 +452,7 @@ function sortCommandsIntoSection($commands)
             if ($a['command'] == $b['command']) {
                 return 0;
             }
-            return ($a['command'] < $b['command']) ? -1 : 1;        
+            return ($a['command'] < $b['command']) ? -1 : 1;
         });
         $commandSections[$section] = $commands;
     }
@@ -347,10 +484,10 @@ function outputCommandListing($command, $commands)
     if(!$firstLine)
     {
         $firstLine = 'NULL Command?  Fix this pls.';
-    }    
-    \Pulsestorm\Pestle\Library\output( '  ', 
+    }
+    \Pulsestorm\Pestle\Library\output( '  ',
             getStringWrappedWithShellColor($command['command'], 32),
-            getWhitespaceForCommandList($commands, $command['command']), 
+            getWhitespaceForCommandList($commands, $command['command']),
             $firstLine);
 }
 
@@ -365,14 +502,14 @@ function shouldSkipShowingCommand($command)
     if(in_array($command['command'], $toHide))
     {
         return true;
-    }    
-    
+    }
+
     return false;
 }
 
 function outputAvaiableCommandsBySection($commandSections, $commands)
 {
-   
+
     foreach($commandSections as $section=>$commandsSorted)
     {
         $commandsSorted = $commandSections[$section];
@@ -382,14 +519,14 @@ function outputAvaiableCommandsBySection($commandSections, $commands)
             if(shouldSkipShowingCommand($command))
             {
                 continue;
-            }        
+            }
             outputCommandListing($command, $commands);
         }
     }
 }
 
 function outputAvaiableCommands($commands)
-{    
+{
     \Pulsestorm\Pestle\Library\output('Available commands:');
     $commandSections = [
         'Uncategorized'=>$commands
@@ -413,17 +550,18 @@ function outputCredits()
 function outputTitle()
 {
     $logo = <<<LOGO
-                  _   _      
-                 | | | |     
-  _ __   ___  ___| |_| | ___ 
+                  _   _
+                 | | | |
+  _ __   ___  ___| |_| | ___
  | '_ \ / _ \/ __| __| |/ _ \
  | |_) |  __/\__ \ |_| |  __/
  | .__/ \___||___/\__|_|\___|
- | |                         
- |_|    
+ | |
+ |_|
 LOGO;
     \Pulsestorm\Pestle\Library\output($logo);
-}}
+}
+}
 namespace Pulsestorm\Magento2\Cli\Orphan_Content{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -761,33 +899,33 @@ function getModuleNameFromClassName($modelClass)
 
 function getPersistKeyFromModelClassName($modelClass)
 {
-    $key = strToLower(getModuleNameFromClassName($modelClass) 
-        . '_' 
+    $key = strToLower(getModuleNameFromClassName($modelClass)
+        . '_'
         . getModelShortName($modelClass));
-    
-    return $key;        
+
+    return $key;
 }
 
 function createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule)
 {
     return '
-    const ADMIN_RESOURCE = \''.$aclRule.'\';  
+    const ADMIN_RESOURCE = \''.$aclRule.'\';
     public function execute()
     {
         $resultRedirect = $this->resultRedirectFactory->create();
         $resultRedirect->setPath(\'*/index/index\');
         return $resultRedirect;
-    }     
+    }
 ';
 }
 
 function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
-{    
+{
     $dbID           = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
     $repositoryName = '\\' . \Pulsestorm\Magento2\Cli\Generate\Crud\Model\getModelRepositoryName($modelClass);
-    return '  
+    return '
     const ADMIN_RESOURCE = \''.$aclRule.'\';
-    
+
     /**
      * @var ' . $repositoryName . '
      */
@@ -806,7 +944,7 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
 
         parent::__construct($context);
     }
-          
+
     public function execute()
     {
         // check if we know what should be deleted
@@ -832,10 +970,10 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
         $this->messageManager->addError(__(\'We can not find an object to delete.\'));
         // go to grid
         return $resultRedirect->setPath(\'*/*/\');
-        
-    }    
-    
-';    
+
+    }
+
+';
 }
 
 function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
@@ -855,7 +993,7 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
      * @var DataPersistorInterface
      */
     protected $dataPersistor;
-    
+
     /**
      * @var ' . $repositoryName . '
      */
@@ -873,7 +1011,7 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
     ) {
         $this->dataPersistor    = $dataPersistor;
         $this->objectRepository  = $objectRepository;
-        
+
         parent::__construct($context);
     }
 
@@ -924,27 +1062,27 @@ function createControllerClassBodyForSave($module_info, $modelClass, $aclRule)
             return $resultRedirect->setPath(\'*/*/edit\', [\''.$dbID.'\' => $this->getRequest()->getParam(\''.$dbID.'\')]);
         }
         return $resultRedirect->setPath(\'*/*/\');
-    }    
+    }
 ';
 }
 
 function createControllerClassBody($module_info, $aclRule)
 {
     return '
-    const ADMIN_RESOURCE = \''.$aclRule.'\';       
+    const ADMIN_RESOURCE = \''.$aclRule.'\';
     protected $resultPageFactory;
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory)
     {
-        $this->resultPageFactory = $resultPageFactory;        
+        $this->resultPageFactory = $resultPageFactory;
         parent::__construct($context);
     }
-    
+
     public function execute()
     {
-        return $this->resultPageFactory->create();  
-    }    
+        return $this->resultPageFactory->create();
+    }
 ';
 }
 
@@ -959,8 +1097,8 @@ function createControllerFiles($module_info, $modelClass, $aclRule)
         'controllerSaveClassName' => $prefix . '\Controller\Adminhtml\\'.$shortName.'\Save'
     ];
     foreach($classes as $desc=>$className)
-    {        
-        $contents = createClassWithUse($className, '\Magento\Backend\App\Action', '', 
+    {
+        $contents = createClassWithUse($className, '\Magento\Backend\App\Action', '',
             createControllerClassBody($module_info, $aclRule));
         if($desc === 'controllerSaveClassName')
         {
@@ -970,27 +1108,27 @@ use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Exception\LocalizedException;
             ';
             $contents = createClassWithUse($className, '\Magento\Backend\App\Action', $useString,
-                createControllerClassBodyForSave($module_info, $modelClass, $aclRule));   
-        }       
+                createControllerClassBodyForSave($module_info, $modelClass, $aclRule));
+        }
         \Pulsestorm\Pestle\Library\output("Creating: $className");
-        \Pulsestorm\Magento2\Cli\Library\createClassFile($className,$contents);        
+        \Pulsestorm\Magento2\Cli\Library\createClassFile($className,$contents);
     }
-    
+
     $deleteClassName = $prefix . '\Controller\Adminhtml\\'.$shortName.'\Delete';
     $useString       = '';
     $contents = createClassWithUse(
         $deleteClassName, '\Magento\Backend\App\Action', $useString,
         createControllerClassBodyForDelete($module_info, $modelClass, $aclRule));
     \Pulsestorm\Pestle\Library\output("Creating: $deleteClassName");
-    \Pulsestorm\Magento2\Cli\Library\createClassFile($deleteClassName,$contents); 
-        
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($deleteClassName,$contents);
+
     $indexRedirectClassName = $prefix . '\Controller\Adminhtml\\'.$shortName.'\Index';
     $useString       = '';
     $contents = createClassWithUse(
         $indexRedirectClassName, '\Magento\Backend\App\Action', $useString,
         createControllerClassBodyForIndexRedirect($module_info, $modelClass, $aclRule));
     \Pulsestorm\Pestle\Library\output("Creating: $deleteClassName");
-    \Pulsestorm\Magento2\Cli\Library\createClassFile($indexRedirectClassName,$contents);             
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($indexRedirectClassName,$contents);
 
 
 }
@@ -1004,7 +1142,7 @@ function createCollectionClassNameFromModelName($modelClass)
     }
     $first      = array_slice($parts, 0, 3);
     $first[]    = 'ResourceModel';
-    
+
     $second     = array_slice($parts, 3);
     $second[]   = 'CollectionFactory';
     $new        = array_merge($first, $second);
@@ -1014,7 +1152,7 @@ function createCollectionClassNameFromModelName($modelClass)
 function createDataProviderUseString($module_info, $modelClass)
 {
     $collectionClassName = createCollectionClassNameFromModelName($modelClass);
-        
+
     return 'use '.$collectionClassName.';
 use Magento\Framework\App\Request\DataPersistorInterface;';
 }
@@ -1097,7 +1235,7 @@ function createDataProviderClassBodyString($module_info, $modelClass)
 
         return $this->loadedData;
     }
-';        
+';
 }
 
 function createClassWithUse($className, $parentClass, $useString, $bodyString)
@@ -1118,14 +1256,14 @@ function createDataProvider($module_info, $modelClass)
     // $moduleBasePath = getModuleBasePath();
     $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);
     $contents           = createClassWithUse(
-        $dataProviderClassName, 
+        $dataProviderClassName,
         '\Magento\Ui\DataProvider\AbstractDataProvider',
         createDataProviderUseString($module_info, $modelClass),
-        createDataProviderClassBodyString($module_info, $modelClass)        
-    );        
+        createDataProviderClassBodyString($module_info, $modelClass)
+    );
     \Pulsestorm\Pestle\Library\output("Creating: $dataProviderClassName");
-    $return             = \Pulsestorm\Magento2\Cli\Library\createClassFile($dataProviderClassName,$contents);        
-    
+    $return             = \Pulsestorm\Magento2\Cli\Library\createClassFile($dataProviderClassName,$contents);
+
 }
 
 function createShortPluralModelName($modelClass)
@@ -1133,7 +1271,7 @@ function createShortPluralModelName($modelClass)
     $parts = [];
     $flag  = false;
     foreach(explode('\\', $modelClass) as $part)
-    { 
+    {
         if($part === 'Model')
         {
             $flag = true;
@@ -1141,11 +1279,11 @@ function createShortPluralModelName($modelClass)
         }
         if(!$flag) { continue;}
         $parts[] = $part;
-    }          
-          
+    }
+
     $parts = array_map('strToLower', $parts);
     $name  = implode('_', $parts);
-    
+
     if(preg_match('%ly$%',$name))
     {
         $name = preg_replace('%ly$%', 'lies',$name);
@@ -1160,7 +1298,7 @@ function createShortPluralModelName($modelClass)
 function createEmptyXmlTree()
 {
     $xml = simplexml_load_string(
-        '<page  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        '<page  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                 xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"></page>');
     return $xml;
 }
@@ -1181,34 +1319,34 @@ function addUiComponentToXml($xml, $uiComponentName)
 function createLayoutXmlFiles($module_info, $modelClass)
 {
     $moduleBasePath     = $module_info->folder;
-    $layoutBasePath     = $moduleBasePath . '/view/adminhtml/layout'; 
-    
+    $layoutBasePath     = $moduleBasePath . '/view/adminhtml/layout';
+
     $uiComponentName    = createUiComponentNameFromModuleInfoAndModelClass(
         $module_info, $modelClass);
-    
+
     $prefixFilename = implode('_', [
         strToLower($module_info->name),
         createShortPluralModelName($modelClass),
         strToLower(getModelShortName($modelClass))
         // 'index'
     ]);;
-    
+
     $names = ['edit', 'new', 'save' ];
-    
+
     foreach($names as $name)
     {
         $fileName = $layoutBasePath . '/' . $prefixFilename . '_' . $name . '.xml';
-        
+
         $xml = createEmptyXmlTree();
         if(file_exists($fileName))
         {
             $xml = simplexml_load_file($fileName);
         }
         $xml = addUiComponentToXml($xml, $uiComponentName);
-        
+
         \Pulsestorm\Pestle\Library\output("Creating $fileName");
         \Pulsestorm\Pestle\Library\writeStringToFile($fileName, \Pulsestorm\Xml_Library\formatXmlString($xml->asXml()));
-    }        
+    }
 }
 
 function createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelClass)
@@ -1227,38 +1365,38 @@ function generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule)
     $genericButtonClassName     = $prefix . '\\GenericButton';
     $genericButtonClassContents = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($genericButtonClassName);
     $genericButtonClassContents = str_replace('<$use$>' ,'', $genericButtonClassContents);
-    
+
     $genericContents = '
     //putting all the button methods in here.  No "right", but the whole
     //button/GenericButton thing seems -- not that great -- to begin with
     public function __construct(
         \Magento\Backend\Block\Widget\Context $context
     ) {
-        $this->context = $context;    
+        $this->context = $context;
     }
-    
+
     public function getBackUrl()
     {
         return $this->getUrl(\'*/*/\');
-    }    
-    
+    }
+
     public function getDeleteUrl()
     {
         return $this->getUrl(\'*/*/delete\', [\'object_id\' => $this->getObjectId()]);
-    }   
-    
+    }
+
     public function getUrl($route = \'\', $params = [])
     {
         return $this->context->getUrlBuilder()->getUrl($route, $params);
-    }    
-    
+    }
+
     public function getObjectId()
     {
         return $this->context->getRequest()->getParam(\''.$dbID.'\');
-    }     
-';    
-    $genericButtonClassContents = str_replace('<$body$>',$genericContents, $genericButtonClassContents);    
-    \Pulsestorm\Magento2\Cli\Library\createClassFile($genericButtonClassName,$genericButtonClassContents);                   
+    }
+';
+    $genericButtonClassContents = str_replace('<$body$>',$genericContents, $genericButtonClassContents);
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($genericButtonClassName,$genericButtonClassContents);
     return $genericButtonClassName;
 }
 
@@ -1270,14 +1408,14 @@ function generateButtonClassPrefix($modelClass)
 }
 
 function getAllButtonDataStrings()
-{        
+{
     $singleQuoteForJs = "\\''";
     return [
         'back'=> '[
             \'label\' => __(\'Back\'),
             \'on_click\' => sprintf("location.href = \'%s\';", $this->getBackUrl()),
             \'class\' => \'back\',
-            \'sort_order\' => 10    
+            \'sort_order\' => 10
         ]',
         'delete'=> '[
                 \'label\' => __(\'Delete Object\'),
@@ -1292,7 +1430,7 @@ function getAllButtonDataStrings()
             \'class\' => \'reset\',
             \'on_click\' => \'location.reload();\',
             \'sort_order\' => 30
-        ]',        
+        ]',
         'save'=> '[
             \'label\' => __(\'Save Object\'),
             \'class\' => \'save primary\',
@@ -1301,7 +1439,7 @@ function getAllButtonDataStrings()
                 \'form-role\' => \'save\',
             ],
             \'sort_order\' => 90,
-        ]',                
+        ]',
         'save_and_continue'=> '[
             \'label\' => __(\'Save and Continue Edit\'),
             \'class\' => \'save\',
@@ -1311,8 +1449,8 @@ function getAllButtonDataStrings()
                 ],
             ],
             \'sort_order\' => 80,
-        ]',                        
-    ];    
+        ]',
+    ];
 }
 
 function getButtonDataStringForButton($buttonName)
@@ -1334,7 +1472,7 @@ function createButtonClassContents($buttonName)
     {
         $extra = 'if(!$this->getObjectId()) { return []; }';
     }
-    $contents = '     
+    $contents = '
     public function getButtonData()
     {
         '.$extra.'
@@ -1344,17 +1482,17 @@ function createButtonClassContents($buttonName)
     // return '//implement me for ' . $buttonName;
 }
 function generateButtonClassAndReturnName($modelClass, $buttonName)
-{            
+{
     $prefix = generateButtonClassPrefix($modelClass);
-    $buttonClassName = $prefix .= '\\' . str_replace(' ', '', 
-        ucWords(str_replace('_', ' ', $buttonName))) . 'Button';        
-    
-    $contents = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($buttonClassName, 'GenericButton', 
+    $buttonClassName = $prefix .= '\\' . str_replace(' ', '',
+        ucWords(str_replace('_', ' ', $buttonName))) . 'Button';
+
+    $contents = \Pulsestorm\Cli\Code_Generation\createClassTemplateWithUse($buttonClassName, 'GenericButton',
         'ButtonProviderInterface');
     $contents   = str_replace('<$use$>','use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;',$contents);
     $contents   = str_replace('<$body$>',createButtonClassContents($buttonName),$contents);
-    \Pulsestorm\Magento2\Cli\Library\createClassFile($buttonClassName,$contents);            
-    
+    \Pulsestorm\Magento2\Cli\Library\createClassFile($buttonClassName,$contents);
+
     return $buttonClassName;
 }
 
@@ -1362,41 +1500,41 @@ function createButtonXml($module_info, $modelClass, $aclRule)
 {
     //handle generic button
     $prefix = generateButtonClassPrefix($modelClass);
-    $dbID   = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));    
-    generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule);    
-    
-    $buttons = [        
+    $dbID   = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
+    generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule);
+
+    $buttons = [
         'back'              => generateButtonClassAndReturnName($modelClass,'back'),
         'delete'            => generateButtonClassAndReturnName($modelClass,'delete'),
         'reset'             => generateButtonClassAndReturnName($modelClass,'reset'),
         'save'              => generateButtonClassAndReturnName($modelClass,'save'),
-        'save_and_continue' => generateButtonClassAndReturnName($modelClass,'save_and_continue')                                        
+        'save_and_continue' => generateButtonClassAndReturnName($modelClass,'save_and_continue')
 //         'back'              => $prefix . '\BackButton',
 //         'delete'            => $prefix . '\DeleteButton',
 //         'reset'             => $prefix . '\ResetButton',
 //         'save'              => $prefix . '\SaveButton',
-//         'save_and_continue' => $prefix . '\SaveAndContinueButton',                                
+//         'save_and_continue' => $prefix . '\SaveAndContinueButton',
     ];
     $buttonXml = "\n";
     foreach($buttons as $name=>$class)
     {
         $buttonXml .= '<item name="'.$name.'" xsi:type="string">'.$class.'</item>' . "\n";
     }
-    
+
     return $buttonXml;
 }
 
 function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
-{    
+{
     $moduleBasePath      = $module_info->folder;
-    $uiComponentBasePath = $moduleBasePath . '/view/adminhtml/ui_component';     
+    $uiComponentBasePath = $moduleBasePath . '/view/adminhtml/ui_component';
     $uiComponentName     = createUiComponentNameFromModuleInfoAndModelClass($module_info, $modelClass);
-    $uiComponentFilePath = $uiComponentBasePath . '/' . $uiComponentName . '.xml';        
+    $uiComponentFilePath = $uiComponentBasePath . '/' . $uiComponentName . '.xml';
     $dbID       = \Pulsestorm\Magento2\Cli\Generate\Crud\Model\createDbIdFromModuleInfoAndModelShortName($module_info, getModelShortName($modelClass));
-    $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);          
-    
+    $dataProviderClassName = createDataProviderClassNameFromModelClassName($modelClass);
+
     $buttonXml = createButtonXml($module_info, $modelClass, $aclRule);
-         
+
     $xml = simplexml_load_string(
 '<?xml version="1.0" encoding="UTF-8"?>
 <form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
@@ -1437,8 +1575,8 @@ function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
         <argument name="data" xsi:type="array">
             <item name="config" xsi:type="array">
                 <item name="label" xsi:type="string">Form Data</item>
-                <item name="collapsible" xsi:type="boolean">true</item>                
-                <item name="opened" xsi:type="boolean">true</item>                
+                <item name="collapsible" xsi:type="boolean">true</item>
+                <item name="opened" xsi:type="boolean">true</item>
             </item>
         </argument>
         <field name="'.$dbID.'">
@@ -1446,7 +1584,7 @@ function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
                 <item name="config" xsi:type="array">
                     <item name="visible" xsi:type="boolean">false</item>
                     <item name="dataType" xsi:type="string">text</item>
-                    <item name="formElement" xsi:type="string">input</item>                    
+                    <item name="formElement" xsi:type="string">input</item>
                     <item name="dataScope" xsi:type="string">'.$dbID.'</item>
                 </item>
             </argument>
@@ -1466,8 +1604,8 @@ function createUiComponentXmlFile($module_info, $modelClass, $aclRule)
             </argument>
         </field>
     </fieldset>
-</form>'    
-    );        
+</form>'
+    );
     \Pulsestorm\Pestle\Library\writeStringToFile($uiComponentFilePath, \Pulsestorm\Xml_Library\formatXmlString($xml->asXml()));
 }
 /**
@@ -2544,27 +2682,27 @@ class TokenParser
 {
     protected $position=0;
     protected $tokens;
-    
+
     protected function replaceCurrentToken($token)
     {
         $this->tokens[$this->position] = $token;
     }
-    
+
     public function setStringContents($contents)
     {
         $this->tokens   = \Pulsestorm\Cli\Token_Parse\pestle_token_get_all($contents);
     }
-    
+
     public function getCurrentToken()
     {
         return $this->tokens[$this->position];
     }
-    
+
     public function isAtEnd()
     {
         return count($this->tokens) === ($this->position + 1);
     }
-    
+
     public function goNext()
     {
         $this->position++;
@@ -2575,7 +2713,7 @@ class TokenParser
         $this->position--;
         return null;
     }
-    
+
     public function getClassString()
     {
         $values = array_map(function($token){
@@ -2585,7 +2723,7 @@ class TokenParser
             }
             return '';
         }, $this->tokens);
-        return implode('',  $values);            
+        return implode('',  $values);
     }
 }
 
@@ -2596,13 +2734,13 @@ class EditConstantTokenParser extends TokenParser
         while($token=$this->goNext())
         {
             if($token->token_value === $string)
-            {            
+            {
                 return;
             }
         }
-    
+
     }
-    
+
     private function isPositionAtClassConstant()
     {
         for($i=$this->position;$i--;$i>0)
@@ -2613,7 +2751,7 @@ class EditConstantTokenParser extends TokenParser
         }
         return null;
     }
-    
+
     private function scanToNamedConstant($constantName)
     {
         $this->scanToString($constantName);
@@ -2621,14 +2759,14 @@ class EditConstantTokenParser extends TokenParser
         {
             return true;
         }
-        
+
         if($this->isAtEnd())
         {
             return false;
         }
         return $this->scanToNamedConstant($constantName);
     }
-    
+
     private function getSingleQuotedPhpString($string)
     {
         $string = str_replace("'", "\\'", $string);
@@ -2636,11 +2774,11 @@ class EditConstantTokenParser extends TokenParser
         {
             $string .= '\\';
         }
-        
+
         return "'$string'";
-        
+
     }
-    
+
     public function replaceConstantStringValue($constantName, $value)
     {
         $this->scanToNamedConstant($constantName);
@@ -2649,7 +2787,7 @@ class EditConstantTokenParser extends TokenParser
         {
             return false;
         }
-        
+
         while($token = $this->goNext())
         {
             // if($token->token_name === 'T_WHITESPACE') { continue; }
@@ -2658,24 +2796,24 @@ class EditConstantTokenParser extends TokenParser
                 $this->replaceCurrentToken(null);
                 continue;
             }
-            
+
             //splice in new tokens
             $equalsToken = new \stdClass;
             $equalsToken->token_value = '=';
             $equalsToken->token_name  = 'T_SINGLE_CHAR';
-            
+
             $replacementToken = new \stdClass;
             $replacementToken->token_value = $this->getSingleQuotedPhpString($value);
             $replacementToken->token_name = 'T_CONSTANT_ENCAPSED_STRING';
-            
+
             array_splice($this->tokens, $this->position, 0, [
                 $equalsToken, $replacementToken
             ]);
             break; //hit the ;, break out
         }
-                
+
         return true;
-    }    
+    }
 }
 
 /**
@@ -2683,11 +2821,11 @@ class EditConstantTokenParser extends TokenParser
 *
 * @command magento2:generate:controller-edit-acl
 * @argument path_controller Path to Admin Controller
-* @argument acl_rule Path to Admin Controller
+* @argument acl_rule ACL Rule
 */
 function pestle_cli($argv)
 {
-    $contents = file_get_contents($argv['path_controller']);    
+    $contents = file_get_contents($argv['path_controller']);
     $parser = new EditConstantTokenParser;
     $parser->setStringContents($contents);
     if($parser->replaceConstantStringValue('ADMIN_RESOURCE', $argv['acl_rule']))
@@ -2699,8 +2837,8 @@ function pestle_cli($argv)
     {
         \Pulsestorm\Pestle\Library\output("No ADMIN_RESOURCE constant in class file");
     }
-    
-    
+
+
 }
 }
 namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Config_Helper{
@@ -7930,7 +8068,7 @@ function pestle_cli($argv)
 }
 namespace Pulsestorm\Magento2\Cli\ClassList{
 use function Pulsestorm\Pestle\Importer\pestle_import;
-
+use function stream_get_wrappers;
 
 
 
@@ -8067,6 +8205,11 @@ function pestle_cli($argv)
         // Magento's autoloaders are loaded here
         require \Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir() . '/app/bootstrap.php';
 
+        // some versions of Magengto unregister this, but pestle
+        // needs it to run in `phar` mode.
+        if (!in_array('phar', stream_get_wrappers())) {
+            stream_wrapper_restore('phar');
+        }
         registerAutoloaders($pestlesLoaders);
         /*
          * TODO: wrap this logic in an application container
@@ -8937,21 +9080,21 @@ function getColumnTypes()
         'TYPE_FLOAT'   =>'float',
         'TYPE_INTEGER' =>'integer',
         'TYPE_SMALLINT'=>'smallint',
-        
+
         'PS_TYPE_VARCHAR'   =>'varchar',
-        'PS_TYPE_VARBINARY' =>'varbinary',     
-                
+        'PS_TYPE_VARBINARY' =>'varbinary',
+
         'PS_TYPE_TEXT' =>'text',
-        'PS_TYPE_BLOB' =>'blob',        
-        
+        'PS_TYPE_BLOB' =>'blob',
+
         'PS_TYPE_MEDIUM_TEXT' =>'mediumtext',
-        'PS_TYPE_MEDIUM_BLOB' =>'mediumblob',        
+        'PS_TYPE_MEDIUM_BLOB' =>'mediumblob',
 
         'PS_TYPE_LONG_TEXT' =>'longtext',
-        'PS_TYPE_LONG_BLOB' =>'longblob',   
-                
+        'PS_TYPE_LONG_BLOB' =>'longblob',
+
         'PS_TYPE_TEXT' =>'text',
-        'PS_TYPE_BLOB' =>'blob',                        
+        'PS_TYPE_BLOB' =>'blob',
         // 'TYPE_TIMESTAMP'=>'timestamp',
     ];
 }
@@ -8991,7 +9134,7 @@ function getClassConstantFromType($type)
     {
         $constant = 'TYPE_TEXT';
     }
-            
+
     return '\Magento\Framework\DB\Ddl\Table::' . $constant;
 }
 
@@ -9005,46 +9148,46 @@ function getLengthFromType($type)
         'decimal'=>'[12,4]',
         'float'=>'null',
         'integer'=>'null',
-        'smallint'=>'null',        
+        'smallint'=>'null',
         'varchar'=>'255',
-        'varbinary'=>'255',                     
+        'varbinary'=>'255',
         'text'=>'"64K"',
-        'blob'=>'"64K"',                
+        'blob'=>'"64K"',
         'mediumtext'=>'"2M"',
-        'mediumblob'=>'"2M"',        
+        'mediumblob'=>'"2M"',
         'longtext'=>'"4G"',
-        'longblob'=>'"4G"',   
-    ]; 
-    return $legend[$type];   
+        'longblob'=>'"4G"',
+    ];
+    return $legend[$type];
 }
 
 function getPropertyArrayFromType($type)
 {
     $legend = [
         'bigint'        =>"['nullable' => false, 'default' => 0]",
-        'boolean'       =>"['nullable' => false, 'default' => 0]",        
+        'boolean'       =>"['nullable' => false, 'default' => 0]",
         'date'          =>"[]",
         'datetime'      =>"[]",
         'decimal'       =>"['nullable' => false, 'default' => '0.0000']",
-        'float'         =>"['nullable' => false, 'default' => '0.0000']",        
+        'float'         =>"['nullable' => false, 'default' => '0.0000']",
         'integer'       =>"['nullable' => false, 'default' => 0]",
-        'smallint'      =>"['nullable' => false, 'default' => 0]",        
+        'smallint'      =>"['nullable' => false, 'default' => 0]",
         'varchar'       =>"['nullable' => false, 'default' => '']",
-        'varbinary'     =>"['nullable' => true, 'default' => null]",                     
+        'varbinary'     =>"['nullable' => true, 'default' => null]",
         'text'          =>"['nullable' => true, 'default' => null]",
-        'blob'          =>"['nullable' => true, 'default' => null]",                
+        'blob'          =>"['nullable' => true, 'default' => null]",
         'mediumtext'    =>"['nullable' => true, 'default' => null]",
-        'mediumblob'    =>"['nullable' => true, 'default' => null]",        
+        'mediumblob'    =>"['nullable' => true, 'default' => null]",
         'longtext'      =>"['nullable' => true, 'default' => null]",
-        'longblob'      =>"['nullable' => true, 'default' => null]",   
-    ]; 
-    
+        'longblob'      =>"['nullable' => true, 'default' => null]",
+    ];
+
     return $legend[$type];
 }
 
 function getColumnProps($type)
 {
-    
+
     return [
         'typeConstant'   => getClassConstantFromType($type),    //'\Magento\Framework\DB\Ddl\Table::TYPE_TEXT',
         'length'         => getLengthFromType($type),           //'255',
@@ -9065,8 +9208,8 @@ function generateAddColumn($name, $type)
             $propertyArray,
             $comment
         )";
-        
-    return $string;        
+
+    return $string;
 }
 
 function getNextNonWhitespaceToken(&$tokens, $i, $count, $flag=false)
@@ -9077,13 +9220,13 @@ function getNextNonWhitespaceToken(&$tokens, $i, $count, $flag=false)
         $token = $tokens[$i];
         //skip whitespace
         if($token->token_name === 'T_WHITESPACE') { continue; }
-        
+
         //if we're at the end, return false
         if(!isset($tokens[$i+1]))
-        {        
+        {
             return false;
-        }         
-        return $token;        
+        }
+        return $token;
     }
     return false;
 }
@@ -9091,8 +9234,8 @@ function getNextNonWhitespaceToken(&$tokens, $i, $count, $flag=false)
 //scan until we find a newTable T_STRING followed by a ( T_SINGLE_CHAR
 function scanFoundNewTable($state, $token, $nextToken)
 {
-    return $state === 'start' && 
-            ($token->token_name     === 'T_STRING' && $token->token_value === 'newTable') && 
+    return $state === 'start' &&
+            ($token->token_name     === 'T_STRING' && $token->token_value === 'newTable') &&
             ($nextToken->token_name === 'T_SINGLE_CHAR' && $nextToken->token_value === '(');
 }
 
@@ -9101,7 +9244,7 @@ function scanIsOurTableAndReturnIndex($tokens, $i, $count, $tableName)
     $result           = fetchTokensUntilAddColumn($tokens, $i, $count);
 
     //if we reached the end of the file, bail
-    if(!$result){ return 'end-of-file'; } 
+    if(!$result){ return 'end-of-file'; }
 
     $newTableTokens   = $result['newTableTokens'];
     $i                = $result['i'];
@@ -9111,7 +9254,7 @@ function scanIsOurTableAndReturnIndex($tokens, $i, $count, $tableName)
         return $item->token_value;
     }, $newTableTokens));
 
-    //check if tokens contain our table            
+    //check if tokens contain our table
     if(strpos($string, $tableName) === false)
     {
         //if not, start over
@@ -9126,7 +9269,7 @@ function fetchTokensUntilAddColumn(&$tokens, $i, $count)
 {
     $newTableTokens = [];
     for($i=$i;$i<$count;$i++)
-    {   
+    {
         $token = $tokens[$i];
         $newTableTokens[] = $token;
         if(($token->token_name === 'T_STRING' && $token->token_value === 'addColumn'))
@@ -9136,51 +9279,51 @@ function fetchTokensUntilAddColumn(&$tokens, $i, $count)
                 'i'=>$i];
         }
     }
-    
+
     return false;
 }
 
 function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
-{    
+{
     $tokens                 = \Pulsestorm\Cli\Token_Parse\pestle_token_get_all(file_get_contents($file));
     $count                  = count($tokens);
     $state                  = 'start'; //scanningNewtable, scanningToStatementEnd
     $newTableTokens         = [];
     $tokensWithNewAddColumn = [];
     for($i=0;$i<$count;$i++)
-    {        
+    {
         //get current token and next token, breaking
-        //out if there's no new token  
+        //out if there's no new token
         $token      = $tokens[$i];
         $nextToken  = getNextNonWhitespaceToken($tokens, $i, $count);
-        
+
         //skip whitespace
         if($token->token_name === 'T_WHITESPACE') { continue; }
-        
+
         //scan until we find a newTable T_STRING followed by a ( T_SINGLE_CHAR
         if(scanFoundNewTable($state, $token, $nextToken))
         {
             $state = 'scanningNewTable';
             continue;
         }
-        
+
         //pull out everything until we hit an addColumn
         //does the pulled out string contain our table name?
         if($state === 'scanningNewTable')
         {
             $index = scanIsOurTableAndReturnIndex($tokens, $i, $count, $table);
-            if($index === 'end-of-file') { 
-                break; 
+            if($index === 'end-of-file') {
+                break;
             }
             if($index === 'start-over') {
                 $state = 'start';
-                continue;            
+                continue;
             }
             $i     = $index;
             $state = 'scanningToStatementEnd';
             continue;
-        }    
-        
+        }
+
         //if so, scan until ending ;
         if($state === 'scanningToStatementEnd')
         {
@@ -9189,23 +9332,23 @@ function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
                 //then insert our code block into tokens and break
                 $beforeTokens = array_slice($tokens, 0, $i);
                 $afterTokens  = array_slice($tokens, $i);
-                
+
                 $token = new \stdClass;
                 $token->token_name  = 'T_FAKE_INSERT_HACK';
                 $token->token_value = trim($columnCode);
                 $middleTokens = [$token];
-                
+
                 $tokensWithNewAddColumn = array_merge(
                     $beforeTokens, $middleTokens, $afterTokens
                 );
                 //return our new tokens
                 return $tokensWithNewAddColumn;
             }
-        }                           
-    }    
-    
+        }
+    }
+
     //return empty array, indicating error
-    return $tokensWithNewAddColumn;   
+    return $tokensWithNewAddColumn;
 }
 /**
 * Genreated a Magento 2 addColumn DDL definition and inserts into file
@@ -9214,7 +9357,7 @@ function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
 * attempts to insert it into provided php_file.  Inserting means
 * looking for this pattern.
 *   newTable($installer->getTable('table_name'))->addColumn
-* and if found, scanning to the ; and inserting the addColumn         
+* and if found, scanning to the ; and inserting the addColumn
 *
 * @command magento2:generate:ui:add-schema-column
 * @argument php_file PHP file with newTable call? [skip]
@@ -9222,34 +9365,40 @@ function getTokensWithInsertedCodeFromSourceFile($columnCode, $file, $table)
 * @argument column Columns Name? (new_column)
 * @argument column_type @callback selectColumnType
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options=[])
 {
     validateColumnType($argv['column_type']);
     $columnCode = generateAddColumn($argv['column'], $argv['column_type']);
     if($argv['php_file'] === 'skip')
     {
         \Pulsestorm\Pestle\Library\output($columnCode);
+        return;
     }
-    
+
     $tokens     = getTokensWithInsertedCodeFromSourceFile(
-        $columnCode, $argv['php_file'], $argv['table']); 
+        $columnCode, $argv['php_file'], $argv['table']);
 
     if(!$tokens)
     {
         \Pulsestorm\Pestle\Library\exitWithErrorMessage(
-            "We couldn't find a newTable call with {$argv['table']}" . "\n" . 
-            "Exiting with an error, but here's the code." . "\n" . 
+            "We couldn't find a newTable call with {$argv['table']}" . "\n" .
+            "Exiting with an error, but here's the code." . "\n" .
             $columnCode
         );
-    }        
-    
+    }
+
     \Pulsestorm\Pestle\Library\output("Adding addColumn Call to file");
     $string = implode('', array_map(function($item){
         return $item->token_value;
     }, $tokens));
 
-    \Pulsestorm\Pestle\Library\writeStringToFile($argv['php_file'], $string);   
+    \Pulsestorm\Pestle\Library\writeStringToFile($argv['php_file'], $string);
 }
+
+function exported_pestle_cli($argv, $options=[]) {
+    return pestle_cli($argv, $options);
+}
+
 }
 namespace Pulsestorm\Magento2\Generate\SchemaUpgrade{
 use function Pulsestorm\Pestle\Importer\pestle_import;
@@ -9979,6 +10128,44 @@ function pestle_cli($argv)
     \Pulsestorm\Pestle\Library\output("Node Removed");
 }
 }
+namespace Pulsestorm\Magento2\Generate\Schemaaddcolumn{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+
+
+
+/**
+* Genreated a Magento 2 addColumn DDL definition and inserts into file
+*
+* Command scans creates column definition code and, if provided
+* attempts to insert it into provided php_file.  Inserting means
+* looking for this pattern.
+*   newTable($installer->getTable('table_name'))->addColumn
+* and if found, scanning to the ; and inserting the addColumn
+*
+* @command magento2:generate:schema-add-column
+* @argument php_file PHP file with newTable call? [skip]
+* @argument table Database Table? (packagename_modulename_modelnames)
+* @argument column Columns Name? (new_column)
+* @argument column_type @callback selectColumnType
+*/
+function pestle_cli($argv, $options)
+{
+    return \Pulsestorm\Magento2\Generate\Ui\Addschemacolumn\exported_pestle_cli($argv, $options);
+}
+
+function selectColumnType($arguments, $index, $fullArguments)
+{
+    if(isset($arguments[$index]))
+    {
+        return $arguments[$index];
+    }
+    $types = array_values(\Pulsestorm\Magento2\Generate\Ui\Addschemacolumn\getColumnTypes());
+    $value = inputFromArray("Column Type?", $types, 1);
+    return $value;
+}
+}
 namespace Pulsestorm\Magento2\Generate\Servicecontract{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -10531,6 +10718,11 @@ define('STATE_FOUND_SPECIFIC_FUNCTION',             2);
 define('STATE_FOUND_FIRST_POST_SPECIFIC_BRACKET',   3);
 define('STATE_BRACKET_COUNT_ZEROD_OUT',             4);
 
+define('STATE_FOUND_CLASS', 5);
+define('STATE_FOUND_TOP_LEVEL', 6);
+define('STATE_FOUND_CLASS_EXTENDS', 7);
+define('STATE_FOUND_CLASS_IMPLEMENTS', 8);
+
 /**
 * @command library
 */
@@ -10547,9 +10739,9 @@ function removeWhitespaceAndReIndex(&$tokens)
 {
     $array = array_filter($tokens, function($token){
         return $token->token_name !== 'T_WHITESPACE';
-    });    
+    });
     return array_values($array);
-    
+
 }
 
 function addPhpTagIfNeeded($string)
@@ -10570,22 +10762,22 @@ function extractUntilSemiColon(&$tokens, $i, $toSkipValues)
     {
         $token = $tokens[$i];
         //if we've hit a semi-colon, that's the end
-        if($token->token_value === ';'){ break; }    
+        if($token->token_value === ';'){ break; }
 
         //skip the stuff we don't need
         if(in_array($token->token_value, $toSkipValues))
         {
             continue;
         }
-        
-        $imports[] = $token;        
+
+        $imports[] = $token;
     }
     if(count($imports) > 1)
     {
         var_dump($imports);
         \Pulsestorm\Pestle\Library\exitWithErrorMessage("Not sure what to do about dynamic pestle_import");
     }
-    
+
     $includeString = $imports[0]->token_value;
     $includeString = preg_replace('%[\'"]%', '', $includeString);
     return $includeString;
@@ -10595,7 +10787,7 @@ function getPestleImportsFromCode($string)
 {
     $string = addPhpTagIfNeeded($string);
     $tokens = pestle_token_get_all($string);
-    $tokens = removeWhitespaceAndReIndex($tokens);  
+    $tokens = removeWhitespaceAndReIndex($tokens);
     $importNames = [];
     $tokenCount = count($tokens);
     for($i=0;$i<$tokenCount;$i++)
@@ -10603,9 +10795,9 @@ function getPestleImportsFromCode($string)
         $token = $tokens[$i];
         if($token->token_value == 'pestle_import' && $tokens[$i-1]->token_name !== 'T_NS_SEPARATOR')
         {
-            $importNames[] = extractUntilSemiColon($tokens, $i, ['pestle_import','(',')']);            
+            $importNames[] = extractUntilSemiColon($tokens, $i, ['pestle_import','(',')']);
         }
-    }        
+    }
     return $importNames;
 }
 
@@ -10618,7 +10810,7 @@ function getFunctionInfoFromCodeWithCallback($string, $callback)
     }
 
     $tokens = pestle_token_get_all($string);
-    $tokens = removeWhitespaceAndReIndex($tokens);    
+    $tokens = removeWhitespaceAndReIndex($tokens);
     $tokenCount = count($tokens);
     $functionNames = [];
     for($i=0;$i<$tokenCount;$i++)
@@ -10636,16 +10828,16 @@ function getParsedFunctionInfoFromCode($codeAsString)
 {
     $infos = getFunctionInfoFromCodeWithCallback($codeAsString, function($tokens, $position){
         $importantTokens    = [];
-        // $importantTokens[]  = $tokens[$position+1];        
-        
+        // $importantTokens[]  = $tokens[$position+1];
+
         $accessLevels = ['public','private','protected'];
         $thingsWeWant = array_merge(['static'], $accessLevels);
-        
-        for($i=$position-1;$i>($position-10);$i--)  //ten is arbitrary to 
+
+        for($i=$position-1;$i>($position-10);$i--)  //ten is arbitrary to
         {                                           //avoid infinite back
                                                     //since I'm not confident
-                                                    //I know all the ways a 
-                                                    //method might be declared            
+                                                    //I know all the ways a
+                                                    //method might be declared
             $token = $tokens[$i];
             if(in_array($token->token_value, $thingsWeWant))
             {
@@ -10673,12 +10865,12 @@ function getParsedFunctionInfoFromCode($codeAsString)
         }
         return $info;
     });
-    
+
     //filter out anons for now
     $infos = array_filter($infos, function($info){
         return $info->function_name !== '(';
     });
-    
+
     //array_values to reindex
     return array_values($infos);
 }
@@ -10690,7 +10882,7 @@ function getFunctionNamesFromCode($string)
         $token = $tokens[$position+1];
         $token->is_anon_function = false;
         if('(' === $token->token_value)
-        {   
+        {
             $token->is_anon_function = true;
         }
         return $token;
@@ -10706,7 +10898,7 @@ function getFunctionFromCode($string, $function)
     }
 
     $tokens = pestle_token_get_all($string);
-    $state                              = 0;    
+    $state                              = 0;
     $count_bracket                      = 0;
     $new_tokens                         = [];
     foreach($tokens as $token)
@@ -10719,7 +10911,7 @@ function getFunctionFromCode($string, $function)
                 if($token_name == 'T_FUNCTION')
                 {
                     $state = STATE_FOUND_FUNCTION;
-                }                
+                }
                 break;
             case STATE_FOUND_FUNCTION:
                 if($token_name == 'T_STRING' && $token_value == $function)
@@ -10749,14 +10941,14 @@ function getFunctionFromCode($string, $function)
                 if($token_name == 'T_SINGLE_CHAR' && $token_value == '}')
                 {
                     $count_bracket--;
-                }   
+                }
                 if($count_bracket === 0)
                 {
                     $state = STATE_BRACKET_COUNT_ZEROD_OUT;
-                }             
+                }
                 break;
             case STATE_BRACKET_COUNT_ZEROD_OUT:
-            
+
                 $values = array_map(function($token){
                     return $token->token_value;
                 }, $new_tokens);
@@ -10776,10 +10968,10 @@ function getFunctionFromCode($string, $function)
         {
             return false;
         }
-        return 'function ' . implode('',  $values);        
+        return 'function ' . implode('',  $values);
     }
-    
-    throw new \Exception("Parser Bug. Cries.");    
+
+    throw new \Exception("Parser Bug. Cries.");
 }
 
 function fix_token($token)
@@ -10789,7 +10981,7 @@ function fix_token($token)
         $token['token_name'] = token_name($token[0]);
         $token['token_value'] = $token[1];
         $token['token_line'] = $token[2];
-    }    
+    }
     else
     {
         $tmp                = array();
@@ -10846,7 +11038,7 @@ function run($argv)
 
 function outputChangedFile($file, $buffer)
 {
-    $tokens = pestle_token_get_all(file_get_contents($file));        
+    $tokens = pestle_token_get_all(file_get_contents($file));
     $tokens = fix_all_tokens($tokens);
 
     $to_replace = array(
@@ -10858,18 +11050,18 @@ function outputChangedFile($file, $buffer)
         'Mage_Core_Model_Session_Abstract'              => '\Magento\Core\Model\Session\AbstractSession',
         'Mage_Core_Model_Event_Invoker_InvokerDefault'  => '\Magento\Event\Invoker\InvokerDefault',
         'Mage_Core_Model_Event_Manager'                 => '\Magento\Event\Manager',
-        'Varien_Object'                                 => '\Magento\Object', 
+        'Varien_Object'                                 => '\Magento\Object',
         'Varien_Event_Observer'                         => '\Magento\Event\Observer'
     );
     foreach($tokens as $token)
-    { 
+    {
         if($token->token_name = 'T_STRING' && in_array($token->token_value, array_keys($to_replace)))
         {
             $token->token_value = $to_replace[$token->token_value];
         }
-    }    
-    
-    
+    }
+
+
     return outputTokens($tokens, $buffer);
 }
 
@@ -10878,8 +11070,8 @@ function extractClassInformationFromClassContentsDefinition(&$tokens)
 {
     $information = [
         'class'=>[],
-        'extends'=>[],        
-        'implements'=>[],                
+        'extends'=>[],
+        'implements'=>[],
     ];
     $step = PARSE_STEP_START;
     foreach($tokens as $token)
@@ -10895,19 +11087,19 @@ function extractClassInformationFromClassContentsDefinition(&$tokens)
             $step = PARSE_STEP_CLASS;
             continue;
         }
-        
+
         if($step != PARSE_STEP_START && $v === 'extends')
         {
             $step = PARSE_STEP_EXTENDS;
-            continue;            
+            continue;
         }
 
         if($step != PARSE_STEP_START && $v === 'implements')
         {
             $step = PARSE_STEP_IMPLEMENTS;
-            continue;            
+            continue;
         }
-                        
+
         if($step === PARSE_STEP_CLASS)
         {
             $information['class'][] = $token;
@@ -10916,17 +11108,17 @@ function extractClassInformationFromClassContentsDefinition(&$tokens)
         if($step === PARSE_STEP_EXTENDS)
         {
             $information['extends'][] = $token;
-        }        
-        
+        }
+
         if($step === PARSE_STEP_IMPLEMENTS)
         {
             $information['implements'][] = $token;
-        }        
+        }
     }
     $joinCallback = function($token){
         return $token->token_value;
     };
-    
+
     $information['class'] = implode('',array_map($joinCallback, $information['class']));
     $information['extends'] = implode('',array_map($joinCallback, $information['extends']));
     $information['implements'] = implode('',array_map($joinCallback, $information['implements']));
@@ -10964,27 +11156,27 @@ function extractClassInformationFromClassContentsStatementStartsWith($tokens, $s
             $step = PARSE_STEP_USE;
             continue;
         }
-        
+
         if($step === PARSE_STEP_USE && $v === ';')
         {
             $step = PARSE_STEP_START;
-            $information[] = $current;            
+            $information[] = $current;
             $current = [];
             continue;
         }
-        
+
         if($step === PARSE_STEP_USE)
         {
             $current[] = $token;
-        }        
+        }
     }
 
     $information = array_map(function($tokens){
         $joinCallback = function($token){
             return $token->token_value;
         };
-        return implode('',array_map($joinCallback, $tokens));                
-    }, $information);  
+        return implode('',array_map($joinCallback, $tokens));
+    }, $information);
     return $information;
 }
 
@@ -11005,7 +11197,7 @@ function extractFullExtendsFromClassInformation($information)
     {
         return trim($extends,'\\');
     }
-    
+
     //test use statements
     foreach($information['use'] as $use)
     {
@@ -11018,15 +11210,15 @@ function extractFullExtendsFromClassInformation($information)
             return implode('\\',$parts) . '\\' . $extends;
         }
     }
-    
+
     //test multi-part use
     foreach($information['use'] as $use)
     {
         $use = trim($use);
         $partsUse = explode('\\', $use);
-        $lastUse = array_pop($partsUse);        
+        $lastUse = array_pop($partsUse);
         $partsExtends = explode('\\', $extends);
-        $firstExtends = array_shift($partsExtends);        
+        $firstExtends = array_shift($partsExtends);
         if($lastUse === $firstExtends)
         {
             return implode('\\',$partsUse) . '\\' . $extends;
@@ -11035,7 +11227,7 @@ function extractFullExtendsFromClassInformation($information)
 
     //test namespaces
     $parts = explode('\\', trim($information['namespace']));
-    $last  = array_pop($parts);    
+    $last  = array_pop($parts);
     if(strpos($extends, $last) === 0)
     {
         return implode('\\',$parts) . '\\' . $extends;
@@ -11049,7 +11241,7 @@ function extractClassInformationFromClassContents($contents)
     $tokens = pestle_token_get_all($contents);
     $information = extractClassInformationFromClassContentsDefinition($tokens);
     $information['use'] = extractClassInformationFromClassContentsUse($tokens);
-    
+
     $information['namespace'] = extractClassInformationFromClassContentsNamespace($tokens);
     $information['full-class'] = extractFullClassNameFromClassInformation($information);
     $information['full-extends'] = extractFullExtendsFromClassInformation($information);
@@ -11065,8 +11257,191 @@ function extractVariablesFromConstructor($function)
     $variables = array_map(function($token){
         return $token->token_value;
     }, $tokens);
-    
+
     return $variables;
+}
+
+function getClassesFromCode($string) {
+    $tokens = pestle_token_get_all($string);
+    $all        = [];
+    $state = STATE_PARSING;
+    $level = 0;
+    foreach($tokens as $token) {
+        if($token->token_name === 'T_CLASS' && STATE_PARSING == $state) {
+            $state = STATE_FOUND_CLASS;
+            $current = [];
+            $current[] = $token;
+            continue;
+        }
+
+        if($state === STATE_FOUND_CLASS && $token->token_value !== '{')
+        {
+            $current[] = $token;
+            continue;
+        }
+
+        if($state === STATE_FOUND_CLASS && $token->token_value === '{')
+        {
+            $current[] = $token;
+            $state = STATE_FOUND_TOP_LEVEL;
+            continue;
+        }
+
+        if($state === STATE_FOUND_TOP_LEVEL && $token->token_value === '{') {
+            $level++;
+            $current[] = $token;
+            continue;
+        }
+
+        if($state === STATE_FOUND_TOP_LEVEL && $token->token_value === '}' && $level > 0) {
+            $level--;
+            $current[] = $token;
+            continue;
+        }
+
+        if($state === STATE_FOUND_TOP_LEVEL && $token->token_value === '}' && $level == 0) {
+            $current[] = $token;
+            $all[] = $current;
+            $state = STATE_PARSING;
+        }
+
+        if($state === STATE_FOUND_TOP_LEVEL) {
+            $current[] = $token;
+            continue;
+        }
+
+    }
+
+    $all = array_map(function($item){
+        return outputTokens($item, true);
+    }, $all);
+
+    $named = [];
+    foreach($all as $class) {
+        $info = getClassInfoFromClass($class);
+        $names[$info['name']] = $class;
+    }
+    return $names;
+}
+
+function replaceTypeHintsWithNewTypeHints($classBody, $legend) {
+    $tokens = pestle_token_get_all('<' . '?php ' . $classBody);
+    var_dump($tokens);
+    exit;
+}
+
+function getClassInfoFromClass($class) {
+    $tokens = pestle_token_get_all('<' . '?php ' . $class);
+    $state = STATE_PARSING;
+    $current = [
+        'name'=>[],
+        'extends'=>[],
+        'implements'=>[],
+    ];
+
+    $endTokens = ['{','extends','implements'];
+    foreach($tokens as $token) {
+        if($token->token_name === 'T_CLASS' && STATE_PARSING == $state) {
+            $state = STATE_FOUND_CLASS;
+            continue;
+        }
+
+        if($state === STATE_FOUND_CLASS && !in_array($token->token_value,$endTokens))
+        {
+            $current['name'][] = $token;
+            continue;
+        }
+
+        if($state === STATE_FOUND_CLASS_IMPLEMENTS && !in_array($token->token_value,$endTokens))
+        {
+            $current['implements'][] = $token;
+            continue;
+        }
+
+        if($state !== STATE_PARSING && 'extends' === $token->token_value)
+        {
+            $state = STATE_FOUND_CLASS_EXTENDS;
+            continue;
+        }
+
+        if($state !== STATE_PARSING && 'implements' === $token->token_value)
+        {
+            $state = STATE_FOUND_CLASS_IMPLEMENTS;
+            continue;
+        }
+
+        if($state === STATE_FOUND_CLASS_EXTENDS && !in_array($token->token_value,$endTokens))
+        {
+            $current['extends'][] = $token;
+            continue;
+        }
+
+        if($state !== STATE_PARSING && $token->token_value === '{')
+        {
+            break;
+        }
+    }
+
+    $current['name']        = trim( outputTokens($current['name'],       true));
+    $current['extends']     = trim( outputTokens($current['extends'],    true));
+    $current['implements']  = trim( outputTokens($current['implements'], true));
+
+    return $current;
+}
+}
+namespace Pulsestorm\Cli\Ascii_Table{
+use function Pulsestorm\Pestle\Importer\pestle_import;
+
+
+function textTableHashSum($accounts) {
+    $sum = array_sum($accounts);
+
+    arsort($accounts);
+    $accounts = array_map(function($item) {
+        return number_format($item, 2);
+    }, $accounts);
+
+    $longestKey = max(array_map(function($item){
+        return strLen($item);
+    }, array_keys($accounts)));
+
+    $longestLine = 0;
+    foreach($accounts as $key=>$value) {
+        $length = strlen($key) + strlen($value);
+        $longestLine = ($length > $longestLine) ? $length : $longestLine;
+    }
+
+    $longestLine += 5;
+
+    $containerLine = '+'.str_repeat('-', $longestLine) . '+';
+    \Pulsestorm\Pestle\Library\output($containerLine);
+
+    foreach($accounts as $key=>$value) {
+        $paddingKey   = str_repeat(' ', $longestKey - strlen($key) + 1);
+        $paddingValue = str_repeat(' ',
+            $longestLine - strlen($paddingKey . $key . $value . ' | '));
+
+        // $paddingValue = ' ';
+        \Pulsestorm\Pestle\Library\output( '| ' .
+                $key .
+                $paddingKey . '| '.
+                $value .
+                $paddingValue . '|');
+    }
+    \Pulsestorm\Pestle\Library\output($containerLine);
+    $print  = 'SUM: ' . number_format($sum);
+    $length = $longestLine - strlen($print) - 1;
+    $padding = str_repeat(' ', $length);
+    // $padding = ' ';
+    \Pulsestorm\Pestle\Library\output('| ' . $print . $padding . '|');
+    \Pulsestorm\Pestle\Library\output($containerLine);
+}
+
+/**
+* @command library
+*/
+function pestle_cli()
+{
 }
 }
 namespace Pulsestorm\Cli\Md_To_Say{
@@ -11089,31 +11464,32 @@ function pestle_cli($argv)
     $file = \Pulsestorm\Pestle\Library\inputOrIndex("Path to Markdown File?", null, $argv, 0);
 
     $contents = file_get_contents($file);
-    $html     = Markdown::defaultTransform($contents);            
+    $html     = Markdown::defaultTransform($contents);
     $html     = preg_replace(
-        '%<pre><code>.+?</code></pre>%six', 
-        '<p>[CODE SNIPPED].</p>', 
+        '%<pre><code>.+?</code></pre>%six',
+        '<p>[CODE SNIPPED].</p>',
         $html
     );
     $html = str_replace('</p>','</p><br>',$html);
-    
+
     $tmp = tempnam('/tmp', 'md_to_say') . '.html';
-    file_put_contents($tmp, $html);    
-    
+    file_put_contents($tmp, $html);
+
     $cmd = 'textutil -convert txt ' . $tmp;
     `$cmd`;
-    
+
     $tmp_txt    = swapExtension($tmp, 'html','txt');
     $tmp_aiff   = swapExtension($tmp, 'html','aiff');
-    
+
     $cmd = "say -f $tmp_txt -o $tmp_aiff";
     \Pulsestorm\Pestle\Library\output($cmd);
-    `$cmd`;
+    // `$cmd`;
     // $tmp_txt = preg_replace('%\.html$%','.txt', $tmp);
-    
-    \Pulsestorm\Pestle\Library\output($tmp_aiff);    
+
+    \Pulsestorm\Pestle\Library\output($tmp_aiff);
     \Pulsestorm\Pestle\Library\output("Done");
-}}
+}
+}
 namespace Pulsestorm\Cli\Code_Generation{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
@@ -11794,6 +12170,25 @@ function renderBoard($data)
     $data[6], $data[7], $data[8], $data[9], $data[10],
     $data[11], $data[12], $data[13], $data[14], $data[15]);
 }
+
+function moveFromAtoB(&$data, $from, $to)
+{
+    $map = getPositionAndMapLegend();
+
+    //is move valid for position
+    $jumpedAndDestination = $map[$from];
+
+
+    //is destination free
+
+    //is there a piece to jump
+
+    //perform move
+
+    return true;
+    var_dump();
+}
+
 /**
 * One Line Description
 *
@@ -11802,6 +12197,7 @@ function renderBoard($data)
 function pestle_cli($argv)
 {
     $data = getBoardData();
+    moveFromAtoB($data, 15, 13);
     echo renderBoard(getBoardData());
 }
 }
@@ -12039,6 +12435,14 @@ function getProcessFunctionFromFirstLine($line)
     {
         return __NAMESPACE__ . '\processPaypal';
     }
+
+    if((strpos($line[0],'id') !== false) && $line[1] === 'Description' && $line[7] === 'Converted Amount Refunded')
+    {
+        return __NAMESPACE__ . '\processStripe';
+    }
+        
+    var_dump($line);
+    exit;
     throw new Exception("Unknown Process Function");
 }
 
@@ -12055,6 +12459,67 @@ function joinHeadersAndValue($headers, $values)
         $new[($headers[$i])] = $values[$i];
     }
     return $new;
+}
+
+function processStripe($line)
+{
+    static $headers;
+    $to_skip = ['Name','Email','Payer ID','Report Date','Available Balance'];
+    foreach($to_skip as $key)
+    {
+        if((strpos($line[0],$key) !== false))
+        {
+            return;
+        }    
+    }
+    if(!$headers && $line[0] === 'Date')
+    {
+        $headers = $line;
+        return;
+    }
+    $row = joinHeadersAndValue($headers, $line);
+    if(strpos($row['Type'],'Transfer to Bank') !== false)
+    {
+        return null;
+    }
+    $iif      = getIifTemplate();
+    $iif      = str_replace('<$date$>',         $row['Date'],       $iif);
+    $iif      = str_replace('<$entity$>',       $row['Name'],       $iif);
+    $iif      = str_replace('<$amount$>',       trim($row['Net']),        $iif);
+    
+    $product_title = $row['Item Title'];
+    if(!$product_title)
+    {
+        $product_title = $row['Subject'];
+    }
+    
+    //dupe "no title" behavior
+    if($product_title)
+    {
+        $iif      = str_replace('<$product_name$>', $product_title, $iif);
+    }
+    else
+    {
+        $iif      = str_replace('"<$product_name$>"' . "\t", '', $iif);
+    }
+    
+    $iif      = str_replace('<$amount_full$>',  number_format(($row['Gross'] * -1),2), $iif);    
+    $iif      = str_replace('<$amount_fee$>',   number_format(($row['Fee'] * -1),2), $iif);        
+
+    if((int) $row['Fee'] === 0)
+    {
+        $parts = preg_split('%[\r\n]{1,2}%', $iif);
+        $parts = array_filter($parts, function($item){
+            return strpos($item, '"Bank Fee"') === false;
+        });
+        
+        $iif = implode("\n",$parts);
+        if(strpos($iif, '"Bank Fee"') === false)
+        {
+            $iif = str_replace('Express Checkout Payment Received', 'Payment Received', $iif);
+        }                 
+    }
+    return $iif;  
 }
 
 function processPaypal($line)
@@ -12784,7 +13249,7 @@ function getShortClassNameFromClass($class)
 function parseDocCommentAts($r)
 {
     $comment = $r->getDocComment();
-    $comment = preg_replace(['%^\*/%m', '%^/\*\*%m','%^\* %m','%^\*%m'], '', $comment);    
+    $comment = preg_replace(['%^\*/%m', '%^/\*\*%m','%^\* %m','%^\*%m'], '', $comment);
     $parts   = explode('@', $comment);
     array_shift($parts);
     $parsed  = [];
@@ -12798,7 +13263,7 @@ function parseDocCommentAts($r)
     $parsed = array_map(function($thing){
         return trim($thing);
     }, $parsed);
-    
+
     return $parsed;
 }
 
@@ -12822,22 +13287,22 @@ function getNewClassDeclaration($class, $extends, $include_start_bracket=true)
             $parts[] = $extends['full_class'] .';';
         }
     }
-        
-    $parts[] = "\n";    
-    
+
+    $parts[] = "\n";
+
     $parts[] = 'class';
     $parts[] = $class['class'];
     if($extends['class'])
     {
-        $parts[] = 'extends';    
-        $parts[] = $extends['class'];      
+        $parts[] = 'extends';
+        $parts[] = $extends['class'];
     }
-    $parts[] = "\n";    
+    $parts[] = "\n";
     if($include_start_bracket)
     {
-        $parts[] = "{";       
+        $parts[] = "{";
     }
-    
+
     return preg_replace('%^ *%m', '', implode(' ', $parts));
 }
 
@@ -12897,7 +13362,7 @@ function getDocCommentAsString($function)
 {
     $r = new ReflectionFunction($function);
     $lines = explode("\n", $r->getDocComment());
-    
+
     if(count($lines) > 2)
     {
         array_shift($lines);
@@ -12906,7 +13371,7 @@ function getDocCommentAsString($function)
             return trim(trim($line),"* ");
         }, $lines);
     }
-    
+
     return trim( implode("\n", $lines) );
 }
 
@@ -12918,7 +13383,7 @@ function isAboveRoot($path)
     array_unshift($parts, '/');
     $parts      = array_filter($parts,      __NAMESPACE__ . '\notEmpty');
     $parts_real = array_filter($parts_real, __NAMESPACE__ . '\notEmpty');
-    
+
     return count($parts) > count($parts_real);
 }
 
@@ -12928,9 +13393,9 @@ function notEmpty($item)
 }
 
 function inputRawPhp()
-{    
+{
     $handle = fopen ("php://stdin","r");
-    $line = fgets($handle);        
+    $line = fgets($handle);
     fclose($handle);
     return $line;
 }
@@ -12942,6 +13407,10 @@ function inputReadline($prompt=null)
         return readline();
     }
 
+    $parts = explode("\n", $prompt);
+    $prompt = array_pop($parts);
+    $preamble = implode("\n", $parts);
+    if($preamble) { echo $preamble,"\n"; }
     return readline($prompt);
 }
 
@@ -12960,7 +13429,7 @@ function input($string, $default='')
 {
     $prompt =  $string . " (".$default.")] ";
     if(!function_exists('readline'))
-    {   
+    {
         echo($prompt);
         $line = inputRawPhp();
     }
@@ -12973,7 +13442,7 @@ function input($string, $default='')
         return trim($line);
     }
     return $default;
-    
+
 }
 
 function inputOrIndex($question, $default, $argv, $index)
@@ -12982,7 +13451,7 @@ function inputOrIndex($question, $default, $argv, $index)
     {
         return $argv[$index];
     }
-    
+
     return input($question, $default);
 }
 
@@ -13006,7 +13475,7 @@ function output($string)
             continue;
         }
         echo $arg;
-    }    
+    }
     echo "\n";
 }
 
@@ -13034,16 +13503,16 @@ function parseDocBlockIntoParts($string)
 {
     $return = [
         'one-line'      => '',
-        'description'   => '',      
+        'description'   => '',
     ];
-    
+
     $lines = preg_split('%[\r\n]%', $string);
     $start_block = trim(array_shift($lines));
     if($start_block !== '/**')
     {
         return $return;
     }
-    
+
     while($line = array_shift($lines))
     {
         $line = cleanDocBlockLine($line);
@@ -13053,7 +13522,7 @@ function parseDocBlockIntoParts($string)
             break;
         }
         if(!$line) { continue;}
-        
+
         if(!$return['one-line'])
         {
             $return['one-line'] = $line;
@@ -13068,7 +13537,7 @@ function parseDocBlockIntoParts($string)
     $all = implode("\n",$lines);
     preg_match_all('%^.*?@([a-z0-1]+?)[ ](.+?$)%mix', $all, $matches, PREG_SET_ORDER);
     foreach($matches as $match)
-    {        
+    {
         $return[$match[1]][] = trim($match[2]);
     }
     return $return;
@@ -13078,7 +13547,7 @@ function parseArgvIntoCommandAndArgumentsAndOptions($argv)
 {
     $script  = array_shift($argv);
     $command = array_shift($argv);
-     
+
     $arguments = [];
     $options   = [];
     $length = count($argv);
@@ -13088,16 +13557,16 @@ function parseArgvIntoCommandAndArgumentsAndOptions($argv)
         if(isOption($arg))
         {
             $option = str_replace('--', '', $arg);
-            
+
             if(preg_match('%=$%', $option))
             {
-                $option = substr($option, 0, 
+                $option = substr($option, 0,
                     strlen($option)-1);
-                $option_value = $argv[$i+1];                    
-                $i++;                    
+                $option_value = $argv[$i+1];
+                $i++;
             }
             else if(preg_match('%=.%', $option))
-            {   
+            {
                 list($option, $option_value) = explode('=', $option, 2);
             }
             //the boolean options
@@ -13112,19 +13581,19 @@ function parseArgvIntoCommandAndArgumentsAndOptions($argv)
                 {
                     $option_value = $argv[$i+1];
                 }
-                $i++;                
+                $i++;
             }
-            
-            
+
+
             $options[$option] = $option_value;
-            
+
         }
         else
         {
             $arguments[] = $arg;
         }
     }
-    
+
     return [
         'command'   => $command,
         'arguments' => $arguments,
@@ -13137,13 +13606,13 @@ function parseArgvIntoCommandAndArgumentsAndOptions($argv)
 */
 function pestle_cli($argv)
 {
-    
+
 }
 }
 namespace Pulsestorm\Pestle\Version{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
-define('PULSESTORM_PESTLE_VERSION', '1.4.2');
+define('PULSESTORM_PESTLE_VERSION', '1.4.3');
 /**
 * Displays Pestle Version
 *
