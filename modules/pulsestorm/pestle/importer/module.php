@@ -5,11 +5,11 @@ use ReflectionFunction;
 use ReflectionClass;
 
 function pestle_import($thing_to_import, $as=false)
-{     
+{
     $ns_called_from  = getNamespaceCalledFrom();
-    $thing_to_import = trim($thing_to_import, '\\');    
-    $function = extractFunction($thing_to_import);    
-    includeCode($thing_to_import, $function, $ns_called_from);                 
+    $thing_to_import = trim($thing_to_import, '\\');
+    $function = extractFunction($thing_to_import);
+    includeCode($thing_to_import, $function, $ns_called_from);
     return true;
 }
 
@@ -25,7 +25,7 @@ function createFunctionForGlobalExport($function_name)
     $info = extractFunctionNameAndNamespace($function_name);
     //include in the library
     // $code = '<' . '?php' . "\n" .
-    $code = 
+    $code =
     'function ' . $info['short_name'] . '(){
         $args = func_get_args();
         return call_user_func_array(\'\\'.$function_name.'\', $args);
@@ -39,7 +39,7 @@ function extractFunctionNameAndNamespace($full)
     $parts      = explode('\\', $full);
     $short_name = array_pop($parts);
     $namespace  = implode('/',$parts);
-    
+
     return [
         'short_name'=>$short_name,
         'namespace' =>$namespace
@@ -48,12 +48,16 @@ function extractFunctionNameAndNamespace($full)
 
 function getModuleFolders()
 {
-    $paths = [getBaseProjectDir() . '/modules/'];    
+    $pathExtra = '/modules/';
+    $paths = [getBaseProjectDir() . $pathExtra];
     $home = trim(`echo ~`);
-    $pathConfig = $home . '/.pestle/module-folders.json';    
+    $pathConfig = $home . '/.pestle/module-folders.json';
     if(is_dir($home) && file_exists($pathConfig) && $config = json_decode(file_get_contents($pathConfig)))
     {
-        $paths = array_merge($paths, $config->{'module-folders'});
+        $moduleFolders = array_map(function($item) use ($pathExtra) {
+            return $item . $pathExtra;
+        }, $config->{'module-folders'});
+        $paths = array_merge($paths, $moduleFolders);
     }
     return $paths;
 }
@@ -65,8 +69,9 @@ function getPathFromFunctionName($function_name)
     $short_name    = array_pop($parts);
     $namespace     = implode('/',$parts);
     $file          = $namespace . '/module.php';
-    
+
     $folders = getModuleFolders();
+
     foreach($folders as $folder)
     {
         $fullPath = $folder . '/' . $file;
@@ -75,7 +80,7 @@ function getPathFromFunctionName($function_name)
             return $fullPath;
         }
     }
-    
+
     exit("Could not find $file in any folder.\n");
     // return getBaseProjectDir() . '/modules/' . $file;
 }
@@ -94,7 +99,7 @@ function functionCollidesWithPhpGlobalSpace($namespace)
 {
     $parts      = explode('\\', $namespace);
     $short_name = array_pop($parts);
-    
+
     $results = in_array($short_name, get_defined_functions()['internal']);
     if($results)
     {
@@ -110,30 +115,30 @@ function includeCodeReflectionStrategy($namespace, $code, $ns_called_from)
     $parts      = explode('\\', $namespace);
     $short_name = array_pop($parts);
 
-    $code = 
+    $code =
     'use function Pulsestorm\Pestle\Importer\functionRegister;'         . "\n";
     $code .= 'use function Pulsestorm\Pestle\Importer\getNamespaceCalledFromForGenerated;' . "\n";
-    $code .= "function $short_name(){"                                     . "\n" . 
+    $code .= "function $short_name(){"                                     . "\n" .
     '   $function   = functionRegister(__FUNCTION__, getNamespaceCalledFromForGenerated());'            . "\n" .
     '   $args       = func_get_args();'                           . "\n" .
     '   return (new \ReflectionFunction($function))->invokeArgs($args);' . "\n" .
-    '}';    
-    
+    '}';
+
     $full_dir   = $cache_dir    . '/' . str_replace('\\','/',strToLower($namespace));
     $filename   = md5($short_name . $code);
-    // $full_path  = $full_dir . '/'  . $filename . '.php'; 
-    $full_path  = $cache_dir    . '/reflection-strategy/'  . $filename . '.php'; 
-    
+    // $full_path  = $full_dir . '/'  . $filename . '.php';
+    $full_path  = $cache_dir    . '/reflection-strategy/'  . $filename . '.php';
+
     functionRegister($short_name, $ns_called_from, $namespace);
 
     if(file_exists($full_path))
-    {        
+    {
         // require_once getModulePathToFullyNamespacedFunction($namespace);
         require_once $full_path;    //require the exported file
         return;
     }
-    
-    
+
+
 
     if(!is_dir(dirname($full_path)))
     {
@@ -145,33 +150,33 @@ function includeCodeReflectionStrategy($namespace, $code, $ns_called_from)
         //export with a pestle_prefix
         $code = replaceFirstInstanceOfFunctionName($code, $short_name);
     }
-    
+
     // echo $full_path,"\n";
-          
+
     if(!file_exists($full_path))
-    {        
-        //exported as function global function                
+    {
+        //exported as function global function
         file_put_contents($full_path,
-            '<' . '?' . 'php' . "\n" .         
+            '<' . '?' . 'php' . "\n" .
             $code . "\n" .
             '##exported for '      . $namespace . "\n");
     }
-            
-    require_once $full_path ;        
+
+    require_once $full_path ;
 }
 
 function includeCodeFullExportStrategy($namespace, $code)
 {
     $cache_dir = getCacheDir();
     $full_dir  = $cache_dir . '/' . str_replace('\\','/',strToLower($namespace));
-    $full_path = $full_dir . '/'  . md5($code) . '.php';    
-    
+    $full_path = $full_dir . '/'  . md5($code) . '.php';
+
     if(file_exists($full_path))
     {
         require_once $full_path;
         return;
     }
-    
+
     if(!is_dir($full_dir))
     {
         mkdir($full_dir, 0755, true);
@@ -182,18 +187,18 @@ function includeCodeFullExportStrategy($namespace, $code)
         //export with a pestle_prefix
         $code = replaceFirstInstanceOfFunctionName($code, $short_name);
     }
-                        
-    //exported as function global function                
+
+    //exported as function global function
     file_put_contents($full_path,
-        '<' . '?' . 'php' . "\n" .         
+        '<' . '?' . 'php' . "\n" .
         $code . "\n" .
-        '##exported for '      . $namespace . "\n");        
-    require_once $full_path; 
+        '##exported for '      . $namespace . "\n");
+    require_once $full_path;
 }
 function includeCode($namespace, $code, $ns_called_from)
-{   
-    includeCodeReflectionStrategy($namespace, $code, $ns_called_from); 
-    // includeCodeFullExportStrategy($namespace, $code); 
+{
+    includeCodeReflectionStrategy($namespace, $code, $ns_called_from);
+    // includeCodeFullExportStrategy($namespace, $code);
 }
 
 function functionRegisterGet(&$functions, $short_name,$ns_called_from)
@@ -205,38 +210,38 @@ function functionRegisterGet(&$functions, $short_name,$ns_called_from)
     if(!array_key_exists($ns_called_from, $functions[$short_name]))
     {
         exit("No such function [$short_name] imported for namespace [$ns_called_from]");
-    }    
-    return $functions[$short_name][$ns_called_from]; 
+    }
+    return $functions[$short_name][$ns_called_from];
 }
 
 function functionRegisterSet(&$functions, $short_name, $ns_called_from, $namespaced_function)
 {
-    $functions[$short_name][$ns_called_from] = $namespaced_function;    
+    $functions[$short_name][$ns_called_from] = $namespaced_function;
 }
 
 function functionRegister($short_name,$ns_called_from=false,$namespaced_function=false)
-{    
+{
     static $functions=[];
-    if(!$namespaced_function) { 
+    if(!$namespaced_function) {
         return functionRegisterGet($functions, $short_name,$ns_called_from);
-        // return $functions[$short_name][$ns_called_from]; 
+        // return $functions[$short_name][$ns_called_from];
     }
     return functionRegisterSet($functions,$short_name,$ns_called_from,$namespaced_function);
-//     echo "Registering `$short_name` as `$namespaced_function` 
+//     echo "Registering `$short_name` as `$namespaced_function`
 // for calls from `$ns_called_from`","\n";
-    
+
 }
 function replaceFirstInstanceOfFunctionName($code, $short_name)
 {
-    return str_replace('function ' . $short_name, 
-    'function pestle_' . $short_name, $code);    
+    return str_replace('function ' . $short_name,
+    'function pestle_' . $short_name, $code);
 }
 
 function getCacheDir()
 {
     $cache_dir = '/tmp/pestle_cache/' . md5(getBaseProjectDir());
-    
-    if(!is_dir($cache_dir)){ 
+
+    if(!is_dir($cache_dir)){
         mkdir($cache_dir, 0755, true);
     }
     return $cache_dir;
@@ -257,8 +262,8 @@ function getNamespaceCalledFromRequireOrInclude($item)
     if(!in_array($item['function'], ['include','include_once', 'require','require_once']))
     {
         return null;
-    }    
-    
+    }
+
     static $cache = [];
 
     if(array_key_exists($item['file'], $cache))
@@ -280,7 +285,7 @@ function convertAbsoluteFilePathIntoNamespace($path)
     }
     return false;
     // $namespace = splitPopDiscard('\\', $namespace);
-    
+
 
 }
 
@@ -335,15 +340,15 @@ function getItemAfterFunctionFromCallstack($function, $offset=0)
         if(array_key_exists('function', $item) && $item['function'] == $function)
         {
             return $info[($i + 1 + $offset)];
-        }        
+        }
     }
-    return false;    
+    return false;
 }
 function getNamespaceFromFileOfNonNamespaceFunctionCall($item)
 {
     if(!array_key_exists('function', $item))
-    {        
-        return;    
+    {
+        return;
     }
     if(strpos($item['function'], '\\') !== false)
     {
@@ -357,7 +362,7 @@ function getCanidateStackFramesForNamespaceHeuristics()
 {
     $items      = [];
     $items['getItemAfterPestleImportFromCallstack']         = getItemAfterPestleImportFromCallstack();
-    $items['getItemAfterCallFromGeneratedFromCallstack']    = getItemAfterCallFromGeneratedFromCallstack();    
+    $items['getItemAfterCallFromGeneratedFromCallstack']    = getItemAfterCallFromGeneratedFromCallstack();
     return $items;
 }
 
@@ -365,7 +370,7 @@ function getModulePathToFullyNamespacedFunction($namespaced_function)
 {
     $namespace = splitPopDiscard('\\',$namespaced_function);
     $function  = splitPop('\\',$namespaced_function);
-    
+
     $namespace = strToLower(str_replace('\\','/',$namespace));
     $path = getBaseProjectDir() . '/modules/' . $namespace . '/module.php';
     return $path;
@@ -382,7 +387,7 @@ function getNamespaceCalledFromInsideAFile()
         $i++;
         if(!isset($item['function'])) { continue; };
         if($item['function'] !== 'Pulsestorm\Pestle\Importer\pestle_import') { continue; }
-        $found = true;        
+        $found = true;
         break;
     }
     if($found && $i > 0 && array_key_exists($i, $trace))
@@ -397,7 +402,7 @@ function getNamespaceCalledFromInsideAFile()
             return $namespace;
         }
     }
-    //end pestle_import from inside a file    
+    //end pestle_import from inside a file
 }
 
 function ifItemExistsThenReturnNamespaceFromFile($item)
@@ -416,35 +421,35 @@ function getNamespaceCalledFromCallFromGenerateFunction()
     $namespace = ifItemExistsThenReturnNamespaceFromFile($item);
     if($namespace)
     {
-        return $namespace;    
+        return $namespace;
     }
     //for running stand alone file
     $item = getItemAfterCallFromGeneratedFromCallstack(1);
     $namespace = ifItemExistsThenReturnNamespaceFromFile($item);
-    return $namespace;    
-    //end callFromGenereate usage    
+    return $namespace;
+    //end callFromGenereate usage
 }
 
 function getNamespaceCalledFrom()
-{   
+{
     $trace = debug_backtrace();
     $found = false;
-    
+
     $namespace = getNamespaceCalledFromInsideAFile();
     if($namespace)
     {
         return $namespace;
     }
-    
+
     $namespace = getNamespaceCalledFromCallFromGenerateFunction();
     if($namespace)
     {
         return $namespace;
     }
-    
+
     var_dump("Could not determine where pestle_include was callled from");
     var_dump($trace);
-    exit;      
+    exit;
 }
 
 /**
