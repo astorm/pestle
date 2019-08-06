@@ -13612,7 +13612,7 @@ function pestle_cli($argv)
 namespace Pulsestorm\Pestle\Version{
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
-define('PULSESTORM_PESTLE_VERSION', '1.4.3');
+define('PULSESTORM_PESTLE_VERSION', '1.4.4');
 /**
 * Displays Pestle Version
 *
