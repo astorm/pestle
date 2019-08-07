@@ -8,29 +8,32 @@ Regardless -- this document will get you up and running and ready to contribute 
 
 Step 1!  Pestle's source is [kept on GitHub](https://github.com/astorm/pestle).  The first thing you'll want to do is clone this repository.  You'll need [to have git installed](https://help.github.com/en/articles/set-up-git) and then run one of the following (depending on whether you're [cloning with http](https://help.github.com/en/articles/which-remote-url-should-i-use/#cloning-with-https-urls-recommended) via [ssh](https://help.github.com/en/articles/which-remote-url-should-i-use#cloning-with-ssh-urls))
 
-    $ git clone https://github.com/astorm/pestle
+```
+$ git clone https://github.com/astorm/pestle
 
-    // or
+// or
 
-    $ git clone git@github.com:astorm/pestle.git
-    Cloning into 'pestle'...
-    remote: Enumerating objects: 90, done.
-    remote: Counting objects: 100% (90/90), done.
-    remote: Compressing objects: 100% (57/57), done.
-    remote: Total 4531 (delta 42), reused 52 (delta 27), pack-reused 4441
-    Receiving objects: 100% (4531/4531), 1.10 MiB | 1005.00 KiB/s, done.
-    Resolving deltas: 100% (2133/2133), done.
-    Checking connectivity... done.
-
+$ git clone git@github.com:astorm/pestle.git
+Cloning into 'pestle'...
+remote: Enumerating objects: 90, done.
+remote: Counting objects: 100% (90/90), done.
+remote: Compressing objects: 100% (57/57), done.
+remote: Total 4531 (delta 42), reused 52 (delta 27), pack-reused 4441
+Receiving objects: 100% (4531/4531), 1.10 MiB | 1005.00 KiB/s, done.
+Resolving deltas: 100% (2133/2133), done.
+Checking connectivity... done.
+```
 
 Once you've checked pestle out, you'll need to [install composer](https://getcomposer.org/download/), and then use composer to install its dependencies.
 
-    $ cd pestle
-    $ composer install
-    Loading composer repositories with package information
-    Installing dependencies (including require-dev) from lock file
-    // ...
-    Generating autoload files
+```
+$ cd pestle
+$ composer install
+Loading composer repositories with package information
+Installing dependencies (including require-dev) from lock file
+// ...
+Generating autoload files
+```
 
 Composer will run for a bit of time (between 20 seconds and 5 minutes, depending on the state of your network and composer cache), and will install the dependencies to the `vendor/` folder.
 
@@ -42,22 +45,24 @@ When you're working on pestle's source, you'll need a way to invoke pestle that 
 
 Within the root pestle folder, there's a script named `pestle_dev`.  You can use this to invoke pestle and it it load code from the checked out github repository.
 
-    $ ./pestle_dev
-                      _   _
-                     | | | |
-      _ __   ___  ___| |_| | ___
-     | '_ \ / _ \/ __| __| |/ _ \
-     | |_) |  __/\__ \ |_| |  __/
-     | .__/ \___||___/\__|_|\___|
-     | |
-     |_|
-    pestle by Pulse Storm LLC
+```
+$ ./pestle_dev
+                  _   _
+                 | | | |
+  _ __   ___  ___| |_| | ___
+ | '_ \ / _ \/ __| __| |/ _ \
+ | |_) |  __/\__ \ |_| |  __/
+ | .__/ \___||___/\__|_|\___|
+ | |
+ |_|
+pestle by Pulse Storm LLC
 
-    Usage:
-      pestle command_name [options] [arguments]
+Usage:
+  pestle command_name [options] [arguments]
 
-    Available commands:
-    //...
+Available commands:
+//...
+```
 
 Depending on what you're doing, this may be all your need to work on your feature.
 
@@ -71,64 +76,74 @@ The `runner.php` file has the PHP code needed to bootstrap pestle's enviornment.
 
 So, your shell might look something like this after creating the file for this new shell script.
 
-    $ pwd
-    /path/to/pestle-internals/pestle
+```
+$ pwd
+/path/to/pestle-internals/pestle
 
-    $ touch /usr/local/bin/pestle_dev
-    $ chmod +x /usr/local/bin/pestle_dev
-    $ which pestle_dev
-    /usr/local/bin/pestle_dev
+$ touch /usr/local/bin/pestle_dev
+$ chmod +x /usr/local/bin/pestle_dev
+$ which pestle_dev
+/usr/local/bin/pestle_dev
+```
 
 and then you would add the following code to the `/usr/local/bin/pestle_dev` file
 
-    #!/usr/bin/env php
-    <?php
-    require_once('/path/to/pestle-internals/pestle/runner.php');
+```
+#!/usr/bin/env php
+<?php
+require_once('/path/to/pestle-internals/pestle/runner.php');
+```
 
-Which this script in place, and in your unix path, you should be able to invoke the development version of pestle from any folder.
+With this script in place, (and in your unix path), you should be able to invoke the development version of pestle from any folder.
 
-    $ cd ~/Sites/some-magento-system.localhost
-    $ pestle_dev
-                      _   _
-                     | | | |
-      _ __   ___  ___| |_| | ___
-     | '_ \ / _ \/ __| __| |/ _ \
-     | |_) |  __/\__ \ |_| |  __/
-     | .__/ \___||___/\__|_|\___|
-     | |
-     |_|
-    pestle by Pulse Storm LLC
+```
+$ cd ~/Sites/some-magento-system.localhost
+$ pestle_dev
+                  _   _
+                 | | | |
+  _ __   ___  ___| |_| | ___
+ | '_ \ / _ \/ __| __| |/ _ \
+ | |_) |  __/\__ \ |_| |  __/
+ | .__/ \___||___/\__|_|\___|
+ | |
+ |_|
+pestle by Pulse Storm LLC
 
-    Usage:
-      pestle command_name [options] [arguments]
+Usage:
+  pestle command_name [options] [arguments]
 
-    Available commands:
-    //...
+Available commands:
+//...
+```
 
 ## Running Unit Tests
 
 You've got your code checked out.  You can invoke a version of pestle that uses the source code.  Next up?  You'll need to know how to run Pestle's tests.
 
-Pestle uses the ["somehow it's still free" Travis CI](https://travis-ci.org/) as it's continuous integration system.  i.e. Travis is what runs Pestle's tests automatically before and after every code checkin.  This means the `.travis.yml` in the project root will always have the most up to date version of running Pestle's tests.
+Pestle uses the ["somehow it's still free" Travis CI](https://travis-ci.org/) as its continuous integration system.  i.e. Travis is what runs Pestle's tests automatically before and after every code checkin.  This means the `.travis.yml` in the project root will always have the most up to date information on running Pestle's tests.
 
 As of this writing, you can run Pestle's units tests by invoking the following
 
-    $ vendor/bin/phpunit tests
-    PHPUnit 4.8.36 by Sebastian Bergmann and contributors.
+```
+$ vendor/bin/phpunit tests
+PHPUnit 4.8.36 by Sebastian Bergmann and contributors.
 
-    ................................................................. 65 / 88 ( 73%)
-    .......................
+................................................................. 65 / 88 ( 73%)
+.......................
 
-    Time: 2.7 seconds, Memory: 8.00MB
+Time: 2.7 seconds, Memory: 8.00MB
 
-    OK (88 tests, 95 assertions)
+OK (88 tests, 95 assertions)
+```
 
-We're also experimenting with including a test script in `composer.json`, mimicking a patterns that's common in npm based javascript development.
+We're also experimenting with including a test script in `composer.json`, mimicking a pattern that's common in npm based javascript development.
 
-    $ composer.phar test
-    PHPUnit 4.8.36 by Sebastian Bergmann and contributors.
+```
+$ composer.phar test
+PHPUnit 4.8.36 by Sebastian Bergmann and contributors.
 
-    //...
+//...
+```
 
 ## Running Integration Tests
 
@@ -138,6 +153,7 @@ The bitrot in the integration tests integration tests is real.  When we [get aro
 
 Pestle uses [the PHPUnit framework](https://phpunit.de/) for its unit tests. To create a new test, pick a class-name, and then create a PHP Unit class file in the `tests` folder that looks something like this
 
+``` php
     #File: tests/YourClassNameTest.php
     <?php
     namespace Pulsestorm\Pestle\Tests;
@@ -152,28 +168,31 @@ Pestle uses [the PHPUnit framework](https://phpunit.de/) for its unit tests. To 
             );
         }
     }
+```
 
 All pestle tests extend the `Pulsestorm\Pestle\Tests\PestleBaseTest` class, and this class needs to be manually `require_once`d in.  This bit of non-elegance is due, in part, to the fact that Pestle was being worked on while PHP was still getting PSR-0 and PSR-4 sorted out.  We regret the decision and [are working on a fix](https://github.com/astorm/pestle/issues/470).
 
 The test runner and pestle are smart enough to use the `pestle_import` function to pull in individual functions from pestle's module sources.  This means you can use `pestle_import` to pull in a function and test it.  You can see an example of this here, where we're testing the standard pestle `output` function.
 
-    #File: pestle/tests/NamespaceRefactoringTest.php
-    use function Pulsestorm\Pestle\Importer\pestle_import;
-    /* ... */
-    pestle_import('Pulsestorm\Pestle\Library\output');
-    /* ... */
-    class NamespaceRefactoringTest extends PestleBaseTest
+```php
+#File: pestle/tests/NamespaceRefactoringTest.php
+use function Pulsestorm\Pestle\Importer\pestle_import;
+/* ... */
+pestle_import('Pulsestorm\Pestle\Library\output');
+/* ... */
+class NamespaceRefactoringTest extends PestleBaseTest
+{
+    public function testsOutput()
     {
-        public function testsOutput()
-        {
-            ob_start();
-            output("Hello");
-            $results = ob_get_clean();
-            $this->assertEquals(trim($results), "Hello");
-        }
-
-        /* ... */
+        ob_start();
+        output("Hello");
+        $results = ob_get_clean();
+        $this->assertEquals(trim($results), "Hello");
     }
+
+    /* ... */
+}
+```
 
 ## Writing Integration Tests
 
@@ -183,13 +202,17 @@ The bitrot in the integration tests integration tests is real.  When we [get aro
 
 Alright!  You've made your changes and you're ready to do some end-to-end testing.  In other words, you want to build pestle's `.phar` file and see if your stuff actually works.
 
-Pestle uses the [venerable phing build tool](https://www.phing.info/) to create it's `phar` file.  Unfortunatly, when PHP started shipping with the ini setting `phar.readonly` set to `1`, they semi-broke our build.  In order to build a `.phar`, you'll need to invoke `phing` with the following.
+Pestle uses the [venerable phing build tool](https://www.phing.info/) to create its `phar` file.  Unfortunatly, when PHP started shipping with the ini setting `phar.readonly` set to `1`, they semi-broke our build.  In order to build a `.phar`, you'll need to invoke `phing` with the following.
 
-    $ php -d phar.readonly=0 vendor/bin/phing package_phar
+```
+$ php -d phar.readonly=0 vendor/bin/phing package_phar
+```
 
 Once this command finishes running, you should have a brand new `pestle.phar` in your root project directory.
 
-    $ ls pestle.phar
-    pestle.phar
+```
+$ ls pestle.phar
+pestle.phar
+```
 
 The eagle eyes amoung you may have noticed a `build.sh` script.  This script is part of our semi-automated process of releasing a new version of pestle.  Pay it no mind, as we're [working towards 100% automation](https://github.com/astorm/pestle/issues/472) for the build-and-release process.
