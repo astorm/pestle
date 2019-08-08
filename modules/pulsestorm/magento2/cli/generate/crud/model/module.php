@@ -399,8 +399,8 @@ function createModelClass($moduleInfo, $modelName)
     $cache_tag           = strToLower($moduleInfo->name . '_' . $modelName);
     $class_model         = getModelClassNameFromModuleInfo($moduleInfo, $modelName);
     $class_resource      = getResourceModelClassNameFromModuleInfo($moduleInfo, $modelName);
-    $implements          = getImplementsModelInterfaceName($moduleInfo, $modelName) . ', \Magento\Framework\DataObject\IdentityInterface';
-    $template            = createClassTemplate($class_model, BASE_MODEL_CLASS, $implements);    
+    $implements          = getImplementsModelInterfaceName($moduleInfo, $modelName) . ',\Magento\Framework\DataObject\IdentityInterface';
+    $template            = createClassTemplate($class_model, BASE_MODEL_CLASS, $implements);
     $construct           = templateConstruct($class_resource);
 
     $body                = 

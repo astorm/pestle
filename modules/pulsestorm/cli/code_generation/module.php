@@ -302,7 +302,21 @@ function createClassTemplate($class, $extends=false, $implements=false, $include
     }
     if($implements)
     {
-        $template .= " implements $implements";
+        if (strpos($implements, ',') !== false) {
+            $implements = explode(',', $implements);
+            $i = count($implements);
+            $template .= " implements" . "\n";
+            foreach ($implements as $implement) {
+                $template .= '    ' . $implement;
+                if ($i - 1 > 0) {
+                    $template .= ',' . "\n";
+                    $i--;
+                }
+            }
+        }
+        else {
+            $template .= " implements $implements";
+        }
     }
     $template .= "\n" .
     '{' . '<$body$>' . '}' . "\n";
