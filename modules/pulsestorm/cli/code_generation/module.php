@@ -99,6 +99,7 @@ function processNewColumnAttributes($array)
 
     $normalize_whitespace = "/\s+/";
     $attrs = preg_replace($normalize_whitespace, " ", $attrs);
+    $attrs = substr($attrs, 0, -3) . ' ]';
 
     return $attrs;
 }

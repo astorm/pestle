@@ -45,8 +45,10 @@ function templateUpgradeDataFunction()
     "    /**" . "\n" .
     "     * @inheritDoc" . "\n" .
     "     */";
-    return "\n" . $phpDoc . "\n" . '    public function upgrade(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
-    {
+    return "\n" . $phpDoc . "\n" . '    public function upgrade(' . "\n" .
+    '        \Magento\Framework\Setup\ModuleDataSetupInterface $setup,' . "\n" .
+    '        \Magento\Framework\Setup\ModuleContextInterface $context' ."\n" .
+    '    ) {
         //install data here
     }' . "\n";
 
@@ -58,16 +60,20 @@ function templateInstallDataFunction()
     "    /**" . "\n" .
     "     * @inheritDoc" . "\n" .
     "     */";
-    return "\n" . $phpDoc . "\n" . '    public function install(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
-    {
+    return "\n" . $phpDoc . "\n" . '    public function install(' . "\n" .
+    '        \Magento\Framework\Setup\ModuleDataSetupInterface $setup,' . "\n" .
+    '        \Magento\Framework\Setup\ModuleContextInterface $context' . "\n" .
+    '    ) {
         //install data here
     }' . "\n";
 }
 
 function templateUpgradeFunction()
 {
-    return "\n" . '    public function upgrade(\Magento\Framework\Setup\SchemaSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
-    {
+    return "\n" . '    public function upgrade(' . "\n" .
+    '        \Magento\Framework\Setup\SchemaSetupInterface $setup,' . "\n" .
+    '        \Magento\Framework\Setup\ModuleContextInterface $context' . "\n" .
+    '    ) {
         $installer = $setup;
         $installer->startSetup();
         //START: install stuff
@@ -80,11 +86,14 @@ function templateUpgradeFunction()
 function templateInstallFunction()
 {
     $phpDoc =
-    "    /**" . "\n" .
-    "     * @inheritDoc" . "\n" .
-    "     */";
-    return "\n" . $phpDoc . "\n" . '    public function install(\Magento\Framework\Setup\SchemaSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
-    {
+    '    /**' . "\n" .
+    '     * @inheritDoc' . "\n" .
+    '     * @throws \Zend_Db_Exception' . "\n" .
+    '     */';
+    return "\n" . $phpDoc . "\n" . '    public function install(' . "\n" .
+    '        \Magento\Framework\Setup\SchemaSetupInterface $setup,' . "\n" .
+    '        \Magento\Framework\Setup\ModuleContextInterface $context' . "\n" .
+    '    ) {
         $installer = $setup;
         $installer->startSetup();
         //START: install stuff
@@ -97,9 +106,9 @@ function templateConstruct($init1=false, $init2=false)
 {
     $params = convertToClassNotation($init1, $init2);
     $phpDoc =
-        '    /**'. "\n" .
-        '     * Init' . "\n" .
-        '     */';
+    '    /**'. "\n" .
+    '     * Init' . "\n" .
+    '     */';
     $phpCsIgnore = ' // phpcs:ignore PSR2.Methods.MethodDeclaration';
     return "\n" . $phpDoc . "\n" .
     '    protected function _construct()' . $phpCsIgnore . "\n" .
@@ -128,15 +137,52 @@ function convertToClassNotation($init1, $init2=false)
 
 function templateRepositoryInterfaceAbstractFunction($modelShortInterface)
 {
+    $modelName = str_replace('Interface', '', $modelShortInterface);
+
     return "
+    /**
+     * Create or update a $modelName.
+     *
+     * @param " . $modelName . "Interface \$page
+     * @return " . $modelName . "Interface
+     */
     public function save({$modelShortInterface} \$page);
 
+    /**
+     * Get a $modelName by Id
+     *
+     * @param int \$id
+     * @return " . $modelName . "Interface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If " . $modelName . " with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function getById(\$id);
 
+    /**
+     * Retrieve $modelName"."s which match a specified criteria.
+     *
+     * @param SearchCriteriaInterface \$criteria
+     */
     public function getList(SearchCriteriaInterface \$criteria);
 
+    /**
+     * Delete a $modelName
+     *
+     * @param " . $modelName . "Interface \$page
+     * @return " . $modelName . "Interface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If " . $modelName . " with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function delete({$modelShortInterface} \$page);
 
+    /**
+     * Delete a $modelName by Id
+     *
+     * @param int \$id
+     * @return " . $modelName . "Interface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If customer with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function deleteById(\$id);    
 ";    
 }
@@ -151,7 +197,7 @@ use Magento\Framework\Api\SearchCriteriaInterface;
 function templateComplexInterface($useContents, $methodContents, $interfaceContents)
 {
     $interfaceContents = preg_replace(
-        '%(\/\*\*\n \* Interface.*\n.*\*\/)%',
+        '%(\/\*\*\n \* Interface.*\n.*\n.*\n.*\*\/)%',
         $useContents . "\n" . '$1',
         $interfaceContents);
 
@@ -501,7 +547,7 @@ function prependInstallerCodeBeforeEndSetup($moduleInfo, $modelName, $path)
         $moduleInfo, $modelName);
     $install_code = generateInstallSchemaTable($table_name, $modelName);
     $contents     = file_get_contents($path);
-    $end_setup    = '$installer->endSetup();';
+    $end_setup    = '        $installer->endSetup();';
     $contents     = str_replace($end_setup, 
         "\n        //START table setup\n" .
         $install_code .
