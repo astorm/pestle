@@ -84,9 +84,14 @@ function templateInstallFunction()
 function templateConstruct($init1=false, $init2=false)
 {
     $params = array_filter([$init1, $init2]);
-    $params = "'" . implode("','",$params) . "'";
-    
-    return "\n" . '    protected function _construct()' . "\n" .
+    $params = "'" . implode("', '",$params) . "'";
+    $phpDoc =
+        '    /**'. "\n" .
+        '     * Init' . "\n" .
+        '     */';
+    $phpCsIgnore = ' // phpcs:ignore PSR2.Methods.MethodDeclaration';
+    return "\n" . $phpDoc . "\n" .
+    '    protected function _construct()' . $phpCsIgnore . "\n" .
     '    {' . "\n" .
     '        $this->_init('.$params.');' . "\n" .
     '    }' . "\n";
