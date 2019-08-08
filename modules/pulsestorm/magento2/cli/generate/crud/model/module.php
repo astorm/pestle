@@ -83,8 +83,7 @@ function templateInstallFunction()
 
 function templateConstruct($init1=false, $init2=false)
 {
-    $params = array_filter([$init1, $init2]);
-    $params = "'" . implode("', '",$params) . "'";
+    $params = convertToClassNotation($init1, $init2);
     $phpDoc =
         '    /**'. "\n" .
         '     * Init' . "\n" .
@@ -95,6 +94,24 @@ function templateConstruct($init1=false, $init2=false)
     '    {' . "\n" .
     '        $this->_init('.$params.');' . "\n" .
     '    }' . "\n";
+}
+
+function convertToClassNotation($init1, $init2=false)
+{
+    if (strpos($init1, "\\") !== false) {
+        $init1 = "\\" . $init1 . '::class';
+        if ($init2) {
+            $init2 = "\\" . $init2 . '::class';
+        }
+        $params = array_filter([$init1, $init2]);
+        $params = implode(", ",$params);
+    }
+    else {
+        $params = array_filter([$init1, $init2]);
+        $params = implode("', '",$params);
+        $params = "'" . $params . "'";
+    }
+    return $params;
 }
 
 function templateRepositoryInterfaceAbstractFunction($modelShortInterface)
