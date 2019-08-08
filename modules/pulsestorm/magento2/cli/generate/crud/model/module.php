@@ -41,7 +41,11 @@ function getModelClassNameFromModuleInfo($moduleInfo, $modelName)
 
 function templateUpgradeDataFunction()
 {
-    return "\n" . '    public function upgrade(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
+    $phpDoc =
+    "    /**" . "\n" .
+    "     * @inheritDoc" . "\n" .
+    "     */";
+    return "\n" . $phpDoc . "\n" . '    public function upgrade(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
     {
         //install data here
     }' . "\n";
@@ -50,7 +54,11 @@ function templateUpgradeDataFunction()
 
 function templateInstallDataFunction()
 {
-    return "\n" . '    public function install(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
+    $phpDoc =
+    "    /**" . "\n" .
+    "     * @inheritDoc" . "\n" .
+    "     */";
+    return "\n" . $phpDoc . "\n" . '    public function install(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
     {
         //install data here
     }' . "\n";
@@ -71,7 +79,11 @@ function templateUpgradeFunction()
 
 function templateInstallFunction()
 {
-    return "\n" . '    public function install(\Magento\Framework\Setup\SchemaSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
+    $phpDoc =
+    "    /**" . "\n" .
+    "     * @inheritDoc" . "\n" .
+    "     */";
+    return "\n" . $phpDoc . "\n" . '    public function install(\Magento\Framework\Setup\SchemaSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
     {
         $installer = $setup;
         $installer->startSetup();
@@ -361,7 +373,11 @@ function createResourceModelClass($moduleInfo, $modelName)
 
 function templateGetIdentities()
 {
-    return "\n" . '    public function getIdentities()
+    $phpDoc =
+    "    /**" . "\n" .
+    "     * @inheritDoc" . "\n" .
+    "     */";
+    return "\n" . $phpDoc . "\n" . '    public function getIdentities()
     {
         return [self::CACHE_TAG . \'_\' . $this->getId()];
     }' . "\n";
