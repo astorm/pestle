@@ -119,6 +119,7 @@ function templateConstruct($init1=false, $init2=false)
 
 function convertToClassNotation($init1, $init2=false)
 {
+    // add ::class if necessary
     if (strpos($init1, "\\") !== false) {
         $init1 = "\\" . $init1 . '::class';
         if ($init2) {
@@ -126,11 +127,25 @@ function convertToClassNotation($init1, $init2=false)
         }
         $params = array_filter([$init1, $init2]);
         $params = implode(", ",$params);
-    }
-    else {
+    } else {
         $params = array_filter([$init1, $init2]);
         $params = implode("', '",$params);
         $params = "'" . $params . "'";
+    }
+    // make output multiline if long string
+    if (strlen($params) > 90) {
+        if ($init2) {
+            $params = explode(', ', $params);
+            $params = "\n" .
+            '            ' . $params[0] . ',' . "\n" .
+            '            ' . $params[1] . "\n" .
+            '        ';
+        }
+        else {
+            $params = "\n" .
+            '            ' . $params . "\n" .
+            '        ';
+        }
     }
     return $params;
 }
@@ -256,19 +271,19 @@ function templateRepositoryFunctions($modelName)
     protected $objectResourceModel;
     protected $collectionFactory;
     protected $searchResultsFactory;
-    
+
     public function __construct(
         '.$modelNameFactory.' $objectFactory,
         ObjectResourceModel $objectResourceModel,
         CollectionFactory $collectionFactory,
-        SearchResultsInterfaceFactory $searchResultsFactory       
+        SearchResultsInterfaceFactory $searchResultsFactory
     ) {
         $this->objectFactory        = $objectFactory;
         $this->objectResourceModel  = $objectResourceModel;
         $this->collectionFactory    = $collectionFactory;
         $this->searchResultsFactory = $searchResultsFactory;
     }
-    
+
     public function save('.$modelInterface.' $object)
     {
         try {
@@ -286,8 +301,8 @@ function templateRepositoryFunctions($modelName)
         if (!$object->getId()) {
             throw new NoSuchEntityException(__(\'Object with id "%1" does not exist.\', $id));
         }
-        return $object;        
-    }       
+        return $object;
+    }
 
     public function delete('.$modelInterface.' $object)
     {
@@ -296,18 +311,18 @@ function templateRepositoryFunctions($modelName)
         } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
-        return true;    
-    }    
+        return true;
+    }
 
     public function deleteById($id)
     {
         return $this->delete($this->getById($id));
-    }    
+    }
 
     public function getList(SearchCriteriaInterface $criteria)
     {
         $searchResults = $this->searchResultsFactory->create();
-        $searchResults->setSearchCriteria($criteria);  
+        $searchResults->setSearchCriteria($criteria);
         $collection = $this->collectionFactory->create();
         foreach ($criteria->getFilterGroups() as $filterGroup) {
             $fields = [];
@@ -320,7 +335,7 @@ function templateRepositoryFunctions($modelName)
             if ($fields) {
                 $collection->addFieldToFilter($fields, $conditions);
             }
-        }  
+        }
         $searchResults->setTotalCount($collection->getSize());
         $sortOrders = $criteria->getSortOrders();
         if ($sortOrders) {
@@ -334,13 +349,13 @@ function templateRepositoryFunctions($modelName)
         }
         $collection->setCurPage($criteria->getCurrentPage());
         $collection->setPageSize($criteria->getPageSize());
-        $objects = [];                                     
+        $objects = [];
         foreach ($collection as $objectModel) {
             $objects[] = $objectModel;
         }
         $searchResults->setItems($objects);
-        return $searchResults;        
-    }';    
+        return $searchResults;
+    }' . "\n";
 }
 
 function createRepository($moduleInfo, $modelName)
