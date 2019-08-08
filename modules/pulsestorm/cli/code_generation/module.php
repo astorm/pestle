@@ -240,9 +240,16 @@ function templateInterface($interface, $functions=[])
     $class      = trim($interface, '\\');
     $parts      = explode('\\',$class);
     $name       = array_pop($parts);
+    $phpDoc = '/**'. "\n" .
+    ' * Interface ' . $name . "\n" .
+    ' *' . "\n" .
+    ' * @api' . "\n" .
+    ' */';
+
     $template   = '<' . '?' . 'php' . "\n" .
     'namespace ' . implode('\\',$parts) . ";\n" .
-    "interface $name \n{\n";
+    "\n" .$phpDoc . "\n" .
+    "interface $name\n{\n";
     foreach($functions as $function)
     {
         $template .=
@@ -275,13 +282,19 @@ function createClassTemplate($class, $extends=false, $implements=false, $include
     $class = trim($class, '\\');
     $parts = explode('\\',$class);
     $name  = array_pop($parts);
+    $phpDoc = '/**'. "\n" .
+    ' * Class ' . $name . "\n" .
+    ' */';
 
     $template = '<' . '?' . 'php' . "\n" .
     'namespace ' . implode('\\',$parts) . ";\n";
+    $template .= "\n";
+
     if($includeUse)
     {
-        $template .= '<$use$>' . "\n";
+        $template .= '<$use$>' . "\n\n";
     }
+    $template .= $phpDoc . "\n";
     $template .= "class $name";
     if($extends)
     {

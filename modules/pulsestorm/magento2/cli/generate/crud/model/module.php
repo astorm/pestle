@@ -109,8 +109,7 @@ function templateRepositoryInterfaceAbstractFunction($modelShortInterface)
 
 function templateRepositoryInterfaceUse($longModelInterfaceName)
 {
-    return "
-use {$longModelInterfaceName};
+    return "use {$longModelInterfaceName};
 use Magento\Framework\Api\SearchCriteriaInterface;
 ";
 }
@@ -118,8 +117,8 @@ use Magento\Framework\Api\SearchCriteriaInterface;
 function templateComplexInterface($useContents, $methodContents, $interfaceContents)
 {
     $interfaceContents = preg_replace(
-        '%(namespace.+?;)%',
-        '$1' . "\n" . $useContents,
+        '%(\/\*\*\n \* Interface.*\n.*\*\/)%',
+        $useContents . "\n" . '$1',
         $interfaceContents);
 
     $interfaceContents = preg_replace(
@@ -155,8 +154,7 @@ function templateUseFunctions($repositoryInterface, $thingInterface, $classModel
     $thingFactory   = $classModel . 'Factory';
     $resourceModel  = $collectionModel . 'Factory';
 
-    return "
-use {$repositoryInterface};
+    return "use {$repositoryInterface};
 use {$thingInterface};
 use {$thingFactory};
 use {$classResourceModel} as ObjectResourceModel;
@@ -401,7 +399,8 @@ function createModelInterface($moduleInfo, $modelName)
 {
     $interface = getModelInterfaceName($moduleInfo, $modelName);
     $path      = getPathFromClass($interface);
-    $contents  = templateInterface($interface,[]);    
+    $contents  = templateInterface($interface,[]);
+    $contents .= "\n";
     writeStringToFile($path, $contents);
     output("Creating: " . $path);
 }
