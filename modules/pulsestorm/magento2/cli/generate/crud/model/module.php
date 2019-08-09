@@ -248,18 +248,25 @@ function templateUseFunctions($repositoryInterface, $thingInterface, $classModel
 {        
     $thingFactory   = $classModel . 'Factory';
     $resourceModel  = $collectionModel . 'Factory';
+    $nameSpace      = explode('\\', $classModel)[0];
+    $coreImport     = "use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Api\SearchResultsInterfaceFactory;
+use Magento\Framework\Exception\CouldNotDeleteException;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;";
 
-    return "use {$repositoryInterface};
+    $customImport = "use {$repositoryInterface};
 use {$thingInterface};
 use {$thingFactory};
 use {$classResourceModel} as ObjectResourceModel;
-use {$resourceModel};
+use {$resourceModel};";
 
-use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\CouldNotDeleteException;
-use Magento\Framework\Api\SearchResultsInterfaceFactory;";
+    if (strcmp('Magento', $nameSpace) < 0) {
+        return $coreImport . "\n" . "\n" . $customImport;
+    }
+    else {
+        return $customImport . "\n" . "\n" . $coreImport;
+    }
 }
 
 function templateRepositoryFunctions($modelName)
@@ -272,6 +279,14 @@ function templateRepositoryFunctions($modelName)
     protected $collectionFactory;
     protected $searchResultsFactory;
 
+    /**
+     * ' . $modelName . 'Repository constructor.
+     *
+     * @param '.$modelNameFactory.' $objectFactory
+     * @param ObjectResourceModel $objectResourceModel
+     * @param CollectionFactory $collectionFactory
+     * @param SearchResultsInterfaceFactory $searchResultsFactory
+     */
     public function __construct(
         '.$modelNameFactory.' $objectFactory,
         ObjectResourceModel $objectResourceModel,
@@ -284,16 +299,24 @@ function templateRepositoryFunctions($modelName)
         $this->searchResultsFactory = $searchResultsFactory;
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @throws CouldNotSaveException
+     */
     public function save('.$modelInterface.' $object)
     {
         try {
             $this->objectResourceModel->save($object);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
         }
         return $object;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getById($id)
     {
         $object = $this->objectFactory->create();
@@ -304,6 +327,9 @@ function templateRepositoryFunctions($modelName)
         return $object;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function delete('.$modelInterface.' $object)
     {
         try {
@@ -314,11 +340,17 @@ function templateRepositoryFunctions($modelName)
         return true;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function deleteById($id)
     {
         return $this->delete($this->getById($id));
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getList(SearchCriteriaInterface $criteria)
     {
         $searchResults = $this->searchResultsFactory->create();
