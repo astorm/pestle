@@ -1,6 +1,3 @@
-TODO: Change link name to include module source?
-TODO: Land and release https://github.com/astorm/pestle/pull/475
-
 Creating Pestle Modules and Commands
 
 While pestle is most well known as a Magento 2 code generation tool, it started life as a way to manage large sets of command line programs in a way that made it easy to share code between the various programs.
@@ -11,8 +8,10 @@ This document will decribe how you can create your own pestle programs, as well 
 
 First, you'll want to create a folder somewhere on your computer where your pestle based programs will live.  This can be anywhere on your computer.  We'll use a folder named `pestle-programs`.
 
-    $ mkdir /path/to/pestle-programs
-    $ cd pestle-programs
+```
+$ mkdir /path/to/pestle-programs
+$ cd pestle-programs
+```
 
 Once you've created this folder and `cd`'ed into it, run the following pestle command.
 
