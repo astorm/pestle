@@ -93,9 +93,14 @@ before_script:
     - pestle.phar hello_world
     - cd ..
     - composer install
+    # pre modules for phpcs run
+    - pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
 script:
     # unit tests
     - vendor/bin/phpunit tests
     # integration tests
     - cd magento2
     - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration
+    - pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
+    # run phpcs
+    - vendor/bin/phpcs --standard=vendor/magento/magento-coding-standard/Magento2/ app/code/Pulsestorm/Travis
