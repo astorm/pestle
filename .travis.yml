@@ -92,9 +92,9 @@ before_script:
     - curl "$PULSESTORM_MAGE2_FAKE_URL/index.php"
     - pestle.phar hello_world
     - cd ..
-    - composer install
     # pre modules for phpcs run
     - composer require magento/magento-coding-standard -vvv
+    - composer install
     - pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
 script:
     # unit tests
