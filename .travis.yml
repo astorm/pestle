@@ -104,4 +104,5 @@ script:
     - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration
     - pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
     # run phpcs
+    - find .
     - vendor/bin/phpcs --standard=vendor/magento/magento-coding-standard/Magento2/ app/code/Pulsestorm/Travis
