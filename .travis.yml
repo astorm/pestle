@@ -105,10 +105,11 @@ before_script:
     - echo "{}" > composer.json
     - composer require magento/magento-coding-standard -vvv
 
-    # return to the base folder
+    # return to the base folder and composer install pestle
     - pwd
     - cd ..
     - pwd
+    - composer install
 script:
     - pwd
     # unit tests
