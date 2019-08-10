@@ -93,16 +93,22 @@ before_script:
     - curl "$PULSESTORM_MAGE2_FAKE_URL/index.php"
     - pestle.phar hello_world
     - cd ..
-    # pre modules for phpcs run
-    - composer install
+    # phpcs install and generating a module for same
+
+    # generate the module
     - pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
+
+    - cd ..
+    - mkdir phpcs/
+    - cd phpcs/
+    - composer require magento/magento-coding-standard
+
 script:
     # unit tests
     - vendor/bin/phpunit tests
     # integration tests
     - cd magento2
     - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration
-    - pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
     # run phpcs
-    - find .
-    - vendor/bin/phpcs --standard=vendor/magento/magento-coding-standard/Magento2/ app/code/Pulsestorm/Travis
+    - cd ../phpcs
+    - vendor/bin/phpcs vendor/bin/phpcs --standard=vendor/magento/magento-coding-standard/Magento2/ ../magento2/app/code/Pulsestorm/Travis/Model/Thing.php
