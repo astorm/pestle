@@ -9,6 +9,6 @@
 ## putting some basic files in place so we can merge and tackle
 ## the "phpcs-ification" of things in stages
 mkdir -p app/code/Pulsestorm/Travis
-printf "<?php\nnamespace Pulsestorm\\Travis;class Foo\n{\n}\n"  > app/code/Pulsestorm/Travis/Test.php
+printf "<?php\nnamespace Pulsestorm\\Travis;\n\nclass Foo\n{\n}\n"  > app/code/Pulsestorm/Travis/Test.php
 
 # pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
