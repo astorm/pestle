@@ -110,5 +110,5 @@ script:
     - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration
     # run phpcs
     - cd ../phpcs
-    - find ..
+    - find ../magento2/app/code/Pulsestorm
     - vendor/bin/phpcs vendor/bin/phpcs --standard=vendor/magento/magento-coding-standard/Magento2/ ../magento2/app/code/Pulsestorm/Travis/Model/Thing.php
