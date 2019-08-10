@@ -93,8 +93,8 @@ before_script:
     - pestle.phar hello_world
     # phpcs install and generating a module for same
 
-    # generate the module
-    - pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
+    # generate the code for phpcs
+    - ../travis/for-lint.sh
 
     # leave m2 folder
     - cd ..
