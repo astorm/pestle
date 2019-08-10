@@ -21,7 +21,6 @@ language: php
 sudo: required
 dist: trusty
 php:
-#  - 5.6
     - 7.1
 before_script:
     # some useful debugging stuff for travis
@@ -106,12 +105,9 @@ before_script:
     - composer require magento/magento-coding-standard -vvv
 
     # return to the base folder and composer install pestle
-    - pwd
     - cd ..
-    - pwd
     - composer install
 script:
-    - pwd
     # unit tests
     - vendor/bin/phpunit tests
     # integration tests
