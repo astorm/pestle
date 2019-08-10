@@ -105,8 +105,8 @@ before_script:
     - echo "{}" > composer.json
     - composer require magento/magento-coding-standard -vvv
 
-    # return to the magneto2 folder
-    - cd ../magento2
+    # return to the base folder
+    - cd ..
 script:
     # unit tests
     - vendor/bin/phpunit tests
