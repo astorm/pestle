@@ -106,8 +106,11 @@ before_script:
     - composer require magento/magento-coding-standard -vvv
 
     # return to the base folder
+    - pwd
     - cd ..
+    - pwd
 script:
+    - pwd
     # unit tests
     - vendor/bin/phpunit tests
     # integration tests
