@@ -102,6 +102,7 @@ before_script:
     # install phpcs
     - mkdir phpcs/
     - cd phpcs/
+    - echo "{}" > composer.json
     - composer require magento/magento-coding-standard -vvv
 
 script:
