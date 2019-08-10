@@ -21,8 +21,7 @@ language: php
 sudo: required
 dist: trusty
 php:
-   - 5.6
-   - 7.0
+    - 7.1
 before_script:
     # some useful debugging stuff for travis
     #- curl http://magento-2-travis.dev/index.php
@@ -91,6 +90,21 @@ before_script:
     # test that magento is installed
     - curl "$PULSESTORM_MAGE2_FAKE_URL/index.php"
     - pestle.phar hello_world
+    # phpcs install and generating a module for same
+
+    # generate the code for phpcs
+    - ../travis/for-lint.sh
+
+    # leave m2 folder
+    - cd ..
+
+    # install phpcs
+    - mkdir phpcs/
+    - cd phpcs/
+    - echo "{}" > composer.json
+    - composer require magento/magento-coding-standard -vvv
+
+    # return to the base folder and composer install pestle
     - cd ..
     - composer install
 script:
@@ -99,3 +113,7 @@ script:
     # integration tests
     - cd magento2
     - vendor/bin/phpunit vendor/pulsestorm/pestle/tests-integration
+    # run phpcs
+    - cd ../phpcs
+    - find ../magento2/app/code/Pulsestorm
+    - vendor/bin/phpcs vendor/bin/phpcs --standard=vendor/magento/magento-coding-standard/Magento2/ ../magento2/app/code/Pulsestorm/Travis
