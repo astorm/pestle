@@ -21,8 +21,8 @@ language: php
 sudo: required
 dist: trusty
 php:
-   - 5.6
-   - 7.0
+#   - 5.6
+   - 7.2
 before_script:
     # some useful debugging stuff for travis
     #- curl http://magento-2-travis.dev/index.php
