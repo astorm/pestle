@@ -11,4 +11,4 @@
 mkdir -p app/code/Pulsestorm/Travis
 printf "<?php\nnamespace Pulsestorm\\Travis;\n\nclass Foo\n{\n}\n"  > app/code/Pulsestorm/Travis/Test.php
 
-# pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
+pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
