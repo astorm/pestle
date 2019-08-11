@@ -74,9 +74,6 @@ before_script:
     # clone main magento github repository
     - git clone -b 2.1 https://github.com/magento/magento2
 
-    # test that pestle_dev works
-    #- pestle_dev hello_world
-
     # install Magento
     - cd magento2
     # switch to specific branch in you like
