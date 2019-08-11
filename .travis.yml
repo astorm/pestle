@@ -73,11 +73,7 @@ before_script:
 
     # clone main magento github repository
     - git clone -b 2.1 https://github.com/magento/magento2
-    # download latest pestle phar and install
-    #- curl -LO "$PULSESTORM_PESTLE_URL/pestle.phar"
-    # "install" a pestle_dev command
-    - sudo ./travis/install-dev.sh `pwd`
-    - cat /usr/bin/pestle_dev
+
     # test that pestle_dev works
     #- pestle_dev hello_world
 
