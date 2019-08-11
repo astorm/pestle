@@ -13,5 +13,4 @@ printf "<?php\nnamespace Pulsestorm\\Travis;\n\nclass Foo\n{\n}\n"  > app/code/P
 
 ## test generate:crud-model, rm InstallSchema backup file
 pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
-pwd
-rm /home/travis/build/astorm/pestle/magento2/app/code/Pulsestrom/Travis/Setup/InstallSchema.php.*.bak.php
+rm app/code/Pulsestorm/Travis/Setup/InstallSchema.php.*.bak.php
