@@ -57,6 +57,7 @@ function templateUpgradeDataFunction()
 function templateInstallDataFunction()
 {
     $phpDoc =
+    "    // phpcs:disable Magento2.CodeAnalysis.EmptyBlock.DetectedFUNCTION" . "\n" .
     "    /**" . "\n" .
     "     * @inheritDoc" . "\n" .
     "     */";
@@ -65,7 +66,8 @@ function templateInstallDataFunction()
     '        \Magento\Framework\Setup\ModuleContextInterface $context' . "\n" .
     '    ) {
         //install data here
-    }' . "\n";
+    }' . "\n" .
+    '    // phpcs:enable' . "\n";
 }
 
 function templateUpgradeFunction()
