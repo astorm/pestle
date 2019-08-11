@@ -80,10 +80,8 @@ before_script:
     - sudo chmod +x /usr/local/bin/pestle.phar
 
     # "install" a pestle_dev command
-    - sudo printf '#!/usr/bin/env php \n<?php\nrequire "' > /usr/bin/pestle_dev
-    - sudo printf `pwd` >> /usr/bin/pestle_dev
-    - sudo printf '/runner.php";' >> /usr/bin/pestle_dev
-    - sudo chmod +x /usr/bin/pestle_dev
+    - ./travis/install-dev.sh
+    # test that pestle_dev works
     - pestle_dev hello_world
 
     # install Magento
