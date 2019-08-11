@@ -119,4 +119,4 @@ script:
     # run phpcs
     - cd ../phpcs
     - find ../magento2/app/code/Pulsestorm
-    - vendor/bin/phpcs vendor/bin/phpcs --standard=vendor/magento/magento-coding-standard/Magento2/ ../magento2/app/code/Pulsestorm/Travis
+    - vendor/bin/phpcs vendor/bin/phpcs -s --standard=vendor/magento/magento-coding-standard/Magento2/ ../magento2/app/code/Pulsestorm/Travis
