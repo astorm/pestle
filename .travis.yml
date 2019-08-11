@@ -75,8 +75,17 @@ before_script:
     - git clone -b 2.1 https://github.com/magento/magento2
     # download latest pestle phar and install
     - curl -LO "$PULSESTORM_PESTLE_URL/pestle.phar"
+
     - sudo mv pestle.phar /usr/local/bin
     - sudo chmod +x /usr/local/bin/pestle.phar
+
+    # "install" a pestle_dev command
+    - sudo printf '#!/usr/bin/env php \n<?php\nrequire "' > /usr/bin/pestle_dev
+    - sudo printf `pwd` >> /usr/bin/pestle_dev
+    - sudo printf '/runner.php";' >> /usr/bin/pestle_dev
+    - sudo chmod +x /usr/bin/pestle_dev
+    - pestle_dev hello_world
+
     # install Magento
     - cd magento2
     # switch to specific branch in you like
@@ -90,6 +99,10 @@ before_script:
     # test that magento is installed
     - curl "$PULSESTORM_MAGE2_FAKE_URL/index.php"
     - pestle.phar hello_world
+
+    # get a dev version of pestle working
+    -
+
     # phpcs install and generating a module for same
 
     # generate the code for phpcs
