@@ -57,7 +57,7 @@ function templateUpgradeDataFunction()
 function templateInstallDataFunction()
 {
     $phpDoc =
-    "    // phpcs:disable" . "\n" .
+    "    // phpcs:disable Magento2.CodeAnalysis.EmptyBlock.DetectedFUNCTION" . "\n" .
     "    /**" . "\n" .
     "     * @inheritDoc" . "\n" .
     "     */";
