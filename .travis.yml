@@ -107,7 +107,7 @@ before_script:
     - pestle.phar hello_world
 
     # generate the code for phpcs
-    - ../travis/for-lint.sh
+    - ./travis/for-lint.sh
 script:
     # unit tests
     - vendor/bin/phpunit tests
