@@ -112,6 +112,7 @@ function writeStringToFile($path, $contents)
     $path_backup = $path . '.' . uniqid() . '.bak.php';
     if(file_exists($path))
     {
+        output('Backing existing file: ' . $path_backup);
         copy($path, $path_backup);
     }
     file_put_contents($path, $contents);
