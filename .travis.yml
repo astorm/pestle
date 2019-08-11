@@ -73,10 +73,7 @@ before_script:
 
     # clone main magento github repository
     - git clone -b 2.1 https://github.com/magento/magento2
-    # download latest pestle phar and install
-    - curl -LO "$PULSESTORM_PESTLE_URL/pestle.phar"
-    - sudo mv pestle.phar /usr/local/bin
-    - sudo chmod +x /usr/local/bin/pestle.phar
+
     # install Magento
     - cd magento2
     # switch to specific branch in you like
@@ -89,7 +86,7 @@ before_script:
     - php bin/magento setup:install --admin-email "$PULSESTORM_MAGE2_ADMIN_EMAIL" --admin-firstname "$PULSESTORM_MAGE2_ADMIN_FIRST_NAME" --admin-lastname "$PULSESTORM_MAGE2_ADMIN_LAST_NAME" --admin-password "$PULSESTORM_MAGE2_ADMIN_PASSWORD" --admin-user "$PULSESTORM_MAGE2_ADMIN_USERNAME" --backend-frontname admin --base-url "$PULSESTORM_MAGE2_FAKE_URL" --db-host 127.0.0.1 --db-name magento_2_travis --db-user root --session-save files --use-rewrites 1 --use-secure 0 -vvv
     # test that magento is installed
     - curl "$PULSESTORM_MAGE2_FAKE_URL/index.php"
-    - pestle.phar hello_world
+
     # phpcs install and generating a module for same
 
     # generate the code for phpcs
@@ -104,9 +101,15 @@ before_script:
     - echo "{}" > composer.json
     - composer require magento/magento-coding-standard -vvv
 
-    # return to the base folder and composer install pestle
+    # return to the base folder and composer install pestle,
+    # build/install latest
     - cd ..
     - composer install
+
+    - php -d phar.readonly=0 vendor/bin/phing package_phar
+    - sudo mv pestle.phar /usr/bin
+    - sudo chmod +x /usr/bin/pestle.phar
+    - pestle.phar hello_world
 script:
     # unit tests
     - vendor/bin/phpunit tests
