@@ -106,8 +106,10 @@ before_script:
     - sudo chmod +x /usr/bin/pestle.phar
     - pestle.phar hello_world
 
-    # generate the code for phpcs
-    - ./travis/for-lint.sh
+    # cd to magento 2 folder, generate the code for phpcs and leave
+    - cd magento2
+    - ../travis/for-lint.sh
+    - cd ..
 script:
     # unit tests
     - vendor/bin/phpunit tests
