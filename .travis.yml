@@ -87,11 +87,6 @@ before_script:
     # test that magento is installed
     - curl "$PULSESTORM_MAGE2_FAKE_URL/index.php"
 
-    # phpcs install and generating a module for same
-
-    # generate the code for phpcs
-    - ../travis/for-lint.sh
-
     # leave m2 folder
     - cd ..
 
@@ -110,6 +105,9 @@ before_script:
     - sudo mv pestle.phar /usr/bin
     - sudo chmod +x /usr/bin/pestle.phar
     - pestle.phar hello_world
+
+    # generate the code for phpcs
+    - ../travis/for-lint.sh
 script:
     # unit tests
     - vendor/bin/phpunit tests
