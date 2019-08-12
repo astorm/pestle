@@ -2,7 +2,7 @@ Creating Pestle Modules and Commands
 
 While pestle is most well known as a Magento 2 code generation tool, it started life as a way to manage large sets of command line programs in a way that made it easy to share code between the various programs.
 
-This document will decribe how you can create your own pestle programs, as well as configure a location on your computer to serve as a _module source_.
+This document will describe how you can create your own pestle programs, as well as configure a location on your computer to serve as a _module source_.
 
 ## Creating your First Command
 
@@ -10,7 +10,7 @@ First, you'll want to create a folder somewhere on your computer where your pest
 
 ```
 $ mkdir /path/to/pestle-programs
-$ cd pestle-programs
+$ cd /path/to/pestle-programs
 ```
 
 Once you've created this folder and `cd`'ed into it, run the following pestle command.
@@ -28,7 +28,7 @@ Once you've created this folder and `cd`'ed into it, run the following pestle co
 
     $ pestle.phar pestle:generate-command your-command-name YourPhpNamespace
 
-The `pestle:generate-command` command will create a new pestle program, which we'll also refer to as a pestle module.  The above command will create your program at the following location, with some basic boilerplate code.
+The `pestle:generate-command` command will create a new pestle program. We'll also refer to the program as a pestle module.  The above command will create your program at the following location, with some basic boilerplate code.
 
     $ cat modules/yourphpnamespace/yourcommandname/module.php
     <?php
@@ -55,7 +55,7 @@ If you try to run your new command, you'll run into a problem
     $ pestle.phar your-command-name
     Can't find [your_command_name] or [your-command-name] in Pulsestorm\Pestle\Runner\includeLibraryForCommand
 
-We need to tell the `pestle.phar` runtime that this folder is a *module source*.  A module source is a folder on your computer that contains pestle module.
+We need to tell the `pestle.phar` runtime that this folder is a *module source*.  A module source is a folder on your computer that contains pestle modules.
 
 To configure your folder as a pestle module source, create or edit the following file in your home directory.
 
@@ -71,7 +71,7 @@ This file contains a list of all the folders on your computer that contain pestl
     $ pestle.phar your-command-name
     Hello Sailor
 
-Congradulations, you just created your first pestle program.
+Congratulations, you just created your first pestle program.
 
 ## Anatomy of a Pestle Program
 
@@ -95,29 +95,32 @@ If we take a look at our program again.
         output("Hello Sailor");
     }
 
-We'll see a few things worth noting on.
+we'll see a few things worth noting.
 
-First, every pestle program exists in its own namespace
+**First**, every pestle program exists in its own namespace
 
     namespace YourPhpNamespace\Yourcommandname;
 
-You pick the top-level namespace when you create your command, pestle generated the rest of it from your chosen command name.
+You picked the top-level namespace when you created your command (`YourPhpNamespace`) and pestle generated the rest of it from your chosen command name (`your-command-name` turns into `Yourcommandname`).
 
-Second, a module's namespace determines where it exists in a pestle module source.
+**Second**, a module's namespace determines where it exists in a pestle module source.
 
-   namespace YourPhpNamespace\Yourcommandname;
-   modules/yourphpnamespace/yourcommandname/module.php
+    Namespace: namespace YourPhpNamespace\Yourcommandname;
+    File: modules/yourphpnamespace/yourcommandname/module.php
 
 That is -- the file path to the program's `module.php` file is just a version of your program's namespace.
 
-Third -- you'll use a PHP function named `Pulsestorm\Pestle\Importer\pestle_import` to import functions from other modules.
+**Third** -- you'll use a PHP function named `Pulsestorm\Pestle\Importer\pestle_import` to import functions from other modules.  Generating a command will include boilerplate that lets use a local version of this function.
 
     use function Pulsestorm\Pestle\Importer\pestle_import;
+
+Here's how you'd use `pestle_import`.
+
     pestle_import('Pulsestorm\Pestle\Library\output');
 
-The above code imports the `output` function from the `Pulsestorm\Pestle\Library` library/module/program.
+The above code imports the `output` function from the `Pulsestorm\Pestle\Library` pestle library/module/program.
 
-Fourth -- the `pestle_cli` function is your program's main entry point.
+**Fourth** -- the `pestle_cli` function is your program's main entry point.
 
     /**
     * One Line Description
@@ -129,13 +132,13 @@ Fourth -- the `pestle_cli` function is your program's main entry point.
         output("Hello Sailor");
     }
 
-The `@command your-command-name` doc block is signifigant -- it determines the name of your command.  Without it, you won't be able to run your program
+The `@command your-command-name` doc block is significant -- it determines the name of your command.  Without it, you won't be able to run your program
 
     $ pestle.phar your-command-name
 
-The idealized workflow in a pestle program is to just start writing functions, classes, and whatever else your program needs in this single namespace.  For example, if you wanted to move the _Hello X_ message into a separate function, try modifying your program like this.
+The idealized workflow in a pestle program is to just start writing functions, classes, and whatever else your program needs in this single namespace.  For example, let's move the _Hello X_ message into a separate function. Modify your your program so it looks like this.
 
-    /* ... */
+    /* ... the rest of your program, don't edit this ... */
 
     function getHelloMessage() {
         return "Hello Pestle";
@@ -163,11 +166,11 @@ Let's try creating a second command --
     $ pestle.phar second-cmd
     Hello Sailor
 
-Where pestle starts to distinguish itself is in it's ability to selectivly share code between modules.  For example, if we wanted to use the `getHelloMessage` function in our first program in this program, we'd use the `pestle_import` function
+Where pestle starts to distinguish itself is in its ability to selectively share code between modules.  For example, if we wanted to use the `getHelloMessage` function in our first program in this new program, we'd use the `pestle_import` function
 
     /* ... */
 
-    pestle_import('YourPhpNamespace\Secondcmd\getHelloMessage');
+    pestle_import('YourPhpNamespace\Yourcommandname\getHelloMessage');
     /**
     * One Line Description
     *
@@ -179,7 +182,7 @@ Where pestle starts to distinguish itself is in it's ability to selectivly share
         output(getHelloMessage());
     }
 
-If we run our program, you'll see we're successfully imported `getHelloMessage` from our first program
+If we run our program, you'll see we're successfully imported `getHelloMessage` (or more accurately, `YourPhpNamespace\Yourcommandname\getHelloMessage`) from our first program
 
     $ pestle.phar second-cmd
     Hello Sailor
