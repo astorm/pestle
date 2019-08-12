@@ -13,7 +13,8 @@
     "require-dev": {
         "phpunit/phpunit": "4.8.*",
         "phing/phing": "2.*",
-        "phpspec/prophecy":"1.7.0"
+        "phpspec/prophecy":"1.7.0",
+        "magento/magento-coding-standard": "^4.0"
     },
     "autoload": {
         "files": ["library/autoload.php"]
