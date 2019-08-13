@@ -24,7 +24,7 @@ Resolving deltas: 100% (2133/2133), done.
 Checking connectivity... done.
 ```
 
-Once you've checked pestle out, you'll need to [install composer](https://getcomposer.org/download/), and then use composer to install its dependencies.
+Once you've cloned the repository you'll need to [install composer](https://getcomposer.org/download/), and then use composer to install pestle's dependencies.
 
 ```
 $ cd pestle
@@ -35,7 +35,7 @@ Installing dependencies (including require-dev) from lock file
 Generating autoload files
 ```
 
-Composer will run for a bit of time (between 20 seconds and 5 minutes, depending on the state of your network and composer cache), and will install the dependencies to the `vendor/` folder.
+Composer will run for a bit of time (between 20 seconds and 10 minutes, depending on the state of your network and composer cache), and will install the dependencies to the `vendor/` folder.
 
 With this done, you'll have a fully downloaded pestle source!
 
@@ -43,7 +43,7 @@ With this done, you'll have a fully downloaded pestle source!
 
 When you're working on pestle's source, you'll need a way to invoke pestle that points at the source repo instead of pointing at the code in the standard `pestle.phar` file.  There's a number of ways to do this -- but here's what we recommend.
 
-Within the root pestle folder, there's a script named `pestle_dev`.  You can use this to invoke pestle and it it load code from the checked out github repository.
+Within the root pestle folder, there's a script named `pestle_dev`.  You can use this to invoke pestle and it it load code from the cloned repository.
 
 ```
 $ ./pestle_dev
@@ -197,22 +197,3 @@ class NamespaceRefactoringTest extends PestleBaseTest
 ## Writing Integration Tests
 
 The bitrot in the integration tests integration tests is real.  When we [get around to fixing that](https://github.com/astorm/pestle/issues/471), we'll update this section
-
-## Building Pestle
-
-Alright!  You've made your changes and you're ready to do some end-to-end testing.  In other words, you want to build pestle's `.phar` file and see if your stuff actually works.
-
-Pestle uses the [venerable phing build tool](https://www.phing.info/) to create its `phar` file.  Unfortunatly, when PHP started shipping with the ini setting `phar.readonly` set to `1`, they semi-broke our build.  In order to build a `.phar`, you'll need to invoke `phing` with the following.
-
-```
-$ php -d phar.readonly=0 vendor/bin/phing package_phar
-```
-
-Once this command finishes running, you should have a brand new `pestle.phar` in your root project directory.
-
-```
-$ ls pestle.phar
-pestle.phar
-```
-
-The eagle eyes amoung you may have noticed a `build.sh` script.  This script is part of our semi-automated process of releasing a new version of pestle.  Pay it no mind, as we're [working towards 100% automation](https://github.com/astorm/pestle/issues/472) for the build-and-release process.
