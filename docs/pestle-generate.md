@@ -1,6 +1,6 @@
-Creating Pestle Modules and Commands
+# Creating Pestle Modules and Commands
 
-While pestle is most well known as a Magento 2 code generation tool, it started life as a way to manage large sets of command line programs in a way that made it easy to share code between the various programs.
+While pestle is most well known as a Magento 2 code generation tool, it started life as a way to manage large sets of command line programs, with a system for easily sharing code between the various programs.
 
 This document will describe how you can create your own pestle programs, as well as configure a location on your computer to serve as a _module source_.
 
