@@ -17,9 +17,9 @@ $ ls pestle.phar
 pestle.phar
 ```
 
-## Build a Release.
+## Build a Release
 
-Right now the release process is a semi-automated sort of thing. We're [working towards 100% automation](https://github.com/astorm/pestle/issues/472), but something something cobbler's children.
+Right now the release process is only semi-automated. We're [working towards 100% automation](https://github.com/astorm/pestle/issues/472), but something something cobbler's children.
 
 To build a release, we
 
@@ -36,4 +36,4 @@ To build a release, we
 
 Right now, every step here can be completed by anyone _except_ #10, which requires access credentials to pestle.pulsestorm.net.
 
-If you love build system and have opinions on way to automated this, [your feedback and participation is welcome](https://github.com/astorm/pestle/issues/472).
+If you love build systems and have opinions on way to automated this, [your feedback and participation is welcome](https://github.com/astorm/pestle/issues/472).
