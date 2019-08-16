@@ -1,18 +1,20 @@
 # Input, Output, Arguments, Options
 
-Pestle's a system for building structured command line programs.  This means there are systems and library functions available to help you with common tasks you'll need when writing command line programs.  This document will explain how to give you pestle command command line arguments and options, and how to handle basic command Input/Output.
+Pestle's a system for building structured command line programs.  This means there are sub-systems and library functions available to help you with common tasks you'll need when writing command line programs.  This document will explain how to give your pestle program command line arguments/options, and how to handle basic input and output via library functions.
 
 ## Arguments
 
 An _argument_ is a value you pass to your command line program.
 
+```
     $ pestle.phar some-command Hello World "You are Great"
+```
 
 The above pestle invocation runs the `some-command` program, and passes it three individual arguments, _Hello_, _World_, and the full string _You are Great_.
 
-While Pestle is just PHP under the hood, and you could just grab the global `$argv` array to manipulate your arguments, pestle give you a system for defining the sort or arguments you program takes.
+Pestle is just PHP under the hood. You could just grab the global `$argv` array to manipulate your arguments.  However, pestle give you a system for defining the sort or arguments you program takes.
 
-In the PHP doc-block for your `pestle_cli` function, the `@argument` lines define which arguments your program expects.
+In the PHP DocBlock for your `pestle_cli` function, the `@argument` lines define which arguments your program expects.
 
 ``` php
     /**
@@ -31,13 +33,20 @@ In the PHP doc-block for your `pestle_cli` function, the `@argument` lines defin
     }
 ```
 
-And `@argument` line requires three parts.
+Run the above program, and you've expect output similar to this
+
+    $ pestle.phar some-command Hello World "You are Great"
+    Hello
+    World
+    You are Great
+
+An `@argument` line requires three parts.
 
     * @argument arg_id Description [Default]
 
-The first part is a PHP identifier -- `arg_id` above.  This identifier should be alpha numeric, no spaces, plus underscores and dashes.  Stick to PHP variable naming rules (plus dashes) here and you'll be fine.
+The first part is an identifier -- `arg_id` above.  This identifier should be alpha numeric, no spaces, plus underscores and dashes.  Stick to PHP variable naming rules (plus dashes) here and you'll be fine.
 
-The second part of a text description of the variable (`Description` above).
+The second part is a a text description of the argument (`Description` above). This is for humans to read.
 
 The third part is a default value, surrounded by `[]` brackets (`Default` above).
 
@@ -50,17 +59,17 @@ Additionally, if a user fails to provide an argument, pestle will use your descr
     Enter a Compliment (You Are Great)]
 ```
 
-Pestle will ask for the third.  If the user enters a value, pestle will populate the first argument to `pestle_cli` with that value.  If the user hits return without entering a value, pestle will populate the first argument to `pestle_cli` the the _default_ argument.
+Pestle will ask for the third.  If the user enters a value, pestle will populate the first argument to `pestle_cli` with that value.  If the user presses return without entering a value, pestle will populate the first argument to `pestle_cli` with the default value.
 
 ## Options
 
-Sometimes you want to allow the user to pass an _optional_ value to your program.  Unix has a long history of options.  If you do a lot of command line work you probably use options on `ls` all the time.
+Sometimes you want to allow the user to pass an _optional_ value to your program.  Unix has a long history of options to command line programs.  If you do a lot of command line work you probably use options on `ls` all the time.
 
 ```
     $ ls -l
 ```
 
-Unix command have evolved to be more than a single letter. For example, the following two curl commands are equivalent
+Unix commands have evolved to be more than a single letter. For example, the following two curl commands are equivalent
 
 ```
     $ curl -L http://example.com
@@ -69,13 +78,13 @@ Unix command have evolved to be more than a single letter. For example, the foll
 
 The command line program curl has a short option syntax, and a long option syntax.  Generally, single letter option names are preceded by a single dash (`-`), and full-word option names are preceded by a double dash (`--`).
 
-Of course, unix being unix, you had the odd outlier like `find`, where the full-word options, only have a single dash.
+Of course, unix being unix, you had the odd outlier like `find`, where the full-word options use a single dash.
 
 ```
     $ find . -name 'file.txt`
 ```
 
-Pestle support **only** the double dash option format.  Similar to arguments, you can define your options via the `@option` doc-block line of your `pestle_cli` function.
+Pestle support **only** the double dash option format.  Similar to `@arguments`, you can define your options via the `@option` doc-block line of your `pestle_cli` function.
 
 ``` php
     /**
@@ -94,14 +103,14 @@ An `@option` line has two parts.  The first, `some-option` above, is an identifi
 
 The second part is a description of your option.  This is for humans to read and understand what your option is for.
 
-Pestle will pass a _second_ value to `pestle_cli` that's an array populated with your options keys.  If you don't use an option, the key will be set to `NULL`.
+Pestle will pass a _second_ argument to the `pestle_cli` function. This second argument is an array that's populated with your option keys.  If you don't use an option, the key will be set to `NULL`.
 
 ```
     $ pestle.phar some-command
     NULL
 ```
 
-But if you _do_ pass an option, it's value will be set.
+But if you _do_ pass an option, its value will be set.
 
 ```
     $ pestle.phar some-command --some-option foo
@@ -111,48 +120,51 @@ But if you _do_ pass an option, it's value will be set.
     string(3) "foo"
 ```
 
-Pestle supports both a space and an `=` sign between option value and the passed value.
+Pestle supports both a space and an `=` sign between the option identifier and the passed option value.
 
 ## Advanced Arguments
 
-There's a few advanced feature of the `@arguments` directive you'll want to be aware of.
+There's one advanced feature of the `@arguments` directive you'll want to be aware of.  That's the `@callback` argument.
 
-First -- if you name an argument `password`
+A `@callback` argument allows you to invoke a custom function that will ask users for their argument value.
 
-    @argument password What is your password? []
+``` php
+function someLocalFunction() {
+    return 'calculated-value';
+}
+/**
+* Showing you @callback arguments
+*
+* @command some-command
+* @argument identifier @callback someLocalFunction
+*/
+function pestle_cli($argv, $options)
+{
+    output($argv['identifier']);
+}
+```
 
-pestle will attempt to keep the value secret by not outputting the characters entered.
+A `@callback` argument still require a PHP identifier (`identifier`) above.  However, instead of a description, the second part should be `@callback` -- this lets pestle know it's dealing with a callback argument. The third part of a `@callback` argument, `someLocalFunction` above, is a PHP function available in the local scope.
 
-WARNING: This command may or may not work in your terminal or shell -- if there's truly secret information your program needs you should consider using a different mechanism to get it into your program.
-
-The other advanced argument feature are `@callback` arguments.  A `@callback` argument allows you to invoke a custom function that will ask users for their argument value.
-
-    //...
-    function someLocalFunction() {
-        output("Ok, this one is complicated")
-        // input/output function to collect information
-
-    }
-
-    @argument identifier @callback someLocalFunction
-
-A `@callback` argument still require a PHP identifier (`identifier`) above.  However, instead of a description, the next work should be `@callback` -- this lets pestle know its dealing with a callback argument. The third part of a `@callback` argument, `someLocalFunction` above.
-
-With the above configuration, if a user fails to provide a value for argument, pestle will **call `someLocalFunction`.  What value is returned by the `@callback` function will be the value of the argument passed to your program.
+With the above configuration, if a user fails to pass a value for argument, pestle will call `someLocalFunction` and use its return values to populate the arguments array it passes to `pestle_cli`.
 
 ## Input and Output Functions
 
-The default `@argument` and `@option` handling are, by themselves, often enough to give you program enough user interface to get it's job done.  For those commands where you need/want additional input or output, pestle provides a number of importable-able functions.
+The default `@argument` and `@option` mechanisms are, by themselves, often enough to give you program enough user interface to get its job done.  For those commands where you need/want additional input or output, pestle provides a number of importable-able functions.
+
+There are particularly useful when implementing `@callback` arguments, but can be used anywhere you'd like in your program.
 
 ### output
 
-The output function work similarly to PHP's `print` and `echo` statement, and will allow you to send output to a user's terminal.
+The output function is similar to PHP's `print` and `echo` in that it will allow you to send output to a user's terminal.
 
 ``` php
     pestle_import('Pulsestorm\Pestle\Library\output');
     //...
 
     output("Hello World");
+
+    # prints "Hello World\n"
 ```
 
 The `output` function accepts multiple arguments -- each one will be send to a user's terminal.
@@ -162,22 +174,22 @@ The `output` function accepts multiple arguments -- each one will be send to a u
     //...
 
     output("Hello", "World");
+    // prints "HelloWorld"
 ```
 
-The `output` function also accepts arrays and objects, and will `var_dump` their contents.
+The `output` function also accepts arrays, and will `var_dump` their contents.
 
 ``` php
     pestle_import('Pulsestorm\Pestle\Library\output');
     //...
 
     $array = [1,2,3];
-    $object = (object) ['foo'=>'bar']
-    output($array, $object);
+    output($array);
 ```
 
 ### exitWithErrorMessage
 
-When something goes wrong with your program, sometimes it's best to throw up your hands and just exit the program.  The `exitWithErrorMessage` function allows to you
+When something goes wrong with your program, sometimes it's best to throw up your hands and just leave. In other words, `exit` the program. The `exitWithErrorMessage` function allows to you
 
 1. Send a message to your terminal's STDERR stream (i.e. display an error in the user's terminal)
 2. Exit the program.
@@ -207,20 +219,4 @@ If you want to ask your user a question, and then process their answer, use the 
 
 The first argument to `input` is the question you want to ask your user.  The second argument is the default value to use if someone just presses return instead of entering a value.
 
-### inputPassword
-
-If you want to ask your user a question, but don't want their keystrokes to be seen in the terminal, use the `inputPassword` method.
-
-``` php
-    pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
-    //...
-
-    $answer = inputPassword('Tell me your secret?');
-
-    // we would never tell your secret
-    // output("HEY DID YOU SAY ", $answer);
-```
-
-The first argument to `inputPassword` is the question you'll ask a user.
-
-WARNING: This command may or may not work in your terminal or shell -- if there's truly secret information your program needs you should consider using a different mechanism to get it into your program.
+Use this function with care -- once your program requires input from a user it can't be used in shell scripts.  Ideally, limit your use of this function to the `@callback` arguments described earlier in this document.
