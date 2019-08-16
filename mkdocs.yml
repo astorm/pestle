@@ -32,7 +32,6 @@ nav:
 
     - Pestle Modules:
         - Generate a Module: pestle-generate.md
-        - Third Party Modules: pestle-third-party.md
         - Helpful Library Functions: pestle-library.md
     - Development:
         - Introduction: dev-internals-introduction.md
