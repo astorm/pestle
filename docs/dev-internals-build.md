@@ -36,4 +36,4 @@ To build a release, we
 
 Right now, every step here can be completed by anyone _except_ #10, which requires access credentials to pestle.pulsestorm.net.
 
-If you love build systems and have opinions on way to automated this, [your feedback and participation is welcome](https://github.com/astorm/pestle/issues/472).
+If you love build systems and have opinions on way to automate this, [your feedback and participation is welcome](https://github.com/astorm/pestle/issues/472).
