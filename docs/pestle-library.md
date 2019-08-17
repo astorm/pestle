@@ -1,6 +1,6 @@
 # Input, Output, Arguments, Options
 
-Pestle's a system for building structured command line programs.  This means there are sub-systems and library functions available to help you with common tasks you'll need when writing command line programs.  This document will explain how to give your pestle program command line arguments/options, and how to handle basic input and output via library functions.
+Pestle's a system for building structured command line programs.  This means there are sub-systems and library functions available to help you with common tasks you'll need when writing command line programs.  This document will explain how to give your pestle program command line arguments and options, and how to handle basic input and output via library functions.
 
 ## Arguments
 
@@ -12,7 +12,7 @@ An _argument_ is a value you pass to your command line program.
 
 The above pestle invocation runs the `some-command` program, and passes it three individual arguments, _Hello_, _World_, and the full string _You are Great_.
 
-Pestle is just PHP under the hood. You could just grab the global `$argv` array to manipulate your arguments.  However, pestle give you a system for defining the sort or arguments you program takes.
+Pestle is just PHP under the hood. You could just [grab the global `$argv` array](https://www.php.net/manual/en/reserved.variables.argv.php) and access the raw arguments.  However, pestle gives you a system for defining the sort or arguments you program takes.
 
 In the PHP DocBlock for your `pestle_cli` function, the `@argument` lines define which arguments your program expects.
 
@@ -33,7 +33,7 @@ In the PHP DocBlock for your `pestle_cli` function, the `@argument` lines define
     }
 ```
 
-Run the above program, and you've expect output similar to this
+If you ran the above program you would expect output similar to this
 
     $ pestle.phar some-command Hello World "You are Great"
     Hello
@@ -50,7 +50,7 @@ The second part is a a text description of the argument (`Description` above). T
 
 The third part is a default value, surrounded by `[]` brackets (`Default` above).
 
-When you define your arguments this way, pestle will pass your `pestle_cli` function with an `$argv` populated with keys names that are your argument names, and key-values that are the passed in arguments.
+When you define your arguments this way, pestle will pass your `pestle_cli` function an array (`$argv` above) populated with key names that are your argument names, and key-values that are the passed in arguments.
 
 Additionally, if a user fails to provide an argument, pestle will use your description to _ask_ the user for a value.  For example, if you invoke the above program with only two arguments
 
@@ -59,7 +59,7 @@ Additionally, if a user fails to provide an argument, pestle will use your descr
     Enter a Compliment (You Are Great)]
 ```
 
-Pestle will ask for the third.  If the user enters a value, pestle will populate the first argument to `pestle_cli` with that value.  If the user presses return without entering a value, pestle will populate the first argument to `pestle_cli` with the default value.
+pestle will ask for the third.  If the user enters a value, pestle will populate the first argument to `pestle_cli` with that value.  If the user presses return without entering a value, pestle will populate the first argument to `pestle_cli` with the default value.
 
 ## Options
 
@@ -69,7 +69,7 @@ Sometimes you want to allow the user to pass an _optional_ value to your program
     $ ls -l
 ```
 
-Unix commands have evolved to be more than a single letter. For example, the following two curl commands are equivalent
+Unix commands have evolved to be more than a single letter (`-l` above). For example, the following two curl commands are equivalent
 
 ```
     $ curl -L http://example.com
@@ -84,7 +84,7 @@ Of course, unix being unix, you had the odd outlier like `find`, where the full-
     $ find . -name 'file.txt`
 ```
 
-Pestle support **only** the double dash option format.  Similar to `@arguments`, you can define your options via the `@option` doc-block line of your `pestle_cli` function.
+Pestle supports **only** the double dash option format.  Similar to `@arguments`, you can define your options via the `@option` doc-block line of your `pestle_cli` function.
 
 ``` php
     /**
@@ -103,7 +103,7 @@ An `@option` line has two parts.  The first, `some-option` above, is an identifi
 
 The second part is a description of your option.  This is for humans to read and understand what your option is for.
 
-Pestle will pass a _second_ argument to the `pestle_cli` function. This second argument is an array that's populated with your option keys.  If you don't use an option, the key will be set to `NULL`.
+For options, pestle will pass a _second_ array to the `pestle_cli` function that's populated with your option keys.  If you don't use an option, the key will be set to `NULL`.
 
 ```
     $ pestle.phar some-command
@@ -122,7 +122,7 @@ But if you _do_ pass an option, its value will be set.
 
 Pestle supports both a space and an `=` sign between the option identifier and the passed option value.
 
-## Advanced Arguments
+## Callback Arguments
 
 There's one advanced feature of the `@arguments` directive you'll want to be aware of.  That's the `@callback` argument.
 
@@ -144,15 +144,15 @@ function pestle_cli($argv, $options)
 }
 ```
 
-A `@callback` argument still require a PHP identifier (`identifier`) above.  However, instead of a description, the second part should be `@callback` -- this lets pestle know it's dealing with a callback argument. The third part of a `@callback` argument, `someLocalFunction` above, is a PHP function available in the local scope.
+A `@callback` argument still requires a PHP identifier (`identifier`) above.  However, instead of a description, the second part should be `@callback` -- this lets pestle know it's dealing with a callback argument. The third part of a `@callback` argument, `someLocalFunction` above, is a PHP function available in the local scope.
 
-With the above configuration, if a user fails to pass a value for argument, pestle will call `someLocalFunction` and use its return values to populate the arguments array it passes to `pestle_cli`.
+With the above configuration, if a user fails to pass a value for argument, pestle will call `someLocalFunction` and use its return value to populate the arguments array it passes to `pestle_cli`.
 
 ## Input and Output Functions
 
-The default `@argument` and `@option` mechanisms are, by themselves, often enough to give you program enough user interface to get its job done.  For those commands where you need/want additional input or output, pestle provides a number of importable-able functions.
+The default `@argument` and `@option` mechanisms are, by themselves, often enough to give your program enough user interface to get its job done.  For those commands where you need/want additional input or output, pestle provides a number of importable functions.
 
-There are particularly useful when implementing `@callback` arguments, but can be used anywhere you'd like in your program.
+These are particularly useful when implementing `@callback` arguments, but can be used anywhere you'd like in your program.
 
 ### output
 
@@ -185,6 +185,15 @@ The `output` function also accepts arrays, and will `var_dump` their contents.
 
     $array = [1,2,3];
     output($array);
+    // prints
+    // array(3) {
+    //   [0]=>
+    //   int(1)
+    //   [1]=>
+    //   int(2)
+    //   [2]=>
+    //   int(3)
+    // }
 ```
 
 ### exitWithErrorMessage
@@ -219,4 +228,4 @@ If you want to ask your user a question, and then process their answer, use the 
 
 The first argument to `input` is the question you want to ask your user.  The second argument is the default value to use if someone just presses return instead of entering a value.
 
-Use this function with care -- once your program requires input from a user it can't be used in shell scripts.  Ideally, limit your use of this function to the `@callback` arguments described earlier in this document.
+Use this function with care -- once your program requires input from a user it can't be used in shell scripts.  Ideally, limit your use of the `input` function to the `@callback` arguments described earlier in this document.
