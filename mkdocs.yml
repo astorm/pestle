@@ -32,7 +32,7 @@ nav:
 
     - Pestle Modules:
         - Generate a Module: pestle-generate.md
-        - Helpful Library Functions: pestle-library.md
+        - Input, Output, Arguments, Options: pestle-io.md
     - Development:
         - Introduction: dev-internals-introduction.md
         - Setting Up a Dev Enviornment: dev-internals-enviornment.md
