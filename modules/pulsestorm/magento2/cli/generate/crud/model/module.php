@@ -41,8 +41,14 @@ function getModelClassNameFromModuleInfo($moduleInfo, $modelName)
 
 function templateUpgradeDataFunction()
 {
-    return "\n" . '    public function upgrade(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
-    {
+    $phpDoc =
+    "    /**" . "\n" .
+    "     * @inheritDoc" . "\n" .
+    "     */";
+    return "\n" . $phpDoc . "\n" . '    public function upgrade(' . "\n" .
+    '        \Magento\Framework\Setup\ModuleDataSetupInterface $setup,' . "\n" .
+    '        \Magento\Framework\Setup\ModuleContextInterface $context' ."\n" .
+    '    ) {
         //install data here
     }' . "\n";
 
@@ -50,16 +56,26 @@ function templateUpgradeDataFunction()
 
 function templateInstallDataFunction()
 {
-    return "\n" . '    public function install(\Magento\Framework\Setup\ModuleDataSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
-    {
+    $phpDoc =
+    "    // phpcs:disable" . "\n" .
+    "    /**" . "\n" .
+    "     * @inheritDoc" . "\n" .
+    "     */";
+    return "\n" . $phpDoc . "\n" . '    public function install(' . "\n" .
+    '        \Magento\Framework\Setup\ModuleDataSetupInterface $setup,' . "\n" .
+    '        \Magento\Framework\Setup\ModuleContextInterface $context' . "\n" .
+    '    ) {
         //install data here
-    }' . "\n";
+    }' . "\n" .
+    '    // phpcs:enable' . "\n";
 }
 
 function templateUpgradeFunction()
 {
-    return "\n" . '    public function upgrade(\Magento\Framework\Setup\SchemaSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
-    {
+    return "\n" . '    public function upgrade(' . "\n" .
+    '        \Magento\Framework\Setup\SchemaSetupInterface $setup,' . "\n" .
+    '        \Magento\Framework\Setup\ModuleContextInterface $context' . "\n" .
+    '    ) {
         $installer = $setup;
         $installer->startSetup();
         //START: install stuff
@@ -71,8 +87,15 @@ function templateUpgradeFunction()
 
 function templateInstallFunction()
 {
-    return "\n" . '    public function install(\Magento\Framework\Setup\SchemaSetupInterface $setup, \Magento\Framework\Setup\ModuleContextInterface $context)
-    {
+    $phpDoc =
+    '    /**' . "\n" .
+    '     * @inheritDoc' . "\n" .
+    '     * @throws \Zend_Db_Exception' . "\n" .
+    '     */';
+    return "\n" . $phpDoc . "\n" . '    public function install(' . "\n" .
+    '        \Magento\Framework\Setup\SchemaSetupInterface $setup,' . "\n" .
+    '        \Magento\Framework\Setup\ModuleContextInterface $context' . "\n" .
+    '    ) {
         $installer = $setup;
         $installer->startSetup();
         //START: install stuff
@@ -83,34 +106,107 @@ function templateInstallFunction()
 
 function templateConstruct($init1=false, $init2=false)
 {
-    $params = array_filter([$init1, $init2]);
-    $params = "'" . implode("','",$params) . "'";
-    
-    return "\n" . '    protected function _construct()' . "\n" .
+    $params = convertToClassNotation($init1, $init2);
+    $phpDoc =
+    '    /**'. "\n" .
+    '     * Init' . "\n" .
+    '     */';
+    $phpCsIgnore = ' // phpcs:ignore PSR2.Methods.MethodDeclaration';
+    return "\n" . $phpDoc . "\n" .
+    '    protected function _construct()' . $phpCsIgnore . "\n" .
     '    {' . "\n" .
     '        $this->_init('.$params.');' . "\n" .
     '    }' . "\n";
 }
 
+function convertToClassNotation($init1, $init2=false)
+{
+    // add ::class if necessary
+    if (strpos($init1, "\\") !== false) {
+        $init1 = "\\" . $init1 . '::class';
+        if ($init2) {
+            $init2 = "\\" . $init2 . '::class';
+        }
+        $params = array_filter([$init1, $init2]);
+        $params = implode(", ",$params);
+    } else {
+        $params = array_filter([$init1, $init2]);
+        $params = implode("', '",$params);
+        $params = "'" . $params . "'";
+    }
+    // make output multiline if long string
+    if (strlen($params) > 90) {
+        if ($init2) {
+            $params = explode(', ', $params);
+            $params = "\n" .
+            '            ' . $params[0] . ',' . "\n" .
+            '            ' . $params[1] . "\n" .
+            '        ';
+        }
+        else {
+            $params = "\n" .
+            '            ' . $params . "\n" .
+            '        ';
+        }
+    }
+    return $params;
+}
+
 function templateRepositoryInterfaceAbstractFunction($modelShortInterface)
 {
+    $modelName = str_replace('Interface', '', $modelShortInterface);
+
     return "
+    /**
+     * Create or update a $modelName.
+     *
+     * @param " . $modelName . "Interface \$page
+     * @return " . $modelName . "Interface
+     */
     public function save({$modelShortInterface} \$page);
 
+    /**
+     * Get a $modelName by Id
+     *
+     * @param int \$id
+     * @return " . $modelName . "Interface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If " . $modelName . " with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function getById(\$id);
 
+    /**
+     * Retrieve $modelName"."s which match a specified criteria.
+     *
+     * @param SearchCriteriaInterface \$criteria
+     */
     public function getList(SearchCriteriaInterface \$criteria);
 
+    /**
+     * Delete a $modelName
+     *
+     * @param " . $modelName . "Interface \$page
+     * @return " . $modelName . "Interface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If " . $modelName . " with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function delete({$modelShortInterface} \$page);
 
+    /**
+     * Delete a $modelName by Id
+     *
+     * @param int \$id
+     * @return " . $modelName . "Interface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException If customer with the specified ID does not exist.
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function deleteById(\$id);    
 ";    
 }
 
 function templateRepositoryInterfaceUse($longModelInterfaceName)
 {
-    return "
-use {$longModelInterfaceName};
+    return "use {$longModelInterfaceName};
 use Magento\Framework\Api\SearchCriteriaInterface;
 ";
 }
@@ -118,8 +214,8 @@ use Magento\Framework\Api\SearchCriteriaInterface;
 function templateComplexInterface($useContents, $methodContents, $interfaceContents)
 {
     $interfaceContents = preg_replace(
-        '%(namespace.+?;)%',
-        '$1' . "\n" . $useContents,
+        '%(\/\*\*\n \* Interface.*\n.*\n.*\n.*\*\/)%',
+        $useContents . "\n" . '$1',
         $interfaceContents);
 
     $interfaceContents = preg_replace(
@@ -154,19 +250,25 @@ function templateUseFunctions($repositoryInterface, $thingInterface, $classModel
 {        
     $thingFactory   = $classModel . 'Factory';
     $resourceModel  = $collectionModel . 'Factory';
+    $nameSpace      = explode('\\', $classModel)[0];
+    $coreImport     = "use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Api\SearchResultsInterfaceFactory;
+use Magento\Framework\Exception\CouldNotDeleteException;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;";
 
-    return "
-use {$repositoryInterface};
+    $customImport = "use {$repositoryInterface};
 use {$thingInterface};
 use {$thingFactory};
 use {$classResourceModel} as ObjectResourceModel;
-use {$resourceModel};
+use {$resourceModel};";
 
-use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\CouldNotDeleteException;
-use Magento\Framework\Api\SearchResultsInterfaceFactory;";
+    if (strcmp('Magento', $nameSpace) < 0) {
+        return $coreImport . "\n" . "\n" . $customImport;
+    }
+    else {
+        return $customImport . "\n" . "\n" . $coreImport;
+    }
 }
 
 function templateRepositoryFunctions($modelName)
@@ -178,29 +280,45 @@ function templateRepositoryFunctions($modelName)
     protected $objectResourceModel;
     protected $collectionFactory;
     protected $searchResultsFactory;
-    
+
+    /**
+     * ' . $modelName . 'Repository constructor.
+     *
+     * @param '.$modelNameFactory.' $objectFactory
+     * @param ObjectResourceModel $objectResourceModel
+     * @param CollectionFactory $collectionFactory
+     * @param SearchResultsInterfaceFactory $searchResultsFactory
+     */
     public function __construct(
         '.$modelNameFactory.' $objectFactory,
         ObjectResourceModel $objectResourceModel,
         CollectionFactory $collectionFactory,
-        SearchResultsInterfaceFactory $searchResultsFactory       
+        SearchResultsInterfaceFactory $searchResultsFactory
     ) {
         $this->objectFactory        = $objectFactory;
         $this->objectResourceModel  = $objectResourceModel;
         $this->collectionFactory    = $collectionFactory;
         $this->searchResultsFactory = $searchResultsFactory;
     }
-    
+
+    /**
+     * @inheritDoc
+     *
+     * @throws CouldNotSaveException
+     */
     public function save('.$modelInterface.' $object)
     {
         try {
             $this->objectResourceModel->save($object);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
         }
         return $object;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getById($id)
     {
         $object = $this->objectFactory->create();
@@ -208,9 +326,12 @@ function templateRepositoryFunctions($modelName)
         if (!$object->getId()) {
             throw new NoSuchEntityException(__(\'Object with id "%1" does not exist.\', $id));
         }
-        return $object;        
-    }       
+        return $object;
+    }
 
+    /**
+     * @inheritDoc
+     */
     public function delete('.$modelInterface.' $object)
     {
         try {
@@ -218,18 +339,24 @@ function templateRepositoryFunctions($modelName)
         } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
-        return true;    
-    }    
+        return true;
+    }
 
+    /**
+     * @inheritDoc
+     */
     public function deleteById($id)
     {
         return $this->delete($this->getById($id));
-    }    
+    }
 
+    /**
+     * @inheritDoc
+     */
     public function getList(SearchCriteriaInterface $criteria)
     {
         $searchResults = $this->searchResultsFactory->create();
-        $searchResults->setSearchCriteria($criteria);  
+        $searchResults->setSearchCriteria($criteria);
         $collection = $this->collectionFactory->create();
         foreach ($criteria->getFilterGroups() as $filterGroup) {
             $fields = [];
@@ -242,7 +369,7 @@ function templateRepositoryFunctions($modelName)
             if ($fields) {
                 $collection->addFieldToFilter($fields, $conditions);
             }
-        }  
+        }
         $searchResults->setTotalCount($collection->getSize());
         $sortOrders = $criteria->getSortOrders();
         if ($sortOrders) {
@@ -256,13 +383,13 @@ function templateRepositoryFunctions($modelName)
         }
         $collection->setCurPage($criteria->getCurrentPage());
         $collection->setPageSize($criteria->getPageSize());
-        $objects = [];                                     
+        $objects = [];
         foreach ($collection as $objectModel) {
             $objects[] = $objectModel;
         }
         $searchResults->setItems($objects);
-        return $searchResults;        
-    }';    
+        return $searchResults;
+    }' . "\n";
 }
 
 function createRepository($moduleInfo, $modelName)
@@ -341,7 +468,11 @@ function createResourceModelClass($moduleInfo, $modelName)
 
 function templateGetIdentities()
 {
-    return "\n" . '    public function getIdentities()
+    $phpDoc =
+    "    /**" . "\n" .
+    "     * @inheritDoc" . "\n" .
+    "     */";
+    return "\n" . $phpDoc . "\n" . '    public function getIdentities()
     {
         return [self::CACHE_TAG . \'_\' . $this->getId()];
     }' . "\n";
@@ -363,8 +494,8 @@ function createModelClass($moduleInfo, $modelName)
     $cache_tag           = strToLower($moduleInfo->name . '_' . $modelName);
     $class_model         = getModelClassNameFromModuleInfo($moduleInfo, $modelName);
     $class_resource      = getResourceModelClassNameFromModuleInfo($moduleInfo, $modelName);
-    $implements          = getImplementsModelInterfaceName($moduleInfo, $modelName) . ', \Magento\Framework\DataObject\IdentityInterface';
-    $template            = createClassTemplate($class_model, BASE_MODEL_CLASS, $implements);    
+    $implements          = getImplementsModelInterfaceName($moduleInfo, $modelName) . ',\Magento\Framework\DataObject\IdentityInterface';
+    $template            = createClassTemplate($class_model, BASE_MODEL_CLASS, $implements);
     $construct           = templateConstruct($class_resource);
 
     $body                = 
@@ -401,7 +532,8 @@ function createModelInterface($moduleInfo, $modelName)
 {
     $interface = getModelInterfaceName($moduleInfo, $modelName);
     $path      = getPathFromClass($interface);
-    $contents  = templateInterface($interface,[]);    
+    $contents  = templateInterface($interface,[]);
+    $contents .= "\n";
     writeStringToFile($path, $contents);
     output("Creating: " . $path);
 }
@@ -464,7 +596,7 @@ function prependInstallerCodeBeforeEndSetup($moduleInfo, $modelName, $path)
         $moduleInfo, $modelName);
     $install_code = generateInstallSchemaTable($table_name, $modelName);
     $contents     = file_get_contents($path);
-    $end_setup    = '$installer->endSetup();';
+    $end_setup    = '        $installer->endSetup();';
     $contents     = str_replace($end_setup, 
         "\n        //START table setup\n" .
         $install_code .

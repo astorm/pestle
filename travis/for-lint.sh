@@ -11,4 +11,6 @@
 mkdir -p app/code/Pulsestorm/Travis
 printf "<?php\nnamespace Pulsestorm\\Travis;\n\nclass Foo\n{\n}\n"  > app/code/Pulsestorm/Travis/Test.php
 
-# pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
+## test generate:crud-model, rm InstallSchema backup file
+pestle.phar magento2:generate:crud-model Pulsestorm_Travis Thing
+find app/code/Pulsestorm/Travis -type f -name '*.bak*' -exec rm '{}' \;

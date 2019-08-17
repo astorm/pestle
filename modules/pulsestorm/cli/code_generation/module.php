@@ -99,6 +99,7 @@ function processNewColumnAttributes($array)
 
     $normalize_whitespace = "/\s+/";
     $attrs = preg_replace($normalize_whitespace, " ", $attrs);
+    $attrs = substr($attrs, 0, -3) . ' ]';
 
     return $attrs;
 }
@@ -240,9 +241,16 @@ function templateInterface($interface, $functions=[])
     $class      = trim($interface, '\\');
     $parts      = explode('\\',$class);
     $name       = array_pop($parts);
+    $phpDoc = '/**'. "\n" .
+    ' * Interface ' . $name . "\n" .
+    ' *' . "\n" .
+    ' * @api' . "\n" .
+    ' */';
+
     $template   = '<' . '?' . 'php' . "\n" .
     'namespace ' . implode('\\',$parts) . ";\n" .
-    "interface $name \n{\n";
+    "\n" .$phpDoc . "\n" .
+    "interface $name\n{\n";
     foreach($functions as $function)
     {
         $template .=
@@ -275,13 +283,19 @@ function createClassTemplate($class, $extends=false, $implements=false, $include
     $class = trim($class, '\\');
     $parts = explode('\\',$class);
     $name  = array_pop($parts);
+    $phpDoc = '/**'. "\n" .
+    ' * Class ' . $name . "\n" .
+    ' */';
 
     $template = '<' . '?' . 'php' . "\n" .
     'namespace ' . implode('\\',$parts) . ";\n";
+    $template .= "\n";
+
     if($includeUse)
     {
-        $template .= '<$use$>' . "\n";
+        $template .= '<$use$>' . "\n\n";
     }
+    $template .= $phpDoc . "\n";
     $template .= "class $name";
     if($extends)
     {
@@ -289,7 +303,21 @@ function createClassTemplate($class, $extends=false, $implements=false, $include
     }
     if($implements)
     {
-        $template .= " implements $implements";
+        if (strpos($implements, ',') !== false) {
+            $implements = explode(',', $implements);
+            $i = count($implements);
+            $template .= " implements" . "\n";
+            foreach ($implements as $implement) {
+                $template .= '    ' . $implement;
+                if ($i - 1 > 0) {
+                    $template .= ',' . "\n";
+                    $i--;
+                }
+            }
+        }
+        else {
+            $template .= " implements $implements";
+        }
     }
     $template .= "\n" .
     '{' . '<$body$>' . '}' . "\n";
