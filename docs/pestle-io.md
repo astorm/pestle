@@ -1,4 +1,4 @@
-# Input, Output, Arguments, Options
+# Interacting with the User
 
 Pestle's a system for building structured command line programs.  This means there are sub-systems and library functions available to help you with common tasks you'll need when writing command line programs.  This document will explain how to give your pestle program command line arguments and options, and how to handle basic input and output via library functions.
 
