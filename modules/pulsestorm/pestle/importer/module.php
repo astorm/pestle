@@ -15,11 +15,9 @@ function pestle_import($thing_to_import, $as=false)
      * @var string $ns_called_from ex. \Namespace\Called\From
      */
     $ns_called_from  = getNamespaceCalledFrom();
-
     $thing_to_import = trim($thing_to_import, '\\');
 
     includeModule($thing_to_import);
-
     includeCode($thing_to_import, $ns_called_from);
     return true;
 }
@@ -169,11 +167,15 @@ function includeCodeReflectionStrategy($thing_to_import, $ns_called_from)
     $parts      = explode('\\', $thing_to_import);
     $short_name = array_pop($parts);
 
+    functionRegister($short_name, $ns_called_from, $thing_to_import);
+    generateOrIncludeExecutorFunction($short_name, $thing_to_import);
+}
+
+function generateOrIncludeExecutorFunction($short_name, $thing_to_import) {
+
     $code = generateCodeForReflectionStrategy($short_name, $thing_to_import);
     $full_path = generateCacheFilePathForReflectionStrategy(
         $short_name, $thing_to_import, $code);
-
-    functionRegister($short_name, $ns_called_from, $thing_to_import);
 
     /**
      * If file's already been generated, return it
@@ -217,7 +219,6 @@ function includeCodeReflectionStrategy($thing_to_import, $ns_called_from)
 
     require_once $full_path ;
 }
-
 function includeCodeFullExportStrategy($namespace, $code)
 {
     $cache_dir = getCacheDir();
@@ -251,7 +252,6 @@ function includeCodeFullExportStrategy($namespace, $code)
 
 /**
  * @param string $thing_to_import \Namespace\To\someFunction
- * @param string $code -- see $function in pestle_import definition
  * @param string $nd_called_from \Namespace\Called\From
  */
 function includeCode($thing_to_import, $ns_called_from)
@@ -325,8 +325,8 @@ function functionRegister($short_name,$ns_called_from=false,$namespaced_function
         // return $functions[$short_name][$ns_called_from];
     }
     return functionRegisterSet($functions,$short_name,$ns_called_from,$namespaced_function);
-//     echo "Registering `$short_name` as `$namespaced_function`
-// for calls from `$ns_called_from`","\n";
+    //     echo "Registering `$short_name` as `$namespaced_function`
+    // for calls from `$ns_called_from`","\n";
 
 }
 function replaceFirstInstanceOfFunctionName($code, $short_name)
