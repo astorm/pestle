@@ -18,17 +18,9 @@ function pestle_import($thing_to_import, $as=false)
 
     $thing_to_import = trim($thing_to_import, '\\');
 
-    /**
-     * A string that's a function definition that looks like
-     * function somefunction() {
-     *     $args = func_get_args();
-     *     return call_user_func_array('\Namespace\To\someFunction', $args);
-     * }
-     * @var string $function
-     */
-    $function = extractFunction($thing_to_import);
+    includeModule($thing_to_import);
 
-    includeCode($thing_to_import, $function, $ns_called_from);
+    includeCode($thing_to_import, $ns_called_from);
     return true;
 }
 
@@ -37,7 +29,6 @@ function pestle_import($thing_to_import, $as=false)
  */
 function extractFunction($function_name)
 {
-    includeModule($function_name);
     $code = createFunctionForGlobalExport($function_name);
     return $code;
 }
@@ -171,10 +162,9 @@ function generateCacheFilePathForReflectionStrategy($short_name, $thing_to_impor
 }
 /**
  * @param string $thing_to_import \Namespace\To\someFunction
- * @param string $code -- see $function in pestle_import definition
  * @param string $nd_called_from \Namespace\Called\From
  */
-function includeCodeReflectionStrategy($thing_to_import, $code, $ns_called_from)
+function includeCodeReflectionStrategy($thing_to_import, $ns_called_from)
 {
     $parts      = explode('\\', $thing_to_import);
     $short_name = array_pop($parts);
@@ -264,9 +254,18 @@ function includeCodeFullExportStrategy($namespace, $code)
  * @param string $code -- see $function in pestle_import definition
  * @param string $nd_called_from \Namespace\Called\From
  */
-function includeCode($thing_to_import, $code, $ns_called_from)
+function includeCode($thing_to_import, $ns_called_from)
 {
-    includeCodeReflectionStrategy($thing_to_import, $code, $ns_called_from);
+    includeCodeReflectionStrategy($thing_to_import, $ns_called_from);
+    /**
+     * A string that's a function definition that looks like
+     * function somefunction() {
+     *     $args = func_get_args();
+     *     return call_user_func_array('\Namespace\To\someFunction', $args);
+     * }
+     * @var string $function
+     */
+    // $code = extractFunction($thing_to_import);
     // includeCodeFullExportStrategy($thing_to_import, $code);
 }
 
