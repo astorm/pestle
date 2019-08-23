@@ -16,7 +16,7 @@ Put another way, this program
     someFunction();
 ```
 
-needs to behave like this programs
+needs to behave like this program
 
 ```php
     namespace My\Programs\FullNamespace;
@@ -37,7 +37,7 @@ It's this second part that's the tricky one.  If `someFunction` looked like this
     }
 ```
 
-We could just define a new function named `someFunction` in the `My\Programs\FullNamespace` namespace and be done.  However, if the function looks like this
+we could just define a new function named `someFunction` in the `My\Programs\FullNamespace` namespace and be done.  However, if the function looks like this
 
 ```php
     function someFunction() {
@@ -47,7 +47,7 @@ We could just define a new function named `someFunction` in the `My\Programs\Ful
 
 we can't just include it into `My\Programs\FullNamespace`, because then the code would attempt to call `My\Programs\FullNamespace\someOtherFunction`, which doesn't exist.  We need to make sure `someOtherFunction` still calls the function from its original namespace.
 
-In other words, we're dealing with a class problem that's traditionally [solved by a linker](https://en.wikipedia.org/wiki/Linker_(computing).
+In other words, we're dealing with a class problem that's traditionally [solved by a linker](https://en.wikipedia.org/wiki/Linker_(computing)).
 
 ## Incremental Strategies
 
