@@ -1,8 +1,8 @@
 Here's the basic problem pestle needs to solve.  When a user calls the `pestle_import` function
 
 ```php
-    namespace My\Programs\FullNamespace;
-    pestle_import('FullNamespace\To\someFunction');
+namespace My\Programs\FullNamespace;
+pestle_import('FullNamespace\To\someFunction');
 ```
 
 pestle needs to ensure that calls to `someFunction` in the _local_ namespace will behave as though `someFunction` were called via its full name.
@@ -10,18 +10,18 @@ pestle needs to ensure that calls to `someFunction` in the _local_ namespace wil
 Put another way, this program
 
 ```php
-    namespace My\Programs\FullNamespace;
-    pestle_import('FullNamespace\To\someFunction');
+namespace My\Programs\FullNamespace;
+pestle_import('FullNamespace\To\someFunction');
 
-    someFunction();
+someFunction();
 ```
 
 needs to behave like this program
 
 ```php
-    namespace My\Programs\FullNamespace;
-    require_once 'modules/fullnamespace/to/module.php'
-    FullNamespace\To\someFunction();
+namespace My\Programs\FullNamespace;
+require_once 'modules/fullnamespace/to/module.php'
+FullNamespace\To\someFunction();
 ```
 
 Put a third way, `pestle_import` needs to
@@ -32,17 +32,17 @@ Put a third way, `pestle_import` needs to
 It's this second part that's the tricky one.  If `someFunction` looked like this
 
 ```php
-    function someFunction() {
-        echo "Hello Function";
-    }
+function someFunction() {
+    echo "Hello Function";
+}
 ```
 
 we could just define a new function named `someFunction` in the `My\Programs\FullNamespace` namespace and be done.  However, if the function looks like this
 
 ```php
-    function someFunction() {
-        return someOtherFunction();
-    }
+function someFunction() {
+    return someOtherFunction();
+}
 ```
 
 we can't just include it into `My\Programs\FullNamespace`, because then the code would attempt to call `My\Programs\FullNamespace\someOtherFunction`, which doesn't exist.  We need to make sure `someOtherFunction` still calls the function from its original namespace.
@@ -72,8 +72,8 @@ That's pretty high level though -- let's take a look at what all that actually m
 We're going to follow a  `pestle_import` call that looks like this
 
 ```php
-    namespace Foo\Baz\Bar;
-    pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+namespace Foo\Baz\Bar;
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 ```
 
 With this call, the end-user-programmer is saying
@@ -83,25 +83,25 @@ With this call, the end-user-programmer is saying
 Here's the entry point of a `pestle_import` call
 
 ```php
-    #File: astorm/pestle/modules/pulsestorm/pestle/importer/module.php
-    function pestle_import($thing_to_import, $as=false)
-    {
-        /**
-         * @var string $ns_called_from ex. \Namespace\Called\From
-         */
-        $ns_called_from  = getNamespaceCalledFrom();
-        $thing_to_import = trim($thing_to_import, '\\');
+#File: astorm/pestle/modules/pulsestorm/pestle/importer/module.php
+function pestle_import($thing_to_import, $as=false)
+{
+    /**
+     * @var string $ns_called_from ex. \Namespace\Called\From
+     */
+    $ns_called_from  = getNamespaceCalledFrom();
+    $thing_to_import = trim($thing_to_import, '\\');
 
-        includeModule($thing_to_import);
-        includeCode($thing_to_import, $ns_called_from);
-        return true;
-    }
+    includeModule($thing_to_import);
+    includeCode($thing_to_import, $ns_called_from);
+    return true;
+}
 ```
 
 The first line,
 
 ```php
-    $ns_called_from  = getNamespaceCalledFrom();
+$ns_called_from  = getNamespaceCalledFrom();
 ```
 
 fetches the namespace that `pestle_import` **was called from**.  In the above example this will be `Foo\Baz\Bar`.  The `getNamespaceCalledFrom` function uses information in PHP's built in `debug_backtrace` function to determine where `pestle_import` was called from.
@@ -109,16 +109,16 @@ fetches the namespace that `pestle_import` **was called from**.  In the above ex
 Next, the `includeModule` code will `require` in  `Pulsestorm\Pestle\Library\inputOrIndex`'s source  module.
 
 ```php
-    #File: astorm/pestle/modules/pulsestorm/pestle/importer/module.php
-    function includeModule($function_name)
-    {
-        $function_name = strToLower($function_name);
-        $parts         = explode('\\', $function_name);
-        $short_name    = array_pop($parts);
-        $namespace     = implode('/',$parts);
-        $file          = $namespace . '/module.php';
-        return require_once(getPathFromFunctionName($function_name));
-    }
+#File: astorm/pestle/modules/pulsestorm/pestle/importer/module.php
+function includeModule($function_name)
+{
+    $function_name = strToLower($function_name);
+    $parts         = explode('\\', $function_name);
+    $short_name    = array_pop($parts);
+    $namespace     = implode('/',$parts);
+    $file          = $namespace . '/module.php';
+    return require_once(getPathFromFunctionName($function_name));
+}
 ```
 
 This is where the we can find the code that converts a PHP namespace into a pestle module file path.  The `getPathFromFunctionName` function will search through pestle's default modules, as well as any configured modules, until it finds a `module.php` file.
@@ -126,11 +126,11 @@ This is where the we can find the code that converts a PHP namespace into a pest
 Once `includeModule` is done, pestle will call the `includeCode` function, which is a wrapper function for the current pestle import strategy.
 
 ```php
-    function includeCode($thing_to_import, $ns_called_from)
-    {
-        includeCodeReflectionStrategy($thing_to_import, $ns_called_from);
-        // ... older strategies are often left, commented out ...
-    }
+function includeCode($thing_to_import, $ns_called_from)
+{
+    includeCodeReflectionStrategy($thing_to_import, $ns_called_from);
+    // ... older strategies are often left, commented out ...
+}
 ```
 
 ## Reflection Strategy: Registering the Function
@@ -138,15 +138,15 @@ Once `includeModule` is done, pestle will call the `includeCode` function, which
 The `includeCodeReflectionStrategy` has two jobs -- the first is to register the function/symbol we want to import, and the second is to ensure an _executor_ function is loaded.
 
 ```php
-    #File: modules/pulsestorm/pestle/importer/module.php
-    function includeCodeReflectionStrategy($thing_to_import, $ns_called_from)
-    {
-        $parts      = explode('\\', $thing_to_import);
-        $short_name = array_pop($parts);
+#File: modules/pulsestorm/pestle/importer/module.php
+function includeCodeReflectionStrategy($thing_to_import, $ns_called_from)
+{
+    $parts      = explode('\\', $thing_to_import);
+    $short_name = array_pop($parts);
 
-        functionRegister($short_name, $ns_called_from, $thing_to_import);
-        generateOrIncludeExecutorFunction($short_name, $thing_to_import);
-    }
+    functionRegister($short_name, $ns_called_from, $thing_to_import);
+    generateOrIncludeExecutorFunction($short_name, $thing_to_import);
+}
 ```
 
 Registering a function means adding the function we want to import to a global registry that keeps track of the following two things
@@ -157,15 +157,15 @@ Registering a function means adding the function we want to import to a global r
 The `functionRegister` function uses a classless getter/setter registry pattern.
 
 ```php
-    function functionRegister($short_name,$ns_called_from=false,$namespaced_function=false)
-    {
-        static $functions=[];
-        if(!$namespaced_function) {
-            return functionRegisterGet($functions, $short_name,$ns_called_from);
-            // return $functions[$short_name][$ns_called_from];
-        }
-        return functionRegisterSet($functions,$short_name,$ns_called_from,$namespaced_function);
+function functionRegister($short_name,$ns_called_from=false,$namespaced_function=false)
+{
+    static $functions=[];
+    if(!$namespaced_function) {
+        return functionRegisterGet($functions, $short_name,$ns_called_from);
+        // return $functions[$short_name][$ns_called_from];
     }
+    return functionRegisterSet($functions,$short_name,$ns_called_from,$namespaced_function);
+}
 ```
 
 The function registry uses the [`static` variable](https://www.php.net/manual/en/language.variables.scope.php) `$functions` to store its values.  If users call `functionRegister` with the `$namespaced_function` argument, `functionRegister` will _set_ a value.  If this argument is not used, `functionRegister` will _get_ a value from its registry.
@@ -173,29 +173,29 @@ The function registry uses the [`static` variable](https://www.php.net/manual/en
 The `functionRegister` call in the `includeCodeReflectionStrategy` function
 
 ```php
-    functionRegister($short_name, $ns_called_from, $thing_to_import);
+functionRegister($short_name, $ns_called_from, $thing_to_import);
 ```
 
 is _setting_ a value.
 
 ```
-    function functionRegisterSet(&$functions, $short_name, $ns_called_from, $namespaced_function)
-    {
-        $functions[$short_name][$ns_called_from] = $namespaced_function;
-    }
+function functionRegisterSet(&$functions, $short_name, $ns_called_from, $namespaced_function)
+{
+    $functions[$short_name][$ns_called_from] = $namespaced_function;
+}
 ```
 
 Again, this registry needs to keep track of all the namespaces a short function name is imported from, and what actual PHP function name it points at.  So something like this --
 
 ```php
-    namespace Foo\Baz\Bar;
-    pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+namespace Foo\Baz\Bar;
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 ```
 
 Will result in the following registered values
 
 ```php
-    $functions['inputOrIndex']['Foo\Baz\Bar'] = 'Pulsestorm\Pestle\Library\inputOrIndex';
+$functions['inputOrIndex']['Foo\Baz\Bar'] = 'Pulsestorm\Pestle\Library\inputOrIndex';
 ```
 
 ## Reflection Strategy: Generating the Executor
@@ -203,25 +203,25 @@ Will result in the following registered values
 After registering the function, we need to include an executor function in the local namespace.
 
 ```php
-    generateOrIncludeExecutorFunction($short_name, $thing_to_import);
+generateOrIncludeExecutorFunction($short_name, $thing_to_import);
 ```
 
 "Executor Function" is our own term.  When an end-user-programmer says something like this
 
 ```php
-    namespace Foo\Baz\Bar;
-    pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+namespace Foo\Baz\Bar;
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 ```
 
 We need to ensure there's a function named `inputOrIndex` in the local namespace.  That is, the user needs to be able to call that function
 
 ```php
-    namespace Foo\Baz\Bar;
-    pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+namespace Foo\Baz\Bar;
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 
-    //...
+//...
 
-    inputOrIndex();
+inputOrIndex();
 ```
 
 Since `pestle_import` is running in the context of this local namespace (`Foo\Baz\Bar`), if we `include` a file with a function definition that _has no namespace_, PHP will define a function in the the same namespace that we called  `pestle_import` from.  So part of `generateOrIncludeExecutorFunction`'s job is to generate an include file (stored in a local, file based cache), and then include it.
@@ -229,22 +229,22 @@ Since `pestle_import` is running in the context of this local namespace (`Foo\Ba
 The _other_ part of `generateOrIncludeExecutorFunction`'s job is making sure that the code it generates will result in the _original_ PHP function being called.  You can see all the executor functions pestle's generated by looking in your `/tmp/pestle_cache` folder -- here's one example.
 
 ```php
-    #File: /private/tmp/pestle_cache/[cache-key]/reflection-strategy/[2nd-cache-key].php
-    <?php
-    use function Pulsestorm\Pestle\Importer\functionRegister;
-    use function Pulsestorm\Pestle\Importer\getNamespaceCalledFromForGenerated;
-    function inputOrIndex(){
-       $function   = functionRegister(__FUNCTION__, getNamespaceCalledFromForGenerated());
-       $args       = func_get_args();
-       return (new \ReflectionFunction($function))->invokeArgs($args);
-    }
-    ##exported for Pulsestorm\Pestle\Library\inputOrIndex
+#File: /private/tmp/pestle_cache/[cache-key]/reflection-strategy/[2nd-cache-key].php
+<?php
+use function Pulsestorm\Pestle\Importer\functionRegister;
+use function Pulsestorm\Pestle\Importer\getNamespaceCalledFromForGenerated;
+function inputOrIndex(){
+   $function   = functionRegister(__FUNCTION__, getNamespaceCalledFromForGenerated());
+   $args       = func_get_args();
+   return (new \ReflectionFunction($function))->invokeArgs($args);
+}
+##exported for Pulsestorm\Pestle\Library\inputOrIndex
 ```
 
 This code was generated when an end user programmer said
 
 ```php
-    pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 ```
 
 The executor function (`function replaceTypeHintsWithNewTypeHints`) will
@@ -256,9 +256,9 @@ The executor function (`function replaceTypeHintsWithNewTypeHints`) will
 When a pestle user calls a function like this
 
 ```php
-    pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
-    //...
-    inputOrIndex(...)
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+//...
+inputOrIndex(...)
 ```
 
 The function they're actually calling is the executor function.
@@ -270,48 +270,50 @@ That's a lot to take in. Let's do it one more time, but jumping back to a 10,000
 Consider a pestle program that calls `pestle_import` from the `Foo\Baz\Bar` namespace.
 
 ```php
-    namespace Foo\Baz\Bar;
-    pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+namespace Foo\Baz\Bar;
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 ```
 
 The first thing that happens?  In `includeModule`, we make sure the PHP file with `inputOrIndex` is `require`d.
 
 ```php
-    require_once('modules/pulsestorm/pestle/library/module.php');
+require_once('modules/pulsestorm/pestle/library/module.php');
 ```
 
 Next, in `includeCode`, we'll register the function, ensuring that that static `$functions` array in `getFunction` has the following keys set
 
 ```php
-    $functions['inputOrIndex']['Foo\Baz\Bar'] = 'Pulsestorm\Pestle\Library\inputOrIndex';
+$functions['inputOrIndex']['Foo\Baz\Bar'] = 'Pulsestorm\Pestle\Library\inputOrIndex';
 ```
 
 Finally, `includeCode` will also (the first time this function is `pestle_import`ed) generate and cache "an executor function" that looks something like this
 
 ```php
-    #File: /tmp/pestle_cache/[pestle-key]/reflection-strategy/[function-key].php
-    <?php
-    use function Pulsestorm\Pestle\Importer\functionRegister;
-    use function Pulsestorm\Pestle\Importer\getNamespaceCalledFromForGenerated;
-    function inputOrIndex(){
-       $function   = functionRegister(__FUNCTION__, getNamespaceCalledFromForGenerated());
-       $args       = func_get_args();
-       return (new \ReflectionFunction($function))->invokeArgs($args);
-    }
-    ##exported for Pulsestorm\Cli\Token_Parse\replaceTypeHintsWithNewTypeHints
+#File: /tmp/pestle_cache/[pestle-key]/reflection-strategy/[function-key].php
+<?php
+use function Pulsestorm\Pestle\Importer\functionRegister;
+use function Pulsestorm\Pestle\Importer\getNamespaceCalledFromForGenerated;
+function inputOrIndex(){
+   $function   = functionRegister(__FUNCTION__, getNamespaceCalledFromForGenerated());
+   $args       = func_get_args();
+   return (new \ReflectionFunction($function))->invokeArgs($args);
+}
+##exported for Pulsestorm\Cli\Token_Parse\replaceTypeHintsWithNewTypeHints
 ```
 
 and then load this executor
 
-    require_once('/tmp/pestle_cache/[pestle-key]/reflection-strategy/[function-key].php')
+```php
+require_once('/tmp/pestle_cache/[pestle-key]/reflection-strategy/[function-key].php')
+```
 
 Future calls will skip the generation and load this file directly from the cache.
 
 The end result?  Back up here
 
 ```php
-    namespace Foo\Baz\Bar;
-    pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
+namespace Foo\Baz\Bar;
+pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 ```
 
 After `pestle_import` finishes, there will be a newly defined and available
