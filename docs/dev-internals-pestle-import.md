@@ -1,4 +1,4 @@
-# What is pestle_import
+# What is pestle_import?
 
 Here's the basic problem pestle needs to solve.  When a user calls the `pestle_import` function
 
