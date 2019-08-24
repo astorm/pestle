@@ -37,4 +37,4 @@ nav:
         - Introduction: dev-internals-introduction.md
         - Setting Up a Dev Enviornment: dev-internals-enviornment.md
         - Building Pestle: dev-internals-build.md
-        - Theroy of Operation: dev-internals-theroy-of-operation.md
+        - Theroy of Operation: dev-internals-pestle-import.md

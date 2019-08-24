@@ -4,27 +4,50 @@ use function Pulsestorm\Pestle\Runner\getBaseProjectDir;
 use ReflectionFunction;
 use ReflectionClass;
 
+/**
+ * One Line Description
+ * @param string $thing_to_import ex. \Namespace\To\someFunction
+ * @return boolean
+ */
 function pestle_import($thing_to_import, $as=false)
 {
+    /**
+     * @var string $ns_called_from ex. \Namespace\Called\From
+     */
     $ns_called_from  = getNamespaceCalledFrom();
     $thing_to_import = trim($thing_to_import, '\\');
-    $function = extractFunction($thing_to_import);
-    includeCode($thing_to_import, $function, $ns_called_from);
+
+    includeModule($thing_to_import);
+    includeCode($thing_to_import, $ns_called_from);
     return true;
 }
 
+/**
+ * @param string funtion_name full namespace "\Namespace\To\someFunction"
+ */
 function extractFunction($function_name)
 {
-    includeModule($function_name);
     $code = createFunctionForGlobalExport($function_name);
     return $code;
 }
 
+/**
+ * @param string funtion_name full namespace "\Namespace\To\someFunction"
+ */
 function createFunctionForGlobalExport($function_name)
 {
+    /**
+     * Namespace and function, extracted
+     *
+     * [
+     *     'short_name'=>$short_name,
+     *     'namespace'=>$namespace,
+     * ]
+     *
+     * @var array $info
+     */
     $info = extractFunctionNameAndNamespace($function_name);
-    //include in the library
-    // $code = '<' . '?php' . "\n" .
+
     $code =
     'function ' . $info['short_name'] . '(){
         $args = func_get_args();
@@ -85,6 +108,12 @@ function getPathFromFunctionName($function_name)
     // return getBaseProjectDir() . '/modules/' . $file;
 }
 
+/**
+ * Turns the full function name into a file path and then
+ * require_once's it.
+ *
+ * @param string funtion_name full namespace "\Namespace\To\someFunction"
+ */
 function includeModule($function_name)
 {
     $function_name = strToLower($function_name);
@@ -108,13 +137,7 @@ function functionCollidesWithPhpGlobalSpace($namespace)
     return $results;
 }
 
-function includeCodeReflectionStrategy($namespace, $code, $ns_called_from)
-{
-
-    $cache_dir  = getCacheDir();
-    $parts      = explode('\\', $namespace);
-    $short_name = array_pop($parts);
-
+function generateCodeForReflectionStrategy($short_name, $thing_to_import) {
     $code =
     'use function Pulsestorm\Pestle\Importer\functionRegister;'         . "\n";
     $code .= 'use function Pulsestorm\Pestle\Importer\getNamespaceCalledFromForGenerated;' . "\n";
@@ -124,47 +147,78 @@ function includeCodeReflectionStrategy($namespace, $code, $ns_called_from)
     '   return (new \ReflectionFunction($function))->invokeArgs($args);' . "\n" .
     '}';
 
-    $full_dir   = $cache_dir    . '/' . str_replace('\\','/',strToLower($namespace));
+    return $code;
+}
+
+function generateCacheFilePathForReflectionStrategy($short_name, $thing_to_import, $code) {
+    $cache_dir  = getCacheDir();
+    $full_dir   = $cache_dir    . '/' . str_replace('\\','/',strToLower($thing_to_import));
     $filename   = md5($short_name . $code);
     // $full_path  = $full_dir . '/'  . $filename . '.php';
     $full_path  = $cache_dir    . '/reflection-strategy/'  . $filename . '.php';
+    return $full_path;
+}
+/**
+ * @param string $thing_to_import \Namespace\To\someFunction
+ * @param string $nd_called_from \Namespace\Called\From
+ */
+function includeCodeReflectionStrategy($thing_to_import, $ns_called_from)
+{
+    $parts      = explode('\\', $thing_to_import);
+    $short_name = array_pop($parts);
 
-    functionRegister($short_name, $ns_called_from, $namespace);
+    functionRegister($short_name, $ns_called_from, $thing_to_import);
+    generateOrIncludeExecutorFunction($short_name, $thing_to_import);
+}
 
+function generateOrIncludeExecutorFunction($short_name, $thing_to_import) {
+
+    $code = generateCodeForReflectionStrategy($short_name, $thing_to_import);
+    $full_path = generateCacheFilePathForReflectionStrategy(
+        $short_name, $thing_to_import, $code);
+
+    /**
+     * If file's already been generated, return it
+     */
     if(file_exists($full_path))
     {
-        // require_once getModulePathToFullyNamespacedFunction($namespace);
+        // require_once getModulePathToFullyNamespacedFunction($thing_to_import);
         require_once $full_path;    //require the exported file
         return;
     }
 
-
-
-    if(!is_dir(dirname($full_path)))
-    {
-        mkdir(dirname($full_path), 0755, true);
-    }
-
-    if($short_name = functionCollidesWithPhpGlobalSpace($namespace))
+    /**
+     * If we have a conflict with a global PHP function, rename it in $code
+     */
+    if($short_name = functionCollidesWithPhpGlobalSpace($thing_to_import))
     {
         //export with a pestle_prefix
         $code = replaceFirstInstanceOfFunctionName($code, $short_name);
     }
 
-    // echo $full_path,"\n";
+    /**
+     * Create a directory if we need it
+     */
+    if(!is_dir(dirname($full_path)))
+    {
+        mkdir(dirname($full_path), 0755, true);
+    }
 
+    /**
+     * Wrap the code in a <?php, and add an exported for
+     * comment for debugging purposes
+     */
     if(!file_exists($full_path))
     {
         //exported as function global function
         file_put_contents($full_path,
             '<' . '?' . 'php' . "\n" .
             $code . "\n" .
-            '##exported for '      . $namespace . "\n");
+            '##exported for '      . $thing_to_import . "\n");
     }
 
     require_once $full_path ;
 }
-
 function includeCodeFullExportStrategy($namespace, $code)
 {
     $cache_dir = getCacheDir();
@@ -195,10 +249,24 @@ function includeCodeFullExportStrategy($namespace, $code)
         '##exported for '      . $namespace . "\n");
     require_once $full_path;
 }
-function includeCode($namespace, $code, $ns_called_from)
+
+/**
+ * @param string $thing_to_import \Namespace\To\someFunction
+ * @param string $nd_called_from \Namespace\Called\From
+ */
+function includeCode($thing_to_import, $ns_called_from)
 {
-    includeCodeReflectionStrategy($namespace, $code, $ns_called_from);
-    // includeCodeFullExportStrategy($namespace, $code);
+    includeCodeReflectionStrategy($thing_to_import, $ns_called_from);
+    /**
+     * A string that's a function definition that looks like
+     * function somefunction() {
+     *     $args = func_get_args();
+     *     return call_user_func_array('\Namespace\To\someFunction', $args);
+     * }
+     * @var string $function
+     */
+    // $code = extractFunction($thing_to_import);
+    // includeCodeFullExportStrategy($thing_to_import, $code);
 }
 
 function functionRegisterGet(&$functions, $short_name,$ns_called_from)
@@ -219,6 +287,36 @@ function functionRegisterSet(&$functions, $short_name, $ns_called_from, $namespa
     $functions[$short_name][$ns_called_from] = $namespaced_function;
 }
 
+/**
+ * Manages state in static $functions.
+ *
+ * If $namespaced_function is false/not-passed, then items
+ * is fetched from static $functions
+ *
+ * If $namespaced_function is set/truthy, then items
+ * are set.
+ *
+ * The static $functions array is a multi-dimensional array
+ * that points a short function name (dimension 1) to a
+ * specific fully namespaced PHP function (value) within
+ * a particular namespace (dimension 2).
+ *
+ * If the following import happens
+ *
+ *     namespace Foo\Bar\Baz;
+ *     pestle_import('Zip\Zap\someFunction')
+ *
+ * then the following runs (functionRegisterSet)
+ *
+ * $functions['someFunction']['Foo\Bar\Baz'] = 'Zip\Zap\someFunction';
+ *
+ * This allows the code in generateCodeForReflectionStrategy to fetch
+ * the full PHP function, and then invoke it via reflection.
+ *
+ * @param string $short_name someFunction
+ * @param string $ns_called_from Namespace\Called\From
+ * @param string $namespace_function Namespace\Of\someFunction
+ */
 function functionRegister($short_name,$ns_called_from=false,$namespaced_function=false)
 {
     static $functions=[];
@@ -227,8 +325,8 @@ function functionRegister($short_name,$ns_called_from=false,$namespaced_function
         // return $functions[$short_name][$ns_called_from];
     }
     return functionRegisterSet($functions,$short_name,$ns_called_from,$namespaced_function);
-//     echo "Registering `$short_name` as `$namespaced_function`
-// for calls from `$ns_called_from`","\n";
+    //     echo "Registering `$short_name` as `$namespaced_function`
+    // for calls from `$ns_called_from`","\n";
 
 }
 function replaceFirstInstanceOfFunctionName($code, $short_name)
