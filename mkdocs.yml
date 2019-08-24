@@ -34,7 +34,6 @@ nav:
         - Generate a Module: pestle-generate.md
         - Input, Output, Arguments, Options: pestle-io.md
     - Development:
-        - Introduction: dev-internals-introduction.md
         - Setting Up a Dev Enviornment: dev-internals-enviornment.md
         - Building Pestle: dev-internals-build.md
         - Theroy of Operation: dev-internals-theroy-of-operation.md
