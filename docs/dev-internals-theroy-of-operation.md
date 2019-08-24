@@ -45,15 +45,15 @@ function someFunction() {
 }
 ```
 
-we can't just include it into `My\Programs\FullNamespace`, because then the code would attempt to call `My\Programs\FullNamespace\someOtherFunction`, which doesn't exist.  We need to make sure `someOtherFunction` still calls the function from its original namespace.
+we can't just include it into `My\Programs\FullNamespace`, because then PHP would attempt to call `My\Programs\FullNamespace\someOtherFunction`, which doesn't exist.  We need to make sure `someOtherFunction` still calls the function from its original namespace.
 
-In other words, we're dealing with a class problem that's traditionally [solved by a linker](https://en.wikipedia.org/wiki/Linker_(computing)).
+In other words, we're dealing with a class of problem that's traditionally [solved by a linker](https://en.wikipedia.org/wiki/Linker_(computing)).
 
 ## Incremental Strategies
 
-This is a non-trivial problem to solve robustly.  So far pestle has taken  non-optimal, incremental approaches towards the problem.  This allows us to build up a body of code that runs via the `pestle_import` pattern. Building up that body of code means we can experiment with syntax and features before committing to a robust solution.
+This is a non-trivial problem to solve robustly, especially from PHP userland.   So far pestle has taken non-optimal, incremental approaches towards the problem.  This allows us to build up a body of code that runs via the `pestle_import` pattern. Building up that body of code means we can experiment with syntax and features before committing to a robust solution.
 
-Right now, pestle currently uses a reflection based strategy to implement local importing of functions. Specifically, (at a high level), Pestle keeps a registry of functions that are imported in each namespace, indexed by their local/short name.  For each of these functions pestle will generate a local PHP include file that defines an un-namespaced function. This un-namespaced function will reference the registry and invokes the full PHP function via reflection.
+Right now, pestle currently uses a reflection based strategy to implement local importing of functions. Specifically, (at a high level), Pestle keeps a registry of functions that are imported in each namespace, indexed by their local/short name.  For each of these functions pestle will generate a local PHP include file that defines an un-namespaced function. This un-namespaced function will reference the registry and invoke the full PHP function via reflection.
 
 ## Pestle Import Lifecycle: 10,000 foot view
 
@@ -104,7 +104,7 @@ The first line,
 $ns_called_from  = getNamespaceCalledFrom();
 ```
 
-fetches the namespace that `pestle_import` **was called from**.  In the above example this will be `Foo\Baz\Bar`.  The `getNamespaceCalledFrom` function uses information in PHP's built in `debug_backtrace` function to determine where `pestle_import` was called from.
+fetches the namespace that `pestle_import` **was called from**.  In the above example this will be `Foo\Baz\Bar`.  The `getNamespaceCalledFrom` function uses information from PHP's built-in [`debug_backtrace`](http://php.net/debug_backtrace) function to determine where `pestle_import` was called from.
 
 Next, the `includeModule` code will `require` in  `Pulsestorm\Pestle\Library\inputOrIndex`'s source  module.
 
@@ -301,7 +301,7 @@ function inputOrIndex(){
 ##exported for Pulsestorm\Cli\Token_Parse\replaceTypeHintsWithNewTypeHints
 ```
 
-and then load this executor
+and then load this executor.
 
 ```php
 require_once('/tmp/pestle_cache/[pestle-key]/reflection-strategy/[function-key].php')
@@ -316,15 +316,13 @@ namespace Foo\Baz\Bar;
 pestle_import('Pulsestorm\Pestle\Library\inputOrIndex');
 ```
 
-After `pestle_import` finishes, there will be a newly defined and available
-
-    Foo\Baz\Bar\inputOrIndex
-
-which, when called, will actually call the requested function, `Pulsestorm\Pestle\Library\inputOrIndex`
+after `pestle_import` finishes, there will be a newly defined and available `Foo\Baz\Bar\inputOrIndex` function which, when called, will actually call the requested function, `Pulsestorm\Pestle\Library\inputOrIndex`
 
 ## Downsides and Future Plans
 
-The main downside of the current strategy is it still requires us to require in all of the original namespace in order for the executor function to do its work. However, with this system in place we should be able to move on to implementing features like
+The main downside of the current strategy is it still requires us to require in all of the original namespace in order for the executor function to do its work.  We're just hiding this detail from the end-user-programmer.
+
+However, with this system in place we should be able to move on to implementing features like
 
 1. Importing other symbols (Classes, constants, and ???)
 2. Importing multiple symbols at one
