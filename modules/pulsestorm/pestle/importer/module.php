@@ -3,6 +3,7 @@ namespace Pulsestorm\Pestle\Importer;
 use function Pulsestorm\Pestle\Runner\getBaseProjectDir;
 use ReflectionFunction;
 use ReflectionClass;
+use Exception;
 
 /**
  * One Line Description
@@ -67,6 +68,38 @@ function extractFunctionNameAndNamespace($full)
         'short_name'=>$short_name,
         'namespace' =>$namespace
     ];
+}
+
+function loadConfig($configType) {
+    $path = getPathConfig($configType);
+    if(!file_exists($path)) {
+        file_put_contents($path,'{}');
+    }
+    $string = file_get_contents($path);
+    $object = json_decode($string);
+    if(!$object) {
+        throw new Exception("Could not load config -- invalid json: $configType");
+    }
+    return $object;
+}
+
+function getPathConfig($file=false) {
+    $home = trim(`echo ~`);
+    if(!is_dir($home)) {
+        throw new Exception("Could not find home directory with echo ~");
+    }
+    $pathConfig = $home . '/.pestle';
+    if(!is_dir($pathConfig)) {
+        mkdir($pathConfig, 0755, true);
+    }
+
+    if(!$file) {
+        return $pathConfig;
+    }
+
+    $pathConfig = $pathConfig . '/' . $file . '.json';
+
+    return $pathConfig;
 }
 
 function getModuleFolders()

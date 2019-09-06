@@ -7,11 +7,12 @@
         "abraham/twitteroauth": "0.7.2",
         "fzaninotto/faker": "^1.6.0",
         "nexmo/client":"@beta",
-        "pear/numbers_words":"0.18.1"
+        "pear/numbers_words":"0.18.1",
+        "symfony/yaml":"^3.4.31"
     },
 
     "require-dev": {
-        "phpunit/phpunit": "4.8.*",
+        "phpunit/phpunit": "^6.5",
         "phing/phing": "2.*",
         "phpspec/prophecy":"1.7.0",
         "magento/magento-coding-standard": "^4.0"

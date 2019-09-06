@@ -4,11 +4,14 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\input');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
+pestle_import('Pulsestorm\Magento2\Cli\Library\getAppCodePath');
 
 function getPathFromClass($class)
 {
     $class = trim($class, '\\');
-    return getBaseMagentoDir() . '/app/code/' . implode('/', explode('\\', $class)) . '.php';
+    return getBaseMagentoDir() . '/' . getAppCodePath() . '/'
+        . implode('/', explode('\\', $class))
+        . '.php';
 }
 
 /**

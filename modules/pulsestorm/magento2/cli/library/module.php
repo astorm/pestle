@@ -18,14 +18,18 @@ pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 pestle_import('Pulsestorm\Xml_Library\addSchemaToXmlString');
 pestle_import('Pulsestorm\Xml_Library\getXmlNamespaceFromPrefix');
 
+function getAppCodePath() {
+    return 'app/code';
+}
+
 function getModuleInformation($module_name)
 {
-    list($vendor, $name) = explode('_', $module_name);        
+    list($vendor, $name) = explode('_', $module_name);
     return (object) [
         'vendor'        => $vendor,
         'short_name'    => $name,
         'name'          => $module_name,
-        'folder'        => getBaseMagentoDir() . "/app/code/$vendor/$name",
+        'folder'        => getBaseMagentoDir() . "/" . getAppCodePath() . "/$vendor/$name",
     ];
 }
 
@@ -34,7 +38,7 @@ function getBaseModuleDir($module_name)
     $path = getModuleInformation($module_name)->folder;
     if(!file_exists($path))
     {
-        exitWithErrorMessage("No such path: $path" . "\n" . 
+        exitWithErrorMessage("No such path: $path" . "\n" .
             "Please use magento2:generate:module to create module first");
         // throw new Exception("No such path: $path");
     }
@@ -44,18 +48,18 @@ function getBaseModuleDir($module_name)
 function askForModuleAndReturnInfo($argv, $index=0)
 {
     $module_name = inputOrIndex(
-        "Which module?", 
+        "Which module?",
         'Magento_Catalog', $argv, $index);
-    return getModuleInformation($module_name);        
+    return getModuleInformation($module_name);
 }
 
 function askForModuleAndReturnFolder($argv)
 {
     $module_folder = inputOrIndex(
-        "Which module?", 
+        "Which module?",
         'Magento_Catalog', $argv, 0);
-    list($package, $vendor) = explode('_', $module_folder);        
-    return getBaseMagentoDir() . "/app/code/$package/$vendor";
+    list($package, $vendor) = explode('_', $module_folder);
+    return getBaseMagentoDir() . "/" . getAppCodePath() . "/$package/$vendor";
 }
 
 function getBaseMagentoDir($path=false)
@@ -79,17 +83,17 @@ function getModuleBaseDir($module)
 {
     $path = implode('/', [
         getBaseMagentoDir(),
-        'app/code',
+        getAppCodePath(),
         str_replace('_', '/', $module)]
     );
-    
+
     return $path;
 }
 
 function getModuleConfigDir($module)
 {
     return implode('/', [
-        getModuleBaseDir($module), 
+        getModuleBaseDir($module),
         'etc']);
 }
 
@@ -98,15 +102,15 @@ function initilizeModuleConfig($module, $file, $xsd)
     $path = implode('/', [
         getModuleConfigDir($module),
         $file]);
-        
+
     if(file_exists($path))
     {
         return $path;
-    }        
-    
+    }
+
     $xml = addSchemaToXmlString('<config></config>', $xsd);
     $xml = simplexml_load_string($xml);
-            
+
     if(!is_dir(dirname($path)))
     {
         mkdir(dirname($path), 0777, true);
@@ -126,8 +130,8 @@ function getSimpleTreeFromSystemXmlFile($path)
         $tree[$section_name] = [];
 
         foreach($section->group as $group)
-        {               
-            $group_name = (string) $group['id']; 
+        {
+            $group_name = (string) $group['id'];
             $tree[$section_name][$group_name] = [];
             foreach($group->field as $field)
             {
@@ -142,9 +146,9 @@ function getSimpleTreeFromSystemXmlFile($path)
 
 function createClassFile($model_name, $contents)
 {
-    $path = getBaseMagentoDir() . '/app/code/' .
+    $path = getBaseMagentoDir() . '/' . getAppCodePath() . '/' .
         str_replace('\\','/',$model_name) . '.php';
-    
+
     if(file_exists($path))
     {
         output($path, "\n" . 'File already exists, skipping');
@@ -175,11 +179,11 @@ function resolveAlias($alias, $config, $type='models')
     $model = str_replace(' ', '_', $model);
 
     $mage1 = $prefix . '_' . $model;
-    return str_replace('_','\\',$mage1);        
+    return str_replace('_','\\',$mage1);
 }
 
 function convertObserverTreeScoped($config, $xml)
-{        
+{
     $xml_new = simplexml_load_string('<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd"></config>');
     if(!$config->events)
     {
@@ -191,7 +195,7 @@ function convertObserverTreeScoped($config, $xml)
         $event_name = modifyEventNameToConvertFromMage1ToMage2($event->getName());
         $event_xml  = $xml_new->addChild('event');
         $event_xml->addAttribute('name',$event_name);
-        
+
         foreach($event->observers->children() as $observer)
         {
             //<observer name="check_theme_is_assigned" instance="Magento\Theme\Model\Observer" method="checkThemeIsAssigned" />
@@ -206,7 +210,7 @@ function convertObserverTreeScoped($config, $xml)
             }
         }
     }
-    
+
     return $xml_new;
 }
 
@@ -233,34 +237,34 @@ function getMage1ClassPathFromConfigPathAndMage2ClassName($path, $class)
     {
         $path_from_pool = preg_replace('%^.*app/code/'.$pool.'/%','',$path_from_pool);
     }
-    
+
     $parts_mage_2 = explode('\\',$class);
     $mage2_vendor = $parts_mage_2[0];
     $mage2_module = $parts_mage_2[1];
-    
+
     $parts_mage_1 = explode('/', $path_from_pool);
     $mage1_vendor = $parts_mage_1[0];
     $mage1_module = $parts_mage_1[1];
-    
+
     if( ($mage1_vendor !== $mage2_vendor) || $mage1_module !== $mage2_module)
     {
         throw new Exception('Config and alias do not appear to match');
     }
-    
+
     $path_from_pool_parts = explode('/',$path);
     $new = [];
     for($i=0;$i<count($path_from_pool_parts);$i++)
     {
         $part = $path_from_pool_parts[$i];
-        
+
         if($part === $mage1_vendor && $path_from_pool_parts[$i+1] == $mage1_module)
         {
             $new[] = str_replace('\\','/',$class) . '.php';
             break;
-        }        
+        }
         $new[] = $part;
     }
-    
+
     return implode('/',$new);
 }
 
@@ -268,14 +272,14 @@ function getVariableNameFromNamespacedClass($class)
 {
     $parts = explode('\\', $class);
     $parts = array_slice($parts, 2);
-    
-    $var = implode('', $parts);    
-    
+
+    $var = implode('', $parts);
+
     if($var)
     {
         $var[0] = strToLower($var);
     }
-    
+
     return '$' . $var;
 }
 
@@ -288,9 +292,9 @@ function getDiLinesFromMage2ClassName($class, $var=false)
     $parameter  = '\\' . trim($class,'\\') . ' ' . $var . ',';
     $property   = 'protected ' . $var . ';';
     $assignment = '$this->' . ltrim($var, '$') . ' = ' . $var . ';';
-    
+
     $lines = $parameter;
-    
+
     return [
         'property' =>$property,
         'parameter'=>$parameter,
@@ -312,28 +316,28 @@ function getKnownClassesMappedToNewClass($return)
     {
         return $return;
     }
-    
+
     $parts = explode('\\', $map[$full_class]);
 
-    $return = [        
-        'class'     =>array_pop($parts),  
+    $return = [
+        'class'     =>array_pop($parts),
         'namespace' =>implode('\\',$parts),
 
-    ];  
-    return $return;    
+    ];
+    return $return;
 }
 
 function getNamespaceAndClassDeclarationFromMage1Class($class, $extends='')
 {
-    $parts = explode('_', $class);      
-    $return = [        
-        'class'     =>array_pop($parts),  
+    $parts = explode('_', $class);
+    $return = [
+        'class'     =>array_pop($parts),
         'namespace' =>implode('\\',$parts),
 
-    ];    
-    
+    ];
+
     $return = getKnownClassesMappedToNewClass($return);
-    
+
     $return['full_class'] = $return['namespace'] . '\\' . $return['class'];
     return $return;
 }
@@ -354,10 +358,10 @@ function convertMageOneClassIntoNamespacedClass($path_mage1)
     $class   = getNamespaceAndClassDeclarationFromMage1Class(
         getClassFromDeclaration($declaration));
     $extends = getNamespaceAndClassDeclarationFromMage1Class(
-        getExtendsFromDeclaration($declaration)); 
-        
+        getExtendsFromDeclaration($declaration));
+
     $declaration_new = getNewClassDeclaration($class, $extends);
-        
+
     $text = str_replace($declaration, $declaration_new, $text);
     return $text;
 }

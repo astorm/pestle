@@ -3,9 +3,9 @@
 namespace Pulsestorm\Pestle\TestsIntegration;
 
 use Exception;
-use PHPUnit_Framework_TestCase;
-
-class PestleTestIntegration extends PHPUnit_Framework_TestCase
+//use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
+class PestleTestIntegration extends TestCase
 {
 
     const COMMAND = '';
