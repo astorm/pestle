@@ -4,6 +4,26 @@ use ReflectionFunction;
 use ReflectionClass;
 use function Pulsestorm\Xml_Library\formatXmlString;
 
+function loadJsonFromFile($file) {
+    return json_decode(
+        file_get_contents($file)
+    );
+}
+
+function fetchObjectPath($object, $path) {
+    $parts = explode('/', $path);
+    $value = null;
+
+    foreach($parts as $path) {
+        if(isset($object->{$path})) {
+            $object = $object->{$path};
+            $value = $object;
+        }
+    }
+
+    return $value;
+}
+
 function exitWithErrorMessage($message)
 {
     fwrite(STDERR, $message . "\n");

@@ -1,6 +1,7 @@
 <?php
 namespace Pulsestorm\Pestle\Importer;
 use function Pulsestorm\Pestle\Runner\getBaseProjectDir;
+
 use ReflectionFunction;
 use ReflectionClass;
 use Exception;
@@ -68,6 +69,11 @@ function extractFunctionNameAndNamespace($full)
         'short_name'=>$short_name,
         'namespace' =>$namespace
     ];
+}
+
+function saveConfig($configType, $config) {
+    $path = getPathConfig($configType);
+    return file_put_contents($path, json_encode($config));
 }
 
 function loadConfig($configType) {
