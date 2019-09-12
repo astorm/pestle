@@ -9,7 +9,12 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
 pestle_import('Pulsestorm\Xml_Library\addSchemaToXmlString');
 pestle_import('Pulsestorm\Cli\Code_Generation\templateRegistrationPhp');
 pestle_import('Pulsestorm\Magento2\Cli\Xml_Template\getBlankXml');
-pestle_import('Pulsestorm\Magento2\Cli\Library\getAppCodePath');
+pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
+
+function getModuleDir($base_dir, $namespace, $name) {
+    $result = getModuleInformation(implode('_', [$namespace,$name]), $base_dir);
+    return $result->folder;
+}
 
 /**
 * Generates new module XML, adds to file system
@@ -38,7 +43,7 @@ function pestle_cli($argv)
     $xml = $config->asXml();
 
     $base_dir   = getBaseMagentoDir();
-    $module_dir = implode('/',[$base_dir, getAppCodePath(), $namespace, $name]);
+    $module_dir = getModuleDir($base_dir, $namespace, $name);
     $etc_dir    = $module_dir . '/etc';
     $reg_path   = $module_dir . '/registration.php';
 
@@ -61,3 +66,4 @@ function exported_pestle_cli($argv)
 {
     return pestle_cli($argv);
 }
+

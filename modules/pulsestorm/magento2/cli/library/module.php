@@ -22,14 +22,16 @@ function getAppCodePath() {
     return 'app/code';
 }
 
-function getModuleInformation($module_name)
+function getModuleInformation($module_name, $path_magento_base=false)
 {
+    $path_magento_base = $path_magento_base ? $path_magento_base : getBaseMagentoDir();
     list($vendor, $name) = explode('_', $module_name);
     return (object) [
         'vendor'        => $vendor,
         'short_name'    => $name,
         'name'          => $module_name,
-        'folder'        => getBaseMagentoDir() . "/" . getAppCodePath() . "/$vendor/$name",
+        'folder'        => $path_magento_base . "/" . getAppCodePath() . "/$vendor/$name",
+        'folder_relative' => getAppCodePath() . "/$vendor/$name"
     ];
 }
 
@@ -53,13 +55,27 @@ function askForModuleAndReturnInfo($argv, $index=0)
     return getModuleInformation($module_name);
 }
 
+function getRelativeModulePath($packageName, $moduleName, $magentoBase=false) {
+    $information = getModuleInformation(
+        implode('_', [$packageName, $moduleName]), $magentoBase);
+
+    return $information->folder_relative;
+}
+
+function getFullModulePath($packageName, $moduleName, $magentoBase=false) {
+    $information = getModuleInformation(
+        implode('_', [$packageName, $moduleName]), $magentoBase);
+
+    return $information->folder;
+}
+
 function askForModuleAndReturnFolder($argv)
 {
     $module_folder = inputOrIndex(
         "Which module?",
         'Magento_Catalog', $argv, 0);
     list($package, $vendor) = explode('_', $module_folder);
-    return getBaseMagentoDir() . "/" . getAppCodePath() . "/$package/$vendor";
+    return getFullModulePath($package, $vendor);
 }
 
 function getBaseMagentoDir($path=false)
@@ -79,15 +95,10 @@ function getBaseMagentoDir($path=false)
     // return $path;
 }
 
-function getModuleBaseDir($module)
+function getModuleBaseDir($module, $baseMagentoDir=false)
 {
-    $path = implode('/', [
-        getBaseMagentoDir(),
-        getAppCodePath(),
-        str_replace('_', '/', $module)]
-    );
-
-    return $path;
+    list($package, $module) = explode('_', $module);
+    return getFullModulePath($package, $module, $baseMagentoDir);
 }
 
 function getModuleConfigDir($module)
@@ -142,13 +153,18 @@ function getSimpleTreeFromSystemXmlFile($path)
     return $tree;
 }
 
-
+function createClassFilePath($model_class_name, $baseMagentoDir=false) {
+    $baseMagentoDir = $baseMagentoDir ? $baseMagentoDir : getBaseMagentoDir();
+    $parts = explode('\\', $model_class_name);
+    $information = getModuleInformation(
+        implode('_', [array_shift($parts), array_shift($parts)]), $baseMagentoDir);
+    $path = $information->folder . '/' . implode('/', $parts) . '.php';
+    return $path;
+}
 
 function createClassFile($model_name, $contents)
 {
-    $path = getBaseMagentoDir() . '/' . getAppCodePath() . '/' .
-        str_replace('\\','/',$model_name) . '.php';
-
+    $path = createClassFilePath($model_name);
     if(file_exists($path))
     {
         output($path, "\n" . 'File already exists, skipping');

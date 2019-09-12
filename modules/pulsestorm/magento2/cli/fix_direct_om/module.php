@@ -10,7 +10,6 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Di\defineStates');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getDiLinesFromMage2ClassName');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getVariableNameFromNamespacedClass');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
-pestle_import('Pulsestorm\Magento2\Cli\Library\getAppCodePath');
 
 function getFiles($folder, $extension_string)
 {
@@ -331,10 +330,12 @@ function performInjectionAndReplaceObjectManager($results, $tokens_all)
     }
 }
 
-function getBaseMagentoDirFromFile($dir)
+function getBaseMagentoDirFromFile($dir,$skipRealPath=false)
 {
-    $dir    = realpath($dir);
-    $split  = '/' . getAppCodePath() . '/';
+    if(!$skipRealPath) {
+        $dir    = realpath($dir);
+    }
+    $split  = '/' . 'app/code' . '/';
     $parts  = explode($split, $dir);
     if(count($parts) === 1)
     {
