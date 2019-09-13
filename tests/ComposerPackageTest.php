@@ -2,8 +2,8 @@
 namespace Pulsestorm\Pestle\Tests;
 require_once 'PestleBaseTest.php';
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Pestle\Importer\getPathConfig');
-pestle_import('Pulsestorm\Pestle\Importer\loadConfig');
+pestle_import('Pulsestorm\Pestle\Config\getPathConfig');
+pestle_import('Pulsestorm\Pestle\Config\loadConfig');
 
 class ComposerPackageTest extends PestleBaseTest
 {
