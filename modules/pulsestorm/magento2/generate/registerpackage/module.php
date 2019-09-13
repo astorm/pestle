@@ -9,8 +9,9 @@ pestle_import('Pulsestorm\Cli\Token_Parse\pestle_token_get_all');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Pestle\Library\loadJsonFromFile');
 pestle_import('Pulsestorm\Pestle\Library\fetchObjectPath');
-pestle_import('Pulsestorm\Pestle\Importer\loadConfig');
-pestle_import('Pulsestorm\Pestle\Importer\saveConfig');
+pestle_import('Pulsestorm\Pestle\Config\loadConfig');
+pestle_import('Pulsestorm\Pestle\Config\saveConfig');
+
 function createOrValidateRegistrationFile($modulePath, $moduleName) {
     $pathRegistration   = $modulePath . '/registration.php';
     $hasRegistration    = file_exists($pathRegistration);

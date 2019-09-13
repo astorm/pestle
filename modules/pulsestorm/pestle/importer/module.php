@@ -71,43 +71,6 @@ function extractFunctionNameAndNamespace($full)
     ];
 }
 
-function saveConfig($configType, $config) {
-    $path = getPathConfig($configType);
-    return file_put_contents($path, json_encode($config));
-}
-
-function loadConfig($configType) {
-    $path = getPathConfig($configType);
-    if(!file_exists($path)) {
-        file_put_contents($path,'{}');
-    }
-    $string = file_get_contents($path);
-    $object = json_decode($string);
-    if(!$object) {
-        throw new Exception("Could not load config -- invalid json: $configType");
-    }
-    return $object;
-}
-
-function getPathConfig($file=false) {
-    $home = trim(`echo ~`);
-    if(!is_dir($home)) {
-        throw new Exception("Could not find home directory with echo ~");
-    }
-    $pathConfig = $home . '/.pestle';
-    if(!is_dir($pathConfig)) {
-        mkdir($pathConfig, 0755, true);
-    }
-
-    if(!$file) {
-        return $pathConfig;
-    }
-
-    $pathConfig = $pathConfig . '/' . $file . '.json';
-
-    return $pathConfig;
-}
-
 function getModuleFolders()
 {
     $pathExtra = '/modules/';

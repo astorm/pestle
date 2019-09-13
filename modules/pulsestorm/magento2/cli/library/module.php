@@ -17,6 +17,8 @@ pestle_import('Pulsestorm\Pestle\Library\getNewClassDeclaration');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 pestle_import('Pulsestorm\Xml_Library\addSchemaToXmlString');
 pestle_import('Pulsestorm\Xml_Library\getXmlNamespaceFromPrefix');
+pestle_import('Pulsestorm\Pestle\Config\loadConfig');
+pestle_import('Pulsestorm\Pestle\Config\saveConfig');
 
 function getAppCodePath() {
     return 'app/code';
@@ -25,6 +27,13 @@ function getAppCodePath() {
 function getModuleInformation($module_name, $path_magento_base=false)
 {
     $path_magento_base = $path_magento_base ? $path_magento_base : getBaseMagentoDir();
+
+    // we need to check the configuration for a path.  If it exists, then
+    // we need to return a different `folder` value.
+    $config = loadConfig('package-folders');
+
+    // Also, do we need to differentiate between base folder and src folder?
+
     list($vendor, $name) = explode('_', $module_name);
     return (object) [
         'vendor'        => $vendor,
