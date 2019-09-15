@@ -11,6 +11,11 @@ pestle_import('Pulsestorm\Pestle\Library\loadJsonFromFile');
 pestle_import('Pulsestorm\Pestle\Library\fetchObjectPath');
 pestle_import('Pulsestorm\Pestle\Config\loadConfig');
 pestle_import('Pulsestorm\Pestle\Config\saveConfig');
+pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
+
+function getRelativeFolder($modulePath, $baseMagentoDir=false) {
+
+}
 
 function createOrValidateRegistrationFile($modulePath, $moduleName) {
     $pathRegistration   = $modulePath . '/registration.php';
@@ -69,6 +74,21 @@ function validateComposerFileIfThere($pathComposer, $hasComposer,
     }
 }
 
+function validateModulePath($modulePath, $baseMagentoDirectory=false) {
+    $baseMagentoDirectory = $baseMagentoDirectory ? $baseMagentoDirectory : getBaseMagentoDir();
+    $fullPath = realpath($modulePath);
+
+    if(strpos($fullPath, $baseMagentoDirectory) !== 0)
+    {
+        exitWithErrorMessage("ERROR: $fullPath is not in current Magento directory, bailing.");
+    }
+}
+
+function respectfulOutput($string, $quiet) {
+    if($quiet !== NULL) { return; };
+    output($string);
+}
+
 /**
 * This command will register a folder on your computers
 * as the composer package for a particular module. This
@@ -90,16 +110,21 @@ function validateComposerFileIfThere($pathComposer, $hasComposer,
 * you've indicated, this command will exit.
 *
 * @command magento2:generate:register-package
-* @argument module What module are you registering? [Pulsestorm_HelloWorld]
+* @argument module What Magento module are you registering? [Pulsestorm_HelloWorld]
 * @argument path Where will this module live? [/path/to/module/folder]
+* @option package Composer package name to generate?
+* @option quiet Disables Output
 */
-function pestle_cli($argv)
+function pestle_cli($argv, $options)
 {
-    $modulePath = $argv['path'];
+    $modulePath = rtrim($argv['path'], '/');
     $moduleName = $argv['module'];
     $moduleParts = explode('_', $moduleName);
     $packageName = strToLower(implode('/', $moduleParts));
-    $moduleNamespacePrefix = $packageName = implode("\\", $moduleParts) . "\\";
+    if(isset($options['package'])) {
+        $packageName = $options['package'];
+    }
+    $moduleNamespacePrefix = implode("\\", $moduleParts) . "\\";
 
     if(!is_dir($modulePath)) {
         exitWithErrorMessage("ERROR: no such path $modulePath");
@@ -109,6 +134,8 @@ function pestle_cli($argv)
 
     // validate the registration file
     createOrValidateRegistrationFile($modulePath, $moduleName);
+
+    validateModulePath($modulePath);
 
     // create the composer.json file if it's not there
     $pathComposer       = $modulePath . '/composer.json';
@@ -120,36 +147,45 @@ function pestle_cli($argv)
 
     // load composer.json file and extract PSR path for our module
     $object = loadJsonFromFile($pathComposer);
-    $psr4AutoLoaders = fetchObjectPath($object, 'autoload/psr4');
-
-    $pathForGeneration = null;
-    foreach($psr4AutoLoaders as $loaderPrefix=>$loader) {
-        if($loaderPrefix !== $moduleNamespacePrefix) { continue; }
-        $pathForGeneration = dirname($pathComposer) . '/' . $loader;
-
-        //match first then bail
-        break;
-    }
-
-    if(!$pathForGeneration) {
-        exitWithErrorMessage("Found no psr4 autoloader for $moduleNamespacePrefix");
-    }
-
-    if(!is_dir($pathForGeneration)) {
-        exitWithErrorMessage("Found psr4 autoloader, but $pathForGeneration directory does not exist");
+    // $psr4AutoLoaders = fetchObjectPath($object, 'autoload/psr4');
+    $packageNameFromFile = fetchObjectPath($object, 'name');
+    if(!$packageNameFromFile) {
+        exitWithErrorMessage("ERROR: $pathComposer has no name, bailing.");
     }
 
     $action = 'Saved';
     $config = loadConfig('package-folders');
 
     if(isset($config->{$moduleName})) {
-        $action = 'Edited';
+        $action = 'Edited:';
     }
 
     // save module + psr path to config
-    $config->{$moduleName} = $pathForGeneration;
+    $config->{$moduleName} = $modulePath;
     saveConfig('package-folders', $config);
 
-    output($action . "\n    " . $moduleName . "=>" . $pathForGeneration .
-        "\n    in package-folders");
+    $relativePath = getRelativeFolder($modulePath);
+
+    $message = "Don't forget to add the following to your project's composer.json
+file.
+
+    {
+        \"repositories\": [
+            /*...*/,
+            {
+                \"type\":\"path\",
+                \"url\":\"$relativePath\"
+            }
+        ]
+    }
+
+and to install/require your module, which will create a symlink
+in your `vendor/` folder
+
+    composer require $packageNameFromFile dev-master
+";
+
+    respectfulOutput($message, $options['quiet']);
+    respectfulOutput($action . "\n    " . $moduleName . "=>" . $modulePath .
+        "\n    in package-folders", $options['quiet']);
 }

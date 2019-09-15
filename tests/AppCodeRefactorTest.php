@@ -14,6 +14,20 @@ pestle_import('Pulsestorm\Magento2\Cli\Generate\Module\getModuleDir');
 class AppCodeRefactorTest extends PestleBaseTest
 {
     const PATH_FAKE_BASE = '/fake/base';
+
+    public function setup() {
+        storageMethod('memory');
+        $config = (object) [
+
+        ];
+
+        saveConfig('package-folders', $config);
+    }
+
+    public function teardown() {
+        storageMethod('file');
+    }
+
     public function testSetup()
     {
         $this->assertEquals(-1, -1);

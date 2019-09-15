@@ -16,6 +16,12 @@ function getModuleDir($base_dir, $namespace, $name) {
     return $result->folder;
 }
 
+function getPackageDir($base_dir, $namespace, $name) {
+    $result = getModuleInformation(implode('_', [$namespace,$name]), $base_dir);
+    return $result->folder_package;
+}
+
+
 /**
 * Generates new module XML, adds to file system
 * This command generates the necessary files and configuration
@@ -42,18 +48,20 @@ function pestle_cli($argv)
     $module->addAttribute('setup_version', $version);
     $xml = $config->asXml();
 
-    $base_dir   = getBaseMagentoDir();
-    $module_dir = getModuleDir($base_dir, $namespace, $name);
-    $etc_dir    = $module_dir . '/etc';
-    $reg_path   = $module_dir . '/registration.php';
+    $base_dir    = getBaseMagentoDir();
+    $module_dir  = getModuleDir($base_dir, $namespace, $name);
+    $package_dir = getPackageDir($base_dir, $namespace, $name);
+    $etc_dir     = $module_dir . '/etc';
+    $reg_path    = $package_dir . '/registration.php';
 
     if(is_dir($etc_dir))
     {
-        output("Module directory [$etc_dir] already exists, bailing");
-        return;
+        output("Module directory [$etc_dir] already exists");
+    } else {
+        output("Creating [$etc_dir] ");
+        mkdir($etc_dir, 0755, $etc_dir);
     }
 
-    mkdir($etc_dir, 0777, $etc_dir);
     writeFormattedXmlStringToFile($etc_dir . '/module.xml', $xml);
     output("Created: " . $etc_dir . '/module.xml');
 

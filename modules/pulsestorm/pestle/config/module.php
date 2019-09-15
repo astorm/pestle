@@ -20,7 +20,9 @@ function loadConfig($configType) {
 }
 
 function saveConfig($configType, $config) {
-    return saveConfigFile($configType, $config);
+    $type = storageMethod();
+    $function = __NAMESPACE__ . '\\' . 'saveConfig' . ucWords($type);
+    return call_user_func($function, $configType, $config);
 }
 
 function saveConfigFile($configType, $config) {

@@ -24,24 +24,88 @@ function getAppCodePath() {
     return 'app/code';
 }
 
+function getModuleAutoloaderPathFromComposerFile($module_name, $path_composer) {
+    if(!file_exists($path_composer)) {
+        throw new Exception("Could not find $path_composer");
+    }
+
+    $composer = json_decode(file_get_contents($path_composer));
+
+    $parts = explode('_', $module_name);
+    $moduleClassPrefix = $parts[0] . '\\' . $parts[1] . '\\';
+    $autoloadPath = false;
+    if(!isset($composer->autoload) || !isset($composer->autoload->psr4)) {
+        throw new Exception("No psr4 autoload section in $path_composer");
+    }
+    foreach($composer->autoload->psr4 as $prefix=>$path) {
+        if($prefix === $moduleClassPrefix) {
+            $autoloadPath = $path;
+        }
+    }
+    return $autoloadPath;
+}
+
+/**
+ * if module is part of the package-folders config, then use the
+ * configured value.  Also, ensure that the folder we're pointing
+ * is actually part of the Magento system we're in
+ */
+function getModuleInformationFolderWhenConfigured($path_magento_base, $configured_path, $module_name) {
+    if(strpos($path_magento_base, $configured_path)) {
+        $message = "Configured Path is not in Magento folder\n" .
+            "Path: ".$configured_path."\n" .
+            "Magento Path: ".$path_magento_base."\n\n";
+        throw new Exception($message);
+    }
+
+    // find composer autoload path
+    $pathComposer = $configured_path . '/composer.json';
+    $autoloadPath = getModuleAutoloaderPathFromComposerFile($module_name, $pathComposer);
+
+    if(!$autoloadPath) {
+        throw new Exception("Could not find autoload path in $pathComposer");
+    }
+
+    return rtrim(preg_replace(
+        '%' . $path_magento_base . '/%', '', $configured_path, 1
+    ), '/');
+}
+
 function getModuleInformation($module_name, $path_magento_base=false)
 {
     $path_magento_base = $path_magento_base ? $path_magento_base : getBaseMagentoDir();
+
+    list($vendor, $name) = explode('_', $module_name);
+    $information = [
+        'vendor'        => $vendor,
+        'short_name'    => $name,
+        'name'          => $module_name,
+    ];
+
 
     // we need to check the configuration for a path.  If it exists, then
     // we need to return a different `folder` value.
     $config = loadConfig('package-folders');
 
-    // Also, do we need to differentiate between base folder and src folder?
+    if(isset($config->{$module_name})) {
+        $folderPackageBase = getModuleInformationFolderWhenConfigured(
+            $path_magento_base, $config->{$module_name}, $module_name);
 
-    list($vendor, $name) = explode('_', $module_name);
-    return (object) [
-        'vendor'        => $vendor,
-        'short_name'    => $name,
-        'name'          => $module_name,
-        'folder'        => $path_magento_base . "/" . getAppCodePath() . "/$vendor/$name",
-        'folder_relative' => getAppCodePath() . "/$vendor/$name"
-    ];
+        $pathComposer = $config->{$module_name} . '/composer.json';
+        $information['folder_relative'] = $folderPackageBase .
+            getModuleAutoloaderPathFromComposerFile($module_name, $pathComposer);
+        $information['folder_package_relative'] = $folderPackageBase;
+
+    } else {
+        $information['folder_relative']  = getAppCodePath() . "/$vendor/$name";
+        $information['folder_package_relative'] = $information['folder_relative'];
+    }
+
+    $information['folder']           =
+        $path_magento_base . "/" . $information['folder_relative'];
+    $information['folder_package']           =
+        $path_magento_base . "/" . $information['folder_package_relative'];
+    return (object) $information;
 }
 
 function getBaseModuleDir($module_name)

@@ -20,15 +20,9 @@ pestle_import('Pulsestorm\Pestle\Config\getOrSetConfigBase');
 
 class ConfigTest extends PestleBaseTest
 {
+    private $baseDirName;
     public function setup() {
-        $dir = '/tmp/.pestle';
-        $file = $dir . '/some-config.json';
-        if(file_exists($file)) {
-            unlink($file);
-        }
-        if(is_dir($dir)) {
-            rmdir($dir);
-        }
+        $this->baseDirName = '/tmp/' . uniqid();
     }
 
     public function testStorage() {
@@ -44,8 +38,8 @@ class ConfigTest extends PestleBaseTest
     public function testStorageSetFile() {
         storageMethod('file');
         $this->assertEquals('file', storageMethod());
-        getOrSetConfigBase('/tmp/.pestle');
-        $this->assertEquals('/tmp/.pestle', getOrSetConfigBase());
+        getOrSetConfigBase($this->baseDirName);
+        $this->assertEquals($this->baseDirName, getOrSetConfigBase());
         $this->configTests();
     }
 
