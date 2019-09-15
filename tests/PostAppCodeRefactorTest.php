@@ -123,5 +123,6 @@ class PostAppCodeRefactorTest extends PestleBaseTest
         // var_dump("TODO: there's a trim that needs to rtrim?");
         var_dump("TODO: Test with real modules");
         // $this->assertTrue(false);
+        $this->assertTrue(true);
     }
 }

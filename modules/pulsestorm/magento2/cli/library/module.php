@@ -42,7 +42,7 @@ function getModuleAutoloaderPathFromComposerFile($module_name, $path_composer) {
             $autoloadPath = $path;
         }
     }
-    return $autoloadPath;
+    return rtrim($autoloadPath, '/');
 }
 
 /**
@@ -92,7 +92,7 @@ function getModuleInformation($module_name, $path_magento_base=false)
             $path_magento_base, $config->{$module_name}, $module_name);
 
         $pathComposer = $config->{$module_name} . '/composer.json';
-        $information['folder_relative'] = $folderPackageBase .
+        $information['folder_relative'] = $folderPackageBase . '/' .
             getModuleAutoloaderPathFromComposerFile($module_name, $pathComposer);
         $information['folder_package_relative'] = $folderPackageBase;
 
