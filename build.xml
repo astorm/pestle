@@ -28,7 +28,7 @@
                 <exclude name="**/phpspec/**" />
                 <exclude name="**/phpunit/**" />
                 <exclude name="**/sebastian/**" />
-                <!-- <exclude name="**/symfony/**" /> -->
+                <exclude name="**/symfony/**" />
             </fileset>
 		</copy>
 	</target>
