@@ -28,7 +28,12 @@
                 <exclude name="**/phpspec/**" />
                 <exclude name="**/phpunit/**" />
                 <exclude name="**/sebastian/**" />
-                <exclude name="**/symfony/**" />
+                <exclude name="**/symfony/yaml/**" />
+                <excludesFile name="vendor/symfony/polyfill-ctype/Ctype.php" />
+                <excludesFile name="vendor/symfony/polyfill-ctype/LICENSE" />
+                <excludesFile name="vendor/symfony/polyfill-ctype/README.md" />
+                <excludesFile name="vendor/symfony/polyfill-ctype/composer.json" />
+                <includesFile name="vendor/symfony/polyfill-ctype/bootstrap.php" />
             </fileset>
 		</copy>
 	</target>
