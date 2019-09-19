@@ -2,21 +2,21 @@
 <project name="MyProject" default="info">
 <!-- Target: build -->
 	<target name="build">
-		<delete dir="/tmp/pestle_cache" /> 	
-		<delete dir="./build" /> 
-		<mkdir  dir="./build" /> 
-		
+		<delete dir="/tmp/pestle_cache" />
+		<delete dir="./build" />
+		<mkdir  dir="./build" />
+
 		<copy todir="./build">
 			<fileset dir=".">
-				<include name="modules/" /> 
+				<include name="modules/" />
 			</fileset>
 		</copy>
 
 		<copy todir="./build">
 			<fileset dir=".">
-				<include name="library/" /> 
+				<include name="library/" />
 			</fileset>
-		</copy>		
+		</copy>
 		<copy todir="./build/vendor">
             <fileset dir="vendor" id="vendor_dir">
                 <include name="**"/>
@@ -28,8 +28,13 @@
                 <exclude name="**/phpspec/**" />
                 <exclude name="**/phpunit/**" />
                 <exclude name="**/sebastian/**" />
-                <exclude name="**/symfony/**" />
-            </fileset>					
+                <exclude name="**/symfony/yaml/**" />
+                <excludesFile name="vendor/symfony/polyfill-ctype/Ctype.php" />
+                <excludesFile name="vendor/symfony/polyfill-ctype/LICENSE" />
+                <excludesFile name="vendor/symfony/polyfill-ctype/README.md" />
+                <excludesFile name="vendor/symfony/polyfill-ctype/composer.json" />
+                <includesFile name="vendor/symfony/polyfill-ctype/bootstrap.php" />
+            </fileset>
 		</copy>
 	</target>
 	<target name="info">
@@ -37,20 +42,20 @@
 	</target>
 <!-- Target: package -->
 	<target name="package_phar" depends="build">
-		<delete file="./pestle.phar" /> 
+		<delete file="./pestle.phar" />
 		<pharpackage destfile="./pestle.phar" basedir="./build" compression="gzip" stub="./phar-stub.php" signature="sha1">
 			<fileset dir="./build">
-				<include name="**/**" /> 
+				<include name="**/**" />
 			</fileset>
 			<metadata>
-				<element name="version" value="0.0.1" /> 
+				<element name="version" value="0.0.1" />
 				<element name="authors">
 					<element name="Alan Storm">
-						<element name="email" value="astorm@alanstorm.com" /> 
+						<element name="email" value="astorm@alanstorm.com" />
 					</element>
 				</element>
 			</metadata>
 		</pharpackage>
-		<delete dir="./build" /> 		
+		<delete dir="./build" />
 	</target>
 </project>

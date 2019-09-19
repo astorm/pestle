@@ -145,7 +145,8 @@ function getListOfDefinedCliFunctions()
     foreach($namespaces as $namespace)
     {
         if(in_array($namespace, ['',$current_namespace,
-            'composer\autoload','guzzlehttp\promise','guzzlehttp\psr7','guzzlehttp']))
+            'composer\autoload','guzzlehttp\promise','guzzlehttp\psr7',
+            'guzzlehttp','deepcopy']))
         {
             //skip self
             continue;

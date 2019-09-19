@@ -17,16 +17,95 @@ pestle_import('Pulsestorm\Pestle\Library\getNewClassDeclaration');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 pestle_import('Pulsestorm\Xml_Library\addSchemaToXmlString');
 pestle_import('Pulsestorm\Xml_Library\getXmlNamespaceFromPrefix');
+pestle_import('Pulsestorm\Pestle\Config\loadConfig');
+pestle_import('Pulsestorm\Pestle\Config\saveConfig');
 
-function getModuleInformation($module_name)
+function getAppCodePath() {
+    return 'app/code';
+}
+
+function getModuleAutoloaderPathFromComposerFile($module_name, $path_composer) {
+    if(!file_exists($path_composer)) {
+        throw new Exception("Could not find $path_composer");
+    }
+
+    $composer = json_decode(file_get_contents($path_composer));
+
+    $parts = explode('_', $module_name);
+    $moduleClassPrefix = $parts[0] . '\\' . $parts[1] . '\\';
+    $autoloadPath = false;
+    if(!isset($composer->autoload) || !isset($composer->autoload->psr4)) {
+        throw new Exception("No psr4 autoload section in $path_composer");
+    }
+    foreach($composer->autoload->psr4 as $prefix=>$path) {
+        if($prefix === $moduleClassPrefix) {
+            $autoloadPath = $path;
+        }
+    }
+    return rtrim($autoloadPath, '/');
+}
+
+/**
+ * if module is part of the package-folders config, then use the
+ * configured value.  Also, ensure that the folder we're pointing
+ * is actually part of the Magento system we're in
+ */
+function getModuleInformationFolderWhenConfigured($path_magento_base, $configured_path, $module_name) {
+    if(strpos($path_magento_base, $configured_path)) {
+        $message = "Configured Path is not in Magento folder\n" .
+            "Path: ".$configured_path."\n" .
+            "Magento Path: ".$path_magento_base."\n\n";
+        throw new Exception($message);
+    }
+
+    // find composer autoload path
+    $pathComposer = $configured_path . '/composer.json';
+    $autoloadPath = getModuleAutoloaderPathFromComposerFile($module_name, $pathComposer);
+
+    if(!$autoloadPath) {
+        throw new Exception("Could not find autoload path in $pathComposer");
+    }
+
+    return rtrim(preg_replace(
+        '%' . $path_magento_base . '/%', '', $configured_path, 1
+    ), '/');
+}
+
+function getModuleInformation($module_name, $path_magento_base=false)
 {
-    list($vendor, $name) = explode('_', $module_name);        
-    return (object) [
+    $path_magento_base = $path_magento_base ? $path_magento_base : getBaseMagentoDir();
+
+    list($vendor, $name) = explode('_', $module_name);
+    $information = [
         'vendor'        => $vendor,
         'short_name'    => $name,
         'name'          => $module_name,
-        'folder'        => getBaseMagentoDir() . "/app/code/$vendor/$name",
     ];
+
+
+    // we need to check the configuration for a path.  If it exists, then
+    // we need to return a different `folder` value.
+    $config = loadConfig('package-folders');
+
+    if(isset($config->{$module_name})) {
+        $folderPackageBase = getModuleInformationFolderWhenConfigured(
+            $path_magento_base, $config->{$module_name}, $module_name);
+
+        $pathComposer = $config->{$module_name} . '/composer.json';
+        $information['folder_relative'] = $folderPackageBase . '/' .
+            getModuleAutoloaderPathFromComposerFile($module_name, $pathComposer);
+        $information['folder_package_relative'] = $folderPackageBase;
+
+    } else {
+        $information['folder_relative']  = getAppCodePath() . "/$vendor/$name";
+        $information['folder_package_relative'] = $information['folder_relative'];
+    }
+
+    $information['folder']           =
+        $path_magento_base . "/" . $information['folder_relative'];
+    $information['folder_package']           =
+        $path_magento_base . "/" . $information['folder_package_relative'];
+    return (object) $information;
 }
 
 function getBaseModuleDir($module_name)
@@ -34,7 +113,7 @@ function getBaseModuleDir($module_name)
     $path = getModuleInformation($module_name)->folder;
     if(!file_exists($path))
     {
-        exitWithErrorMessage("No such path: $path" . "\n" . 
+        exitWithErrorMessage("No such path: $path" . "\n" .
             "Please use magento2:generate:module to create module first");
         // throw new Exception("No such path: $path");
     }
@@ -44,18 +123,32 @@ function getBaseModuleDir($module_name)
 function askForModuleAndReturnInfo($argv, $index=0)
 {
     $module_name = inputOrIndex(
-        "Which module?", 
+        "Which module?",
         'Magento_Catalog', $argv, $index);
-    return getModuleInformation($module_name);        
+    return getModuleInformation($module_name);
+}
+
+function getRelativeModulePath($packageName, $moduleName, $magentoBase=false) {
+    $information = getModuleInformation(
+        implode('_', [$packageName, $moduleName]), $magentoBase);
+
+    return $information->folder_relative;
+}
+
+function getFullModulePath($packageName, $moduleName, $magentoBase=false) {
+    $information = getModuleInformation(
+        implode('_', [$packageName, $moduleName]), $magentoBase);
+
+    return $information->folder;
 }
 
 function askForModuleAndReturnFolder($argv)
 {
     $module_folder = inputOrIndex(
-        "Which module?", 
+        "Which module?",
         'Magento_Catalog', $argv, 0);
-    list($package, $vendor) = explode('_', $module_folder);        
-    return getBaseMagentoDir() . "/app/code/$package/$vendor";
+    list($package, $vendor) = explode('_', $module_folder);
+    return getFullModulePath($package, $vendor);
 }
 
 function getBaseMagentoDir($path=false)
@@ -75,21 +168,16 @@ function getBaseMagentoDir($path=false)
     // return $path;
 }
 
-function getModuleBaseDir($module)
+function getModuleBaseDir($module, $baseMagentoDir=false)
 {
-    $path = implode('/', [
-        getBaseMagentoDir(),
-        'app/code',
-        str_replace('_', '/', $module)]
-    );
-    
-    return $path;
+    list($package, $module) = explode('_', $module);
+    return getFullModulePath($package, $module, $baseMagentoDir);
 }
 
 function getModuleConfigDir($module)
 {
     return implode('/', [
-        getModuleBaseDir($module), 
+        getModuleBaseDir($module),
         'etc']);
 }
 
@@ -98,15 +186,15 @@ function initilizeModuleConfig($module, $file, $xsd)
     $path = implode('/', [
         getModuleConfigDir($module),
         $file]);
-        
+
     if(file_exists($path))
     {
         return $path;
-    }        
-    
+    }
+
     $xml = addSchemaToXmlString('<config></config>', $xsd);
     $xml = simplexml_load_string($xml);
-            
+
     if(!is_dir(dirname($path)))
     {
         mkdir(dirname($path), 0777, true);
@@ -126,8 +214,8 @@ function getSimpleTreeFromSystemXmlFile($path)
         $tree[$section_name] = [];
 
         foreach($section->group as $group)
-        {               
-            $group_name = (string) $group['id']; 
+        {
+            $group_name = (string) $group['id'];
             $tree[$section_name][$group_name] = [];
             foreach($group->field as $field)
             {
@@ -138,13 +226,18 @@ function getSimpleTreeFromSystemXmlFile($path)
     return $tree;
 }
 
-
+function createClassFilePath($model_class_name, $baseMagentoDir=false) {
+    $baseMagentoDir = $baseMagentoDir ? $baseMagentoDir : getBaseMagentoDir();
+    $parts = explode('\\', $model_class_name);
+    $information = getModuleInformation(
+        implode('_', [array_shift($parts), array_shift($parts)]), $baseMagentoDir);
+    $path = $information->folder . '/' . implode('/', $parts) . '.php';
+    return $path;
+}
 
 function createClassFile($model_name, $contents)
 {
-    $path = getBaseMagentoDir() . '/app/code/' .
-        str_replace('\\','/',$model_name) . '.php';
-    
+    $path = createClassFilePath($model_name);
     if(file_exists($path))
     {
         output($path, "\n" . 'File already exists, skipping');
@@ -175,11 +268,11 @@ function resolveAlias($alias, $config, $type='models')
     $model = str_replace(' ', '_', $model);
 
     $mage1 = $prefix . '_' . $model;
-    return str_replace('_','\\',$mage1);        
+    return str_replace('_','\\',$mage1);
 }
 
 function convertObserverTreeScoped($config, $xml)
-{        
+{
     $xml_new = simplexml_load_string('<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd"></config>');
     if(!$config->events)
     {
@@ -191,7 +284,7 @@ function convertObserverTreeScoped($config, $xml)
         $event_name = modifyEventNameToConvertFromMage1ToMage2($event->getName());
         $event_xml  = $xml_new->addChild('event');
         $event_xml->addAttribute('name',$event_name);
-        
+
         foreach($event->observers->children() as $observer)
         {
             //<observer name="check_theme_is_assigned" instance="Magento\Theme\Model\Observer" method="checkThemeIsAssigned" />
@@ -206,7 +299,7 @@ function convertObserverTreeScoped($config, $xml)
             }
         }
     }
-    
+
     return $xml_new;
 }
 
@@ -233,34 +326,34 @@ function getMage1ClassPathFromConfigPathAndMage2ClassName($path, $class)
     {
         $path_from_pool = preg_replace('%^.*app/code/'.$pool.'/%','',$path_from_pool);
     }
-    
+
     $parts_mage_2 = explode('\\',$class);
     $mage2_vendor = $parts_mage_2[0];
     $mage2_module = $parts_mage_2[1];
-    
+
     $parts_mage_1 = explode('/', $path_from_pool);
     $mage1_vendor = $parts_mage_1[0];
     $mage1_module = $parts_mage_1[1];
-    
+
     if( ($mage1_vendor !== $mage2_vendor) || $mage1_module !== $mage2_module)
     {
         throw new Exception('Config and alias do not appear to match');
     }
-    
+
     $path_from_pool_parts = explode('/',$path);
     $new = [];
     for($i=0;$i<count($path_from_pool_parts);$i++)
     {
         $part = $path_from_pool_parts[$i];
-        
+
         if($part === $mage1_vendor && $path_from_pool_parts[$i+1] == $mage1_module)
         {
             $new[] = str_replace('\\','/',$class) . '.php';
             break;
-        }        
+        }
         $new[] = $part;
     }
-    
+
     return implode('/',$new);
 }
 
@@ -268,14 +361,14 @@ function getVariableNameFromNamespacedClass($class)
 {
     $parts = explode('\\', $class);
     $parts = array_slice($parts, 2);
-    
-    $var = implode('', $parts);    
-    
+
+    $var = implode('', $parts);
+
     if($var)
     {
         $var[0] = strToLower($var);
     }
-    
+
     return '$' . $var;
 }
 
@@ -288,9 +381,9 @@ function getDiLinesFromMage2ClassName($class, $var=false)
     $parameter  = '\\' . trim($class,'\\') . ' ' . $var . ',';
     $property   = 'protected ' . $var . ';';
     $assignment = '$this->' . ltrim($var, '$') . ' = ' . $var . ';';
-    
+
     $lines = $parameter;
-    
+
     return [
         'property' =>$property,
         'parameter'=>$parameter,
@@ -312,28 +405,28 @@ function getKnownClassesMappedToNewClass($return)
     {
         return $return;
     }
-    
+
     $parts = explode('\\', $map[$full_class]);
 
-    $return = [        
-        'class'     =>array_pop($parts),  
+    $return = [
+        'class'     =>array_pop($parts),
         'namespace' =>implode('\\',$parts),
 
-    ];  
-    return $return;    
+    ];
+    return $return;
 }
 
 function getNamespaceAndClassDeclarationFromMage1Class($class, $extends='')
 {
-    $parts = explode('_', $class);      
-    $return = [        
-        'class'     =>array_pop($parts),  
+    $parts = explode('_', $class);
+    $return = [
+        'class'     =>array_pop($parts),
         'namespace' =>implode('\\',$parts),
 
-    ];    
-    
+    ];
+
     $return = getKnownClassesMappedToNewClass($return);
-    
+
     $return['full_class'] = $return['namespace'] . '\\' . $return['class'];
     return $return;
 }
@@ -354,10 +447,10 @@ function convertMageOneClassIntoNamespacedClass($path_mage1)
     $class   = getNamespaceAndClassDeclarationFromMage1Class(
         getClassFromDeclaration($declaration));
     $extends = getNamespaceAndClassDeclarationFromMage1Class(
-        getExtendsFromDeclaration($declaration)); 
-        
+        getExtendsFromDeclaration($declaration));
+
     $declaration_new = getNewClassDeclaration($class, $extends);
-        
+
     $text = str_replace($declaration, $declaration_new, $text);
     return $text;
 }

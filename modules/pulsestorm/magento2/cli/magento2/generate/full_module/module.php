@@ -3,6 +3,7 @@ namespace Pulsestorm\Magento2\Cli\Magento2\Generate\Full_Module;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Cli\Magento2\Generate\Ui\Form\createShortPluralModelName');
+pestle_import('Pulsestorm\Magento2\Cli\Library\getRelativeModulePath');
 
 function pharString($commandName, $pharName)
 {
@@ -31,7 +32,7 @@ function getShellScript($argv, $options)
         $pharName = 'pestle_dev';
     }
 
-    $pathModule = 'app/code/'.$packageName . '/' . $moduleName;
+    $pathModule = getRelativeModulePath($packageName, $moduleName);
     $script = '
 #!/bin/bash
 ' . pharString('magento2:generate:module',$pharName)              . $packageName . ' ' . $moduleName . ' 0.0.1
