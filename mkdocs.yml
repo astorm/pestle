@@ -18,6 +18,8 @@ nav:
         # DI and Observers
         - DI and Observers: magento2-di-observers.md
 
+        - Composer Packages: magento2-composer.md
+
         # Other Commands
         - Other Commands: magento2-others.md
 
