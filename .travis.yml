@@ -72,7 +72,7 @@ before_script:
     - sudo service apache2 restart
 
     # clone main magento github repository
-    - git clone -b 2.1 https://github.com/magento/magento2
+    - git clone -b 2.3 https://github.com/magento/magento2
 
     # install Magento
     - cd magento2
