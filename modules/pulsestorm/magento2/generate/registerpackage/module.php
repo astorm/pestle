@@ -14,7 +14,8 @@ pestle_import('Pulsestorm\Pestle\Config\saveConfig');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getBaseMagentoDir');
 
 function getRelativeFolder($modulePath, $baseMagentoDir=false) {
-
+    $baseMagentoDir = $baseMagentoDir ? $baseMagentoDir : getBaseMagentoDir();
+    return preg_replace("%^$baseMagentoDir%", '', $modulePath);
 }
 
 function createOrValidateRegistrationFile($modulePath, $moduleName) {

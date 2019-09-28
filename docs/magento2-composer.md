@@ -38,11 +38,13 @@ The `magento2:generate:register-package` command allows you to tell pestle that 
 
 ## Interactive Invocation
 
-    //...
+    pestle.phar magento2:generate:register-package Pulsestorm_HelloWorld
+    What Magento module are you registering? (Pulsestorm_HelloWorld)]
+    Where will this module live? (/path/to/module/folder)] extensions/pulsestorm-helloworld
 
 ## Argument Invocation
 
-    //...
+    pestle.phar magento2:generate:register-package Pulsestorm_HelloWorld extensions/pulsestorm-helloworld
 
 ## History
 
@@ -67,23 +69,55 @@ The `magento2:generate:register-package` command allows you to develop out of a 
 
 We'll start by registering a folder for a new module.  Our first step has nothing to do with pestle: We need to create a folder in our Magento project for our module, and then tell composer about it.  To do this, run the following command from the root of your project
 
-    ...
+    $ mkdir -p extensions/pulsestorm-helloworld
 
 And then _add_ the following top level configuration to your `composer.json` file.
 
-    ...
+    // File: composer.json
 
-What we've done above is tell cmposer that the folder `...` [is a composer repository](https://getcomposer.org/doc/05-repositories.md).
+    /* ... */
+    "repositories": [
+        /* ... */
+        {
+            "type": "path",
+            "url": "extensions/pulsestorm-helloworld"
+        }
+        /* ... */
+    ]
+    /* ... */
 
-**Important:** This folder needs to be under your Magento root folder.  While composer support absolute file paths for path based repositories, **Magento** will get super-confused if you try to have a module outside of its root folder.  This folder can be named anything you like, but it's a good idea to develop a naming scheme like the one we have above so you can find individual module more easily in the future.
+What we've done above is tell composer that the folder `extensions/pulsestorm-helloworld` [is a composer repository](https://getcomposer.org/doc/05-repositories.md).
+
+**Important:** This folder needs to be under your Magento root folder.  While composer supports absolute file paths for path based repositories, **Magento** will get confused if you try to have a module outside of its root folder.  This folder can be named anything you like, but it's a good idea to develop a naming scheme like the one we have above so you can find individual module more easily in the future.
 
 ## Register our Folder
 
 Next, we'll want to tell pestle to use this folder for our new module.  Run the following command.
 
-    //...
+    $ pestle.phar magento2:generate:register-package Pulsestorm_HelloWorld
+    Don't forget to add the following to your project's composer.json file.
 
-This command will have two things.  First, since `...` was an empty folder, it will create a skeleton `composer.json` file for you.
+    {
+        "repositories": [
+            /*...*/,
+            {
+                "type":"path",
+                "url":"extensions/pulsestorm-helloworld"
+            }
+        ]
+    }
+
+and to install/require your module, which will create a symlink
+in your `vendor/` folder
+
+    composer require pulsestorm/helloworld dev-master
+
+Edited:
+    Pulsestorm_HelloWorld=>extensions/pulsestorm-helloworld
+    in package-folders
+
+
+This command will have do things.  First, since `extensions/pulsestorm-helloworld` was an empty folder, it will create a skeleton `composer.json` file for you.
 
     //...
 
@@ -113,7 +147,7 @@ Running the above command tells composer to look for the `...` composer package 
 
 The `dev-master` is required to ensure composer finds your package irrespective of its version and your project's stability settings.  You don't _need_ to use it, but if you don't you'll need to manage your module's version numbers.
 
-**Important:** This symlink is the reason we need our path repostiroy to be under the Magento root. Magento gets very confused if you try to symlink certain module folders outside of your project root.  You will also want to make sure that
+**Important:** This symlink is the reason we need our path repository to be under the Magento root. Magento gets very confused if you try to symlink certain module folders outside of your project root.  You will also want to make sure that
 
     //...
 
