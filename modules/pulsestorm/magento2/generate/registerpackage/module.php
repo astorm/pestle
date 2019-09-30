@@ -51,7 +51,7 @@ function createComposerFileIfNotThere($pathComposer, $hasComposer,
         $composer->require = new stdClass;
         $composer->autoload = (object) ([
             'files'=>['registration.php'],
-            'psr4'=> ((object)([
+            'psr-4'=> ((object)([
                 $moduleNamespacePrefix=>$pathAutoload
             ]))
         ]);
@@ -66,11 +66,11 @@ function validateComposerFileIfThere($pathComposer, $hasComposer,
     $moduleNamespacePrefix) {
     if($hasComposer) {
         $composer = json_decode(file_get_contents($pathComposer));
-        $psr4Modules = array_keys((array)$composer->autoload->psr4);
+        $psr4Modules = array_keys((array)$composer->autoload->{'psr-4'});
         $hasPsr4 = in_array($moduleNamespacePrefix, $psr4Modules);
         if(!$hasPsr4) {
             exitWithErrorMessage("Found composer.json, but did not find a " .
-                "$moduleNamespacePrefix psr4 autoloader");
+                "$moduleNamespacePrefix psr-4 autoloader");
         }
     }
 }
@@ -183,10 +183,10 @@ file.
 and to install/require your module, which will create a symlink
 in your `vendor/` folder
 
-    composer require $packageNameFromFile dev-master
+    composer require $packageNameFromFile '*'
 ";
 
     respectfulOutput($message, $options['quiet']);
     respectfulOutput($action . "\n    " . $moduleName . "=>" . $modulePath .
-        "\n    in package-folders", $options['quiet']);
+        "\n    in ~/.pestle/package-folders.json", $options['quiet']);
 }
