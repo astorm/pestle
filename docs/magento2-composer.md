@@ -1,5 +1,4 @@
 @TODO: Look for pestle_dev
-@TODO: don't use dev-master use '*'
 
 # generate:register-package
 
@@ -227,16 +226,51 @@ Finally, with all the above done, we'll register the package folder with pestle.
 
 and then start generating code
 
-
-
-- Intro
-- Checkout GitHub Repo
-- Register folder
-- Run some commands
+    $ pestle_dev magento2:generate:route Mageplaza_Smtp frontend pestle_test Hello Index
+    Backing existing file: /path/to/magento/extensions/magento-2-smtp/./etc/frontend/routes.xml.5d929594660f2.bak.php
+    /path/to/magento/extensions/magento-2-smtp/./etc/frontend/routes.xml
+    /path/to/magento/extensions/magento-2-smtp/./Controller/Hello/Index.php
 
 ## Command Internals
 
-- Cover configuration
-- Cover single module path function
-- Cover generated composer.json
-- Cover Autoloader
+If you're running into trouble and need to debug this commands, here's a few pointers.  If you've run into something you feel is a big, please open an issue [over in the GitHub repository](https://github.com/astorm/pestle/issues).
+
+As previously mentioned, the `magento2:generate:register-package` command will register a module's path in the `~/.pestle/package-folders.json` folder.
+
+    $ cat ~/.pestle/package-folders.json
+    {
+        "Pulsestorm_HelloWorld":"extensions\/pulsestorm-helloworld"
+    }
+
+This JSON file is where pestle will look for a module's configured path.  If pestle doesn't find a module reference in this file, it will use the `app/code` folder instead.
+
+This works because of the [`getModuleInformation`](https://github.com/astorm/pestle/blob/6d6d225ee35d86d2f7d1b87f0defebc6021ec343/modules/pulsestorm/magento2/cli/library/module.php#L74) function.
+
+    function getModuleInformation($module_name, $path_magento_base=false)
+    {
+        //...
+    }
+
+This function [returns an object](https://github.com/astorm/pestle/blob/03e538934298212017891913186192c4cc059cf5/tests/PostAppCodeRefactorTest.php#L119) with a module's parsed package/modules name, plus a list of paths related to the module.  The returned object looks something like this.
+
+        (object) [
+            'vendor'=>'Foo',
+            'short_name'=>'Bar',
+            'name'=>'Foo_Bar',
+            'folder_relative'=>'extensions/foo_bar/src',
+            'folder_package_relative'=>'extensions/foo_bar',
+            'folder' => $this->pathBaseMagento . '/' . 'extensions/foo_bar/src',
+            'folder_package' => $this->pathBaseMagento . '/' . 'extensions/foo_bar'
+        ];
+
+"Relative" paths are the path to your module's source from the root of your system.  Your module's "folder" is where your source code is.  Your module's "package folder" is where the `composer.json` and `registration.php` file live.  While these folders are the same for modules in `app/code`, composer based package modules require this distinction as it's the `psr-4` autoloader that determines where a module's source code lives.
+
+**Important**: Pestle make an assumption that your package module has a psr-4 autoloader, and that this autoloader's prefix is your full module name.  i.e.
+
+    "autoload": {
+        "psr-4": {
+            "Foo\\Bar\\": "src/"
+        }
+    }
+
+If you're doing something else with your autoloader, pestle won't be able to register your folder.  Also, if you **are** doing something different let us know via [the issues](https://github.com/astorm/pestle/issues) or [Stack Exchange](https://magento.stackexchange.com/questions/291447/composer-based-modules-and-psr4-autoloaders).

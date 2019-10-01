@@ -34,7 +34,7 @@ function getModuleAutoloaderPathFromComposerFile($module_name, $path_composer) {
     $parts = explode('_', $module_name);
     $moduleClassPrefix = $parts[0] . '\\' . $parts[1] . '\\';
     $autoloadPath = false;
-    if(!isset($composer->autoload) || !isset($composer->autoload->{'psr-4'}) {
+    if(!isset($composer->autoload) || !isset($composer->autoload->{'psr-4'})) {
         throw new Exception("No psr-4 autoload section in $path_composer");
     }
     foreach($composer->autoload->{'psr-4'} as $prefix=>$path) {
@@ -42,6 +42,9 @@ function getModuleAutoloaderPathFromComposerFile($module_name, $path_composer) {
             $autoloadPath = $path;
         }
     }
+    // if blank path, use ./
+    $autoloadPath = trim($autoloadPath) ? $autoloadPath : './';
+
     return rtrim($autoloadPath, '/');
 }
 
