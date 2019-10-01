@@ -7,6 +7,7 @@ pestle_import('Pulsestorm\Magento2\Cli\Library\getFullModulePath');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleBaseDir');
 pestle_import('Pulsestorm\Magento2\Cli\Library\createClassFilePath');
 pestle_import('Pulsestorm\Magento2\Cli\Library\getAppCodePath');
+pestle_import('Pulsestorm\Magento2\Cli\Library\getModuleInformation');
 pestle_import('Pulsestorm\Magento2\Cli\Path_From_Class\getPathFromClass');
 pestle_import('Pulsestorm\Magento2\Cli\Fix_Direct_Om\getBaseMagentoDirFromFile');
 pestle_import('Pulsestorm\Magento2\Cli\Generate\Module\getModuleDir');
@@ -30,7 +31,7 @@ class PostAppCodeRefactorTest extends PestleBaseTest
         "files": [
             "registration.php"
         ],
-        "psr4": {
+        "psr-4": {
             "Foo\\\\Bar\\\\": "src/"
         }
     }
@@ -114,15 +115,18 @@ class PostAppCodeRefactorTest extends PestleBaseTest
         $this->assertEquals($this->pathBaseMagento . '/extensions/foo_bar/src', $result);
     }
 
-    public function testToDo() {
-        // var_dump("TODO: What about composer files that are missing an autoload?");
-        // var_dump("TODO: Also, I don't think we need to look for an autoloader in the command?");
-        // var_dump("TODO: Also, print a reminder about adding the repository section and composer require?");
-        // var_dump("TODO: Also, fix the composer package name that's used.  Make an argument?");
-        // var_dump("TODO: registration.php is generated in the wrong folder?");
-        // var_dump("TODO: there's a trim that needs to rtrim?");
-        var_dump("TODO: Test with real modules");
-        // $this->assertTrue(false);
-        $this->assertTrue(true);
+    public function testGetModuleInformation() {
+        $fixture = (object) [
+            'vendor'=>'Foo',
+            'short_name'=>'Bar',
+            'name'=>'Foo_Bar',
+            'folder_relative'=>'extensions/foo_bar/src',
+            'folder_package_relative'=>'extensions/foo_bar',
+            'folder' => $this->pathBaseMagento . '/' . 'extensions/foo_bar/src',
+            'folder_package' => $this->pathBaseMagento . '/' . 'extensions/foo_bar'
+        ];
+        $information = getModuleInformation('Foo_Bar', $this->pathBaseMagento);
+
+        $this->assertEquals($fixture, $information);
     }
 }
