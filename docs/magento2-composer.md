@@ -1,5 +1,3 @@
-@TODO: Look for pestle_dev
-
 # generate:register-package
 
     Usage:
@@ -50,7 +48,7 @@ The `magento2:generate:register-package` command allows you to tell pestle that 
 
 ## History
 
-Magento 1 did not formally support composer.  Magento 1 was distributed exclusively via archives.  Community packages were distributed by a custom package management system called Magento Connect (based on PHP PEAR, although that story gets complicated quickly), and commercial extension vendors were responsible for distributing their own packages -- usually via a tar archive.
+Magento 1 did not formally support composer.  Magento 1 was (at least officially) distributed exclusively via archives.  Community packages were distributed by a custom package management system called Magento Connect (based on PHP PEAR, although that story gets complicated quickly), and commercial extension vendors were responsible for distributing their own packages -- usually via a tar or zip archive.
 
 At its inception, Magento 2 tried to have it both ways and
 
@@ -61,9 +59,9 @@ This means there's _two_ ways to install Magento modules into a system.  The fir
 
 Your second option is to create a composer package with a special `autoloader` section that loads in a Magento 2 module's `registration.php` file.  Put you module in a _composer repository_, run `composer require your/module-id` and you're good to go.
 
-While this new option has made is easier to control the distribution of Magento module, it's made life more difficult for developers.  Should be be developing out of `app/code`, or out of a composer package?  If a composer package -- does that mean we need to commit to a repository before _every code change_?  Usually your best best is to follow the vendor's practice -- but as platform owner Magento gets to have it both ways: Magento modules [are developed in `app/code`](https://github.com/magento/magento2/tree/2.3-develop/app/code/Magento) -- but then a closed source process publishes them to the private `repo.magento.com` composer repository.  While this works for a multi-national software company eye acquisition by Adobe, it's a bit of a burden on the traditional Magento merchant or agent user.
+While this new option has made is easier to control the distribution of Magento module, it's made life more difficult for developers.  Should we be developing out of `app/code`, or out of a composer package?  If a composer package -- does that mean we need to commit to a repository before _every code change_?  Usually your best best is to follow the vendor's practice -- but as platform owner Magento gets to have it both ways: Magento modules [are developed in `app/code`](https://github.com/magento/magento2/tree/2.3-develop/app/code/Magento) -- but then a closed source process publishes them to the private `repo.magento.com` composer repository.  While this works for a multi-national software company eyeing acquisition by Adobe, it's a bit of a burden on the traditional Magento merchant or agent user.
 
-One technique that a group of Magento developers have come up with is to use a [_path based_ composer repository](https://getcomposer.org/doc/05-repositories.md#path).  One of the really smart things the composer developers did was make the idae of a "repository" super abstract -- repositories can be a central thing like packagist.org, a version control repository, a web server of archive files, or even a simple path on your computer.
+One technique that a group of Magento developers came up with is to use a [_path based_ composer repository](https://getcomposer.org/doc/05-repositories.md#path).  One of the really smart things the composer developers did was make the idea of a "repository" abstract -- repositories can be a formal central repository packagist.org, but they can also be just a version control repository, a web server of archive files, or even a simple path on your computer.
 
 The `magento2:generate:register-package` command allows you to develop out of a composer path repository.  The rest of this document will explain how to do that.
 
@@ -90,7 +88,7 @@ And then _add_ the following top level configuration to your `composer.json` fil
 
 What we've done above is tell composer that the folder `extensions/pulsestorm-helloworld` [is a composer repository](https://getcomposer.org/doc/05-repositories.md).
 
-**Important:** This folder needs to be under your Magento root folder.  While composer supports absolute file paths for path based repositories, **Magento** will get confused if you try to have a module outside of its root folder.  This folder can be named anything you like, but it's a good idea to develop a naming scheme like the one we have above so you can find individual module more easily in the future.
+**Important:** This folder needs to be under your Magento root folder.  While composer supports absolute file paths for path based repositories, **Magento** will get confused if you try to have a module outside of its root folder.  This folder can be named anything you like, but it's a good idea to develop a naming scheme like the one we have above so you can find individual modules more easily in the future.
 
 ## Register our Folder
 
@@ -137,7 +135,7 @@ This command will have do things.  First, since `extensions/pulsestorm-helloworl
         }
     }
 
-The second this command does is add this module/path to a configuration file
+The second thing this command does is add this module/path to a configuration file
 
     $ cat ~/.pestle/package-folders.json
     {
@@ -164,7 +162,7 @@ We now have a composer package, in our path based repository, and our project kn
 
     $ composer require pulsestorm/helloworld '*'
 
-Running the above command tells composer to look for the `...` composer package and require it in the project.  When composer finds a module in a path repository, it will _symlink_ a folder in vendor.  You can see this by running the following after composer is done.
+Running the above command tells composer to look for the `pulsestorm/helloworld` composer package and `require` it in the project.  When composer finds a module in a path repository, it will _symlink_ a folder in vendor.  You can see this by running the following after composer is done.
 
     $ ls -lh vendor/pulsestorm/
     total 0
@@ -178,6 +176,8 @@ The `*` is required to ensure composer finds your package irrespective of its ve
 
 is enabled on your system if you're developing out of a path based repository folder -- otherwise your templates may not render correctly.
 
+**Also Important:** Your `composer.json` file will need a `version` field if you're using `'*'` as the version number.
+`
 Congratulations!  You're now working with a local, composer based, module.
 
 ## Registering existing project
@@ -186,7 +186,7 @@ This technique isn't limited to from scratch modules -- you can use it with any 
 
 Let's consider this [randomly chosen Magento 2 module related to SMTP](https://github.com/mageplaza/magento-2-smtp/).  If we were going to add features to this module with pestle and manage it as a composer module, first we'd configure a path repository for it in our Magento system's `composer.json` file
 
-    #File: compser.json
+    #File: composer.json
 
     "repositories": [
         /* ... */
@@ -218,7 +218,7 @@ Once we've done this, we'll confirm that the module is symlinked.
 
     lrwxr-xr-x   1 alanstorm  staff   31 Sep 30 08:34 module-smtp -> ../../extensions/magento-2-smtp
 
-This step is extra important for a module that's also host up on packagist.org.  If you've incorrectly configured your `path` repository composer will still successfully install the package -- it just won't have your version installed.
+This step is extra important for a module that's also hosted up on packagist.org.  If you've incorrectly configured your `path` repository composer will still successfully install the package -- it just won't have your version installed.
 
 Finally, with all the above done, we'll register the package folder with pestle.
 
@@ -226,7 +226,7 @@ Finally, with all the above done, we'll register the package folder with pestle.
 
 and then start generating code
 
-    $ pestle_dev magento2:generate:route Mageplaza_Smtp frontend pestle_test Hello Index
+    $ pestle.phar magento2:generate:route Mageplaza_Smtp frontend pestle_test Hello Index
     Backing existing file: /path/to/magento/extensions/magento-2-smtp/./etc/frontend/routes.xml.5d929594660f2.bak.php
     /path/to/magento/extensions/magento-2-smtp/./etc/frontend/routes.xml
     /path/to/magento/extensions/magento-2-smtp/./Controller/Hello/Index.php
@@ -246,6 +246,8 @@ This JSON file is where pestle will look for a module's configured path.  If pes
 
 This works because of the [`getModuleInformation`](https://github.com/astorm/pestle/blob/6d6d225ee35d86d2f7d1b87f0defebc6021ec343/modules/pulsestorm/magento2/cli/library/module.php#L74) function.
 
+    #File: modules/pulsestorm/magento2/cli/library/module.php
+
     function getModuleInformation($module_name, $path_magento_base=false)
     {
         //...
@@ -263,7 +265,7 @@ This function [returns an object](https://github.com/astorm/pestle/blob/03e53893
             'folder_package' => $this->pathBaseMagento . '/' . 'extensions/foo_bar'
         ];
 
-"Relative" paths are the path to your module's source from the root of your system.  Your module's "folder" is where your source code is.  Your module's "package folder" is where the `composer.json` and `registration.php` file live.  While these folders are the same for modules in `app/code`, composer based package modules require this distinction as it's the `psr-4` autoloader that determines where a module's source code lives.
+"Relative" paths are the path to your module's source from the root of your system.  Your module's "folder" is where your source code is.  Your module's "package folder" is where the `composer.json` and `registration.php` files live.  While these folders are the same for modules in `app/code`, composer based package modules require this distinction as it's the `psr-4` autoloader that determines where a module's source code lives.
 
 **Important**: Pestle make an assumption that your package module has a psr-4 autoloader, and that this autoloader's prefix is your full module name.  i.e.
 

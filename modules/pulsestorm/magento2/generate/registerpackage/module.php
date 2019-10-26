@@ -46,6 +46,7 @@ function createComposerFileIfNotThere($pathComposer, $hasComposer,
         $composer = new stdClass;
         $composer->name = $packageName;
         $composer->description = 'A Magento Module';
+        $composer->version = '0.0.1';
         $composer->type = 'magento2-module';
         $composer->{'minimum-stability'} = 'stable';
         $composer->require = new stdClass;
