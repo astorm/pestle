@@ -18,8 +18,25 @@ function getRelativeFolder($modulePath, $baseMagentoDir=false) {
     return preg_replace("%^$baseMagentoDir%", '', $modulePath);
 }
 
-function createOrValidateRegistrationFile($modulePath, $moduleName) {
-    $pathRegistration   = $modulePath . '/registration.php';
+function getRegistrationPathFromComposerFile($object) {
+
+    if(!isset($object->autoload)) { return false; }
+    if(!isset($object->autoload->files)) { return false; }
+    if(!is_array($object->autoload->files)) { return false; }
+
+    foreach($object->autoload->files as $file) {
+        if(preg_match('%registration\.php$%', $file)) {
+            return $file;
+        }
+    }
+
+    return '';
+}
+
+function createOrValidateRegistrationFile($modulePath, $moduleName, $composer) {
+    $pathRegistration   = getRegistrationPathFromComposerFile($composer);
+    $pathRegistration   = $modulePath . '/' . $pathRegistration;
+
     $hasRegistration    = file_exists($pathRegistration);
     if($hasRegistration) {
         $tokens = pestle_token_get_all(file_get_contents($pathRegistration));
@@ -51,7 +68,7 @@ function createComposerFileIfNotThere($pathComposer, $hasComposer,
         $composer->{'minimum-stability'} = 'stable';
         $composer->require = new stdClass;
         $composer->autoload = (object) ([
-            'files'=>['registration.php'],
+            'files'=>['src/registration.php'],
             'psr-4'=> ((object)([
                 $moduleNamespacePrefix=>$pathAutoload
             ]))
@@ -134,9 +151,6 @@ function pestle_cli($argv, $options)
 
     // generate the regsitration file if not there
 
-    // validate the registration file
-    createOrValidateRegistrationFile($modulePath, $moduleName);
-
     validateModulePath($modulePath);
 
     // create the composer.json file if it's not there
@@ -147,8 +161,14 @@ function pestle_cli($argv, $options)
     createComposerFileIfNotThere($pathComposer, $hasComposer,
         $moduleNamespacePrefix, $packageName);
 
-    // load composer.json file and extract PSR path for our module
+    // load composer.json file
+    //   - and validate/check registration.php file
+    //   - and extract PSR path for our module
+    //     validate the registration file
+
     $object = loadJsonFromFile($pathComposer);
+    createOrValidateRegistrationFile($modulePath, $moduleName, $object);
+
     // $psr4AutoLoaders = fetchObjectPath($object, 'autoload/psr4');
     $packageNameFromFile = fetchObjectPath($object, 'name');
     if(!$packageNameFromFile) {

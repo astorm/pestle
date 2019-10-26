@@ -52,7 +52,7 @@ function pestle_cli($argv)
     $module_dir  = getModuleDir($base_dir, $namespace, $name);
     $package_dir = getPackageDir($base_dir, $namespace, $name);
     $etc_dir     = $module_dir . '/etc';
-    $reg_path    = $package_dir . '/registration.php';
+    $reg_path    = $module_dir . '/registration.php';
 
     if(is_dir($etc_dir))
     {
