@@ -21,7 +21,7 @@ language: php
 sudo: required
 dist: trusty
 php:
-    - 7.1
+    - 7.2
 before_script:
     #- env
     # some useful debugging stuff for travis
