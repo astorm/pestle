@@ -1,7 +1,8 @@
 <?php
 namespace Pulsestorm\Pestle\Config;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-use stdClass;
+pestle_import('Pulsestorm\Pestle\Importer\getHomeDirectory');
+use stdClass,Exception;
 
 function storageMethod($value=null) {
     static $method='file';
@@ -47,10 +48,7 @@ function getOrSetConfigBase($value=null) {
     static $base=null;
     if(null === $value) {
         if(null === $base) {
-            $home = trim(`echo ~`);
-            if(!is_dir($home)) {
-                throw new Exception("Could not find home directory with echo ~");
-            }
+            $home = getHomeDirectory();
             $base = $home . '/.pestle';
         }
         if(!is_dir($base)) {
