@@ -10,4 +10,13 @@ class WindowsTest extends PestleBaseTest {
         $dir = getHomeDirectory();
         $this->assertTrue(is_dir($dir));
     }
+
+    public function testGetExecutableFromPath() {
+        $unix = pestleGetExecutableFromPath('/foo/baz/bar');
+        $windows = pestleGetExecutableFromPath('\sing\a\song');
+
+        $this->assertEquals($unix, 'bar');
+        $this->assertEquals($windows, 'song');
+    }
+
 }
