@@ -29,13 +29,10 @@
                 <exclude name="**/phpunit/**" />
                 <exclude name="**/sebastian/**" />
                 <exclude name="**/symfony/yaml/**" />
-                <excludesFile name="vendor/symfony/polyfill-ctype/Ctype.php" />
-                <excludesFile name="vendor/symfony/polyfill-ctype/LICENSE" />
-                <excludesFile name="vendor/symfony/polyfill-ctype/README.md" />
-                <excludesFile name="vendor/symfony/polyfill-ctype/composer.json" />
-                <includesFile name="vendor/symfony/polyfill-ctype/bootstrap.php" />
+								<exclude name="**/zendframework/zend-diactoros/src/functions/marshal_uri_from_sapi.php" />
             </fileset>
 		</copy>
+		<touch file="build/vendor/zendframework/zend-diactoros/src/functions/marshal_uri_from_sapi.php" />
 	</target>
 	<target name="info">
 	    <echo msg="Our default build task."/>
