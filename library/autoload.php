@@ -1,5 +1,5 @@
 <?php
-//this files pulls in the pestle PHP library, unless we're running in 
+//this files pulls in the pestle PHP library, unless we're running in
 //test mode, from travis, or via the phar.  It is ugly and we appologize.
 
 //travis run
@@ -14,7 +14,7 @@ $backtrace = debug_backtrace();
 $top       = array_pop($backtrace);
 $file      = '';
 if(isset($top['file']))
-{ 
+{
     $file = strToLower($top['file']);
 }
 $parts = explode(DIRECTORY_SEPARATOR, $file);
@@ -25,11 +25,16 @@ if(strpos($last, 'phpunit') !== false)
 }
 
 //running as pestle_dev, pestle.phar, or pestle
+function pestleGetExecutableFromPath($path) {
+    $parts = preg_split('%[/\\\]%', $path);
+    return strToLower(array_pop($parts));
+
+}
+
 global $argv;
 if(isset($argv[0]))
-{    
-    $parts = explode(DIRECTORY_SEPARATOR, $argv[0]);
-    $last = strToLower(array_pop($parts));
+{
+    $last = pestleGetExecutableFromPath($argv[0]);
     if(in_array($last, ['pestle', 'pestle_dev', 'pestle.phar']))
     {
         return;
