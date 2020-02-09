@@ -71,11 +71,22 @@ function extractFunctionNameAndNamespace($full)
     ];
 }
 
+function getHomeDirectory() {
+    $home = trim(`echo ~`);
+    if(!is_dir($home)) {
+        $home = trim(`echo %HOMEPATH%`);
+    }
+    if(!is_dir($home)) {
+        throw new Exception("Could not find home directory.");
+    }
+    return $home;
+}
+
 function getModuleFolders()
 {
     $pathExtra = '/modules/';
     $paths = [getBaseProjectDir() . $pathExtra];
-    $home = trim(`echo ~`);
+    $home = getHomeDirectory();
     $pathConfig = $home . '/.pestle/module-folders.json';
     if(is_dir($home) && file_exists($pathConfig) && $config = json_decode(file_get_contents($pathConfig)))
     {
