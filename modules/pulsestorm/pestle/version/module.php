@@ -2,7 +2,7 @@
 namespace Pulsestorm\Pestle\Version;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 pestle_import('Pulsestorm\Pestle\Library\output');
-define('PULSESTORM_PESTLE_VERSION', '1.5.0');
+define('PULSESTORM_PESTLE_VERSION', '1.5.1');
 /**
 * Displays Pestle Version
 *
