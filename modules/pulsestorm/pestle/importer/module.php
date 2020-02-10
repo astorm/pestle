@@ -1,7 +1,7 @@
 <?php
 namespace Pulsestorm\Pestle\Importer;
 use function Pulsestorm\Pestle\Runner\getBaseProjectDir;
-define('PULSESTORM_PESTLE_VERSION', '1.5.1');
+define('PULSESTORM_PESTLE_VERSION', '1.5.2');
 use ReflectionFunction;
 use ReflectionClass;
 use Exception;
