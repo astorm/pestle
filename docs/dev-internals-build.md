@@ -25,7 +25,7 @@ To build a release, we
 
 1. Create a fresh clone of the repo
 2. Run `composer install`
-3. Update the version string in `modules/pulsestorm/pestle/version/module.php`
+3. Update the version string in `modules/pulsestorm/pestle/importer/module.php`
 4. Build the library by running `./build-library.bash`
 5. Commit your changes.
 6. Tag the current commit with the version from #3
