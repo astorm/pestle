@@ -8,7 +8,7 @@ Pestle uses the [venerable phing build tool](https://www.phing.info/) to create 
 $ php -d phar.readonly=0 vendor/bin/phing package_phar
 ```
 
-This uses PHP `-d` command line option to set the `phar.readonly=0` value to zero, and then invokes the `package_phar` build step.
+This uses the PHP `-d` command line option to set the `phar.readonly=0` value to zero, and then invokes the `package_phar` build step.
 
 Once this command finishes running, you should have a brand new `pestle.phar` in your root project directory.
 
@@ -33,7 +33,8 @@ To build a release, we
 8. Check Travis
 9. Once travis is passing, run `build.sh` to build the latest `.phar`
 10. Upload the `phar` to `http://pestle.pulsestorm.net/pestle.phar`
+11. Once uploaded, make a copy in the form of pestle-x-x-x.phar to capture the version
 
-Right now, every step here can be completed by anyone _except_ #10, which requires access credentials to pestle.pulsestorm.net.
+Right now, every step here can be completed by anyone _except_ #10 and #11, which requires access credentials to pestle.pulsestorm.net.
 
 If you love build systems and have opinions on way to automate this, [your feedback and participation is welcome](https://github.com/astorm/pestle/issues/472).
