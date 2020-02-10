@@ -351,7 +351,7 @@ function replaceFirstInstanceOfFunctionName($code, $short_name)
 function getCacheDir()
 {
     $cache_dir = '/tmp/pestle_cache/' . md5(
-        getBaseProjectDir() . getcwd() . PULSESTORM_PESTLE_VERSION
+        getBaseProjectDir() . PULSESTORM_PESTLE_VERSION
     );
 
     if(!is_dir($cache_dir)){
