@@ -5,6 +5,7 @@ define('PULSESTORM_PESTLE_VERSION', '1.5.1');
 use ReflectionFunction;
 use ReflectionClass;
 use Exception;
+use Phar;
 
 /**
  * One Line Description
