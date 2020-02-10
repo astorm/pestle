@@ -1,7 +1,7 @@
 <?php
 namespace Pulsestorm\Pestle\Importer;
 use function Pulsestorm\Pestle\Runner\getBaseProjectDir;
-
+define('PULSESTORM_PESTLE_VERSION', '1.5.1');
 use ReflectionFunction;
 use ReflectionClass;
 use Exception;
@@ -350,7 +350,9 @@ function replaceFirstInstanceOfFunctionName($code, $short_name)
 
 function getCacheDir()
 {
-    $cache_dir = '/tmp/pestle_cache/' . md5(getBaseProjectDir());
+    $cache_dir = '/tmp/pestle_cache/' . md5(
+        getBaseProjectDir() . getcwd() . PULSESTORM_PESTLE_VERSION
+    );
 
     if(!is_dir($cache_dir)){
         mkdir($cache_dir, 0755, true);
