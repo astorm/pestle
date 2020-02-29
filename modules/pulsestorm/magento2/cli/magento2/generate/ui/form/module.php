@@ -453,7 +453,7 @@ function createLayoutXmlFiles($module_info, $modelClass)
 
     $prefixFilename = implode('_', [
         strToLower($module_info->name),
-        createShortPluralModelName($modelClass),
+        // createShortPluralModelName($modelClass),
         strToLower(getModelShortName($modelClass))
         // 'index'
     ]);;
