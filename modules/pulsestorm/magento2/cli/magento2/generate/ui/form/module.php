@@ -75,7 +75,7 @@ function createControllerClassBodyForDelete($module_info, $modelClass, $aclRule)
     public function execute()
     {
         // check if we know what should be deleted
-        $id = $this->getRequest()->getParam(\'object_id\');
+        $id = $this->getRequest()->getParam(\''.$dbID.'\');
         /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultRedirectFactory->create();
         if ($id) {
