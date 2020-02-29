@@ -509,7 +509,7 @@ function generateGenericButtonClassAndReturnName($prefix, $dbID, $aclRule)
 
     public function getDeleteUrl()
     {
-        return $this->getUrl(\'*/*/delete\', [\'object_id\' => $this->getObjectId()]);
+        return $this->getUrl(\'*/*/delete\', [\''.$dbID.'\' => $this->getObjectId()]);
     }
 
     public function getUrl($route = \'\', $params = [])
