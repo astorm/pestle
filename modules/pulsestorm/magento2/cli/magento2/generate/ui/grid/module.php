@@ -229,7 +229,7 @@ function generateDiXml($module_info)
     return $xml;
 }
 
-function generatePageActionClass($moduleInfo, $gridId, $idColumn, $collection)
+function generatePageActionClass($moduleInfo, $gridId, $frontname, $idColumn, $collection)
 {
     $pageActionsClassName = generatePageActionClassNameFromPackageModuleAndGridId(
         $moduleInfo->vendor, $moduleInfo->short_name, $gridId);
@@ -240,7 +240,7 @@ function generatePageActionClass($moduleInfo, $gridId, $idColumn, $collection)
     // $editUrl              = $gridId . '/index/edit';        
     $shortName = getShortModelNameFromResourceModelCollection(
         $collection);    
-    $editUrl = $gridId . '/' . strToLower($shortName) . '/edit';   
+    $editUrl = $frontname . '/' . strToLower($shortName) . '/edit';
     $prepareDataSource    = '
     public function prepareDataSource(array $dataSource)
     {
@@ -315,6 +315,7 @@ function getShortModelNameFromResourceModelCollection($collection)
 *
 * @command magento2:generate:ui:grid
 * @argument module Which Module? [Pulsestorm_Gridexample]
+* @argument frontname Frontname/Route ID? [pulsestorm_helloworld]
 * @argument grid_id Create a unique ID for your Listing/Grid! [pulsestorm_gridexample_log]
 * @argument collection_resource What Resource Collection Model should your listing use? [Magento\Cms\Model\ResourceModel\Page\Collection]
 * @argument db_id_column What's the ID field for you model? [pulsestorm_gridexample_log_id]
@@ -323,7 +324,6 @@ function pestle_cli($argv)
 {
     $module_info      = getModuleInformation($argv['module']);
 
-
     generateUiComponentXmlFile(
         $argv['grid_id'], $argv['db_id_column'], $module_info, $argv['collection_resource']);                                        
         
@@ -331,7 +331,7 @@ function pestle_cli($argv)
         $module_info, $argv['grid_id'], $argv['collection_resource'] . 'Factory');
         
     generatePageActionClass(
-        $module_info, $argv['grid_id'], $argv['db_id_column'], $argv['collection_resource']);                    
+        $module_info, $argv['grid_id'], $argv['frontname'], $argv['db_id_column'], $argv['collection_resource']);
         
     output("Don't forget to add this to your layout XML with <uiComponent name=\"{$argv['grid_id']}\"/> ");        
 }
