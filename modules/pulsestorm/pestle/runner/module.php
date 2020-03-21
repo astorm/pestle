@@ -7,6 +7,7 @@ use Phar;
 use Exception;
 use function Pulsestorm\Pestle\Importer\pestle_import;
 
+// two functions needed to run our only (we hope!) manual requires
 function isPhar()
 {
     $running = Phar::running();
@@ -389,6 +390,23 @@ function nameNewRelicTransactionIfInstalled($command_name)
     }
 }
 
+use OpenTelemetry\Trace\TracerFactory;
+use OpenTelemetry\Exporter\ZipkinExporter;
+use OpenTelemetry\Trace\SpanProcessor\SimpleSpanProcessor;
+
+function doGlobalTracer(){
+
+    $zipkinExporter = new ZipkinExporter(
+        'alwaysOnExporter',
+        'http://127.0.0.1:9411/api/v2/spans'
+    );
+    // put tracer global/here temporarily
+    global $pestleOpenTelemetryTracer;
+    $pestleOpenTelemetryTracer = (TracerFactory::getInstance(
+        [new SimpleSpanProcessor($zipkinExporter)]
+    ))->getTracer('pestle.pulsestorm.net');
+}
+
 /**
 * Main entry point
 */
@@ -396,6 +414,7 @@ function main($argv)
 {
     bootstrapPhp();
     doVersionCheck();
+    doGlobalTracer();
     doPestleImports();
 
     $parsed_argv    = parseArgvIntoCommandAndArgumentsAndOptions($argv);

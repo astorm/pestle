@@ -14,6 +14,10 @@ use Phar;
  */
 function pestle_import($thing_to_import, $as=false)
 {
+    global $pestleOpenTelemetryTracer;
+    $span = $pestleOpenTelemetryTracer->createSpan('IMPORT:' . $thing_to_import);
+    $pestleOpenTelemetryTracer->setActiveSpan($span);
+
     /**
      * @var string $ns_called_from ex. \Namespace\Called\From
      */
@@ -22,6 +26,7 @@ function pestle_import($thing_to_import, $as=false)
 
     includeModule($thing_to_import);
     includeCode($thing_to_import, $ns_called_from);
+    $pestleOpenTelemetryTracer->endActiveSpan();
     return true;
 }
 
