@@ -13,28 +13,28 @@ function getBaseMagentoDir($path=false)
     return getBaseDir($path, 'app/Mage.php');
 }
 
-function generateConfigXml() {
-    return '<?xml version="1.0" encoding="UTF-8"?>
-<config>
+function generateConfigXml($fullModuleName) {
+    return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
+"<config>
     <modules>
-        <Pulsestorm_SimpleRest>
+        <$fullModuleName>
             <version>0.1.0</version>
-        </Pulsestorm_SimpleRest>
+        </$fullModuleName>
     </modules>
-</config>';
+</config>";
 }
 
-function generateModuleDeclarationFile() {
-    return '<?xml version="1.0"?>
-<config>
+function generateModuleDeclarationFile($fullModuleName, $pool) {
+    return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
+"<config>
     <modules>
-        <Pulsestorm_SimpleRest>
+        <$fullModuleName>
             <active>true</active>
-            <codePool>local</codePool>
+            <codePool>$pool</codePool>
             <depends />
-        </Pulsestorm_SimpleRest>
+        </$fullModuleName>
     </modules>
-</config>';
+</config>";
 }
 
 /**
@@ -52,8 +52,8 @@ function pestle_cli($argv)
     $pathModule = getBaseMagentoDir() . '/app/code/' . $argv['code_pool'] . '/' . $package .
         '/' . $module . '/etc/config.xml';
 
-    writeStringToFile($pathEtc, generateModuleDeclarationFile());
-    writeStringToFile($pathModule, generateConfigXml());
+    writeStringToFile($pathEtc, generateModuleDeclarationFile($argv['full_module_name'], $argv['code_pool']));
+    writeStringToFile($pathModule, generateConfigXml($argv['full_module_name']));
 
     output('');
     output('Generated Base Module Files:');
