@@ -166,6 +166,21 @@ function getDocCommentAsString($function)
     return trim( implode("\n", $lines) );
 }
 
+function getBaseDir($path, $fileToTest) {
+    if($path && isAboveRoot($path))
+    {
+        output("Could not find base Magento directory");
+        exit;
+    }
+
+    $path = $path ? $path : getcwd();
+    if(file_exists($path . '/' . $fileToTest))
+    {
+        return realpath($path);
+    }
+    return getBaseDir($path . '/..', $fileToTest);
+}
+
 function isAboveRoot($path)
 {
     $parts = explode('..', $path);

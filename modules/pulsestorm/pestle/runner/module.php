@@ -153,7 +153,7 @@ function getListOfDefinedCliFunctions()
         }
         $main = $namespace . '\\pestle_cli';
         if(!function_exists($main)) {
-            if(!in_array($main, ['zend\diactoros\pestle_cli'])) {
+            if(!in_array($main, ['zend\diactoros\pestle_cli','swoole\coroutine\pestle_cli','co\pestle_cli'])) {
                 output("Skipping $main -- no such function");
             }
             continue;
