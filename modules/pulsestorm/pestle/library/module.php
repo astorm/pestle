@@ -123,16 +123,22 @@ function getPartFromDeclaration($class, $part)
     return null;
 }
 
-function writeStringToFile($path, $contents)
+function writeStringToFile($path, $contents, $overwrite=true)
 {
     if(!is_dir(dirname($path)))
     {
         mkdir(dirname($path),0755,true);
     }
+
+    if(file_exists($path) && !$overwrite) {
+        output('SKIPPING: file already exists ' . $path);
+        return;
+    }
+
     $path_backup = $path . '.' . uniqid() . '.bak.php';
     if(file_exists($path))
     {
-        output('Backing existing file: ' . $path_backup);
+        output('Backing up existing file: ' . $path_backup);
         copy($path, $path_backup);
     }
     file_put_contents($path, $contents);

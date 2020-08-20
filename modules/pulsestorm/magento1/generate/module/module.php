@@ -1,17 +1,10 @@
 <?php
 namespace Pulsestorm\Magento1\Generate\Module;
 use function Pulsestorm\Pestle\Importer\pestle_import;
-pestle_import('Pulsestorm\Pestle\Library\isAboveRoot');
-pestle_import('Pulsestorm\Pestle\Library\getBaseDir');
 pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
 pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
-
-
-function getBaseMagentoDir($path=false)
-{
-    return getBaseDir($path, 'app/Mage.php');
-}
+pestle_import('Pulsestorm\Magento1\Generate\Library\getBaseMagentoDir');
 
 function generateConfigXml($fullModuleName) {
     return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
