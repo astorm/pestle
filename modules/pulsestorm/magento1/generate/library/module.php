@@ -52,7 +52,7 @@ function createFrontendController($fullName, $path) {
     $parts = array_map(function($part){
         return ucwords($part);
     }, $parts);
-    $camelCasedController = implode('', $parts);
+    $camelCasedController = implode('_', $parts);
     $classContents = m1CreateClassTemplate(
         $fullName . "_${camelCasedController}Controller",
         'Mage_Core_Controller_Front_Action'
@@ -70,8 +70,13 @@ function createFrontendController($fullName, $path) {
         $classContents
     );
     $pathControllers = getPathModule($fullName, 'controllers');
+    $parts = explode('_', $camelCasedController);
+    $last = array_pop($parts);
+    $camelCasedControllerPath = implode('_', $parts);
+    $camelCasedControllerPath .= ('/' . $last);
+
     writeStringToFile(
-        $pathControllers . "/${camelCasedController}Controller.php",
+        $pathControllers . "/${camelCasedControllerPath}Controller.php",
         $classContents,
         false
     );

@@ -12,7 +12,7 @@ pestle_import('Pulsestorm\Pestle\Library\writeStringToFile');
 pestle_import('Pulsestorm\Cli\Code_Generation\createClassTemplate');
 
 /**
-* One Line Description
+* Generates frontend route configuration and index controller
 *
 * @command magento1:generate:route
 * @argument full_module_name Full Module Name [Pulsestorm_Helloworld]
@@ -48,4 +48,6 @@ function pestle_cli($argv)
         $argv['full_module_name'],
         'pulsestorm_simplerest/index/index'
     );
+
+    output('Done');
 }
