@@ -10577,6 +10577,7 @@ use function Pulsestorm\Pestle\Importer\pestle_import;
 
 
 
+
 /**
 * Genreated a Magento 2 addColumn DDL definition and inserts into file
 *
@@ -10604,7 +10605,7 @@ function selectColumnType($arguments, $index, $fullArguments)
         return $arguments[$index];
     }
     $types = array_values(\Pulsestorm\Magento2\Generate\Ui\Addschemacolumn\getColumnTypes());
-    $value = inputFromArray("Column Type?", $types, 1);
+    $value = \Pulsestorm\Magento2\Cli\Generate\Menu\inputFromArray("Column Type?", $types, 1);
     return $value;
 }
 }
