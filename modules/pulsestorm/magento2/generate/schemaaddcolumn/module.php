@@ -5,6 +5,7 @@ pestle_import('Pulsestorm\Pestle\Library\output');
 pestle_import('Pulsestorm\Magento2\Generate\Ui\Addschemacolumn\exported_pestle_cli');
 pestle_import('Pulsestorm\Magento2\Generate\Ui\Addschemacolumn\getColumnTypes');
 pestle_import('Pulsestorm\Pestle\Library\exitWithErrorMessage');
+pestle_import('Pulsestorm\Magento2\Cli\Generate\Menu\inputFromArray');
 
 /**
 * Genreated a Magento 2 addColumn DDL definition and inserts into file
