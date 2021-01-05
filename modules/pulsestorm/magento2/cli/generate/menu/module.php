@@ -25,7 +25,7 @@ function getMenuXmlFiles()
     return $results;
 }
 
-function inputFromArray($string='Please select the item:',$array)
+function inputFromArray($string='Please select the item:',$array=[])
 {
     $num = 0;
     $end = '] ';
